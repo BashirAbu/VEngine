@@ -1,0 +1,87 @@
+#pragma once
+#include "ve_defines.h"
+#include <string>
+#include "components/ve_transform_component.h"
+#include <list>
+#include <memory>
+#include <bitset>
+namespace VE 
+{
+	typedef std::bitset<128> LayerMask;
+	class VE_API Entity
+	{
+	public:
+		Entity(std::string name);
+
+		virtual ~Entity();
+
+		virtual void Start() = 0;
+		virtual void Update(float deltaTime) = 0;
+		virtual void Render() {}
+		virtual void Serialize(nlohmann::json& json) {}
+		virtual void Deserialize(nlohmann::json& json) {}
+		virtual void DrawEditorUI() {}
+		template <typename T>
+		T* AddComponent();
+		template <typename T>
+		T* GetComponent();
+		template <typename T>
+		void RemoveComponent();
+
+		std::string GetName() { return name; }
+		std::string GetTag() { return tag; }
+
+
+		LayerMask layer;
+	protected:
+		std::string tag;
+		TransformComponent* transformComponent;
+	private:
+		void ComponentsStart();
+		void ComponentsUpdate(float deltaTime);
+		void ComponentsRender();
+		void ComponentsSerialize(nlohmann::json& json);
+		void ComponentsDeserialize(nlohmann::json& json);
+		void ComponentDrawEditorUI();
+		std::string name;
+		std::list<Component*> components;
+		friend class Scene;
+		friend class SceneManager;
+		friend class Engine;
+		friend class Editor;
+		friend class Scene2D;
+		friend class Scene3D;
+	};
+
+	template <typename T>
+	T* Entity::AddComponent()
+	{
+		T* comp = new T(this);
+		components.push_back(comp);
+		return comp;
+	}
+	template <typename T>
+	T* Entity::GetComponent()
+	{
+		for (Component* comp : components)
+		{
+			if (dynamic_cast<T*>(comp))
+			{
+				return (T*)comp;
+			}
+		}
+		return nullptr;
+	}
+	template <typename T>
+	void Entity::RemoveComponent()
+	{
+		for (auto itr = components.begin(); itr != components.end(); itr++)
+		{
+			if (dynamic_cast<T*>(*itr))
+			{
+				components.erase(itr);
+				return;
+			}
+		}
+	}
+}

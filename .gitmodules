@@ -1,0 +1,26 @@
+[submodule "VEngine/third_party/raylib"]
+	path = VEngine/third_party/raylib
+	url = https://github.com/BashirAbu/VE_raylib.git
+
+[submodule "VEngine/third_party/nlohmann_json"]
+	path = VEngine/third_party/nlohmann_json
+	url = https://github.com/BashirAbu/VE_nlohmannJson.git
+
+[submodule "VEngine/third_party/imgui"]
+	path = VEngine/third_party/imgui
+	url = https://github.com/BashirAbu/VE_imgui.git
+	branch = docking
+
+[submodule "VEngine/third_party/glfw"]
+	path = VEngine/third_party/glfw
+	url = https://github.com/BashirAbu/VE_glfw.git
+
+[submodule "VEngine/third_party/rlImGui"]
+	path = VEngine/third_party/rlImGui
+	url = https://github.com/BashirAbu/VE_rlImGui.git
+[submodule "VEngine/third_party/glm"]
+	path = VEngine/third_party/glm
+	url = https://github.com/BashirAbu/VE_glm.git
+[submodule "VEngine/third_party/ImGuizmo"]
+	path = VEngine/third_party/ImGuizmo
+	url = https://github.com/BashirAbu/VE_ImGuizmo.git
