@@ -33,12 +33,16 @@ namespace VE
 	}
 	void TransformComponent::DrawEditorUI()
 	{
-		ImGui::Text("Transform Component");
-		ImGui::Spacing();
-		EditorElement::Vec3(position, "Position");
-		ImGui::Spacing();
-		EditorElement::Vec3(rotation, "Rotation");
-		ImGui::Spacing();
-		EditorElement::Vec3(scale,    "Scale   ");
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)this), ImGuiTreeNodeFlags_DefaultOpen, "Transform Component");
+		if (opened)
+		{
+			ImGui::Spacing();
+			EditorElement::Vec3(position, "Position");
+			ImGui::Spacing();
+			EditorElement::Vec3(rotation, "Rotation");
+			ImGui::Spacing();
+			EditorElement::Vec3(scale,    "Scale   ");
+			ImGui::TreePop();
+		}
 	}
 }

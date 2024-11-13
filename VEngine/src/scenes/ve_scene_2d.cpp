@@ -49,17 +49,12 @@ namespace VE
 												{0.0f,                                         0.0f}  // Top-left
 			};
 
-
 			glm::mat4 transform =
-				glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x, mainCamera->camera2D.target.y, 0.0f))
-				* glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.offset.x * mainCamera->GetRenderTarget()->texture.width,
-					mainCamera->camera2D.offset.y * mainCamera->GetRenderTarget()->texture.height, 0.0f))
+				glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + +mainCamera->camera2D.offset.y, 0.0f))
 				* glm::rotate(glm::mat4(1.0f), -glm::radians(mainCamera->camera2D.rotation), glm::vec3(0.0f, 0.0f, 1.0f))
 				* glm::scale(glm::mat4(1.0f), glm::vec3((1.0f / mainCamera->camera2D.zoom), (1.0f / mainCamera->camera2D.zoom), 1.0f))
-				* glm::translate(glm::mat4(1.0f), -glm::vec3(mainCamera->camera2D.target.x, mainCamera->camera2D.target.y, 0.0f))
-				* glm::translate(glm::mat4(1.0f), -glm::vec3(mainCamera->camera2D.offset.x * mainCamera->GetRenderTarget()->texture.width,
-					mainCamera->camera2D.offset.y * mainCamera->GetRenderTarget()->texture.height, 0.0f))
-				* glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x, mainCamera->camera2D.target.y, 0.0f));
+				* glm::translate(glm::mat4(1.0f), -glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + mainCamera->camera2D.offset.y, 0.0f))
+				* glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + mainCamera->camera2D.offset.y, 0.0f));
 
 			std::vector<glm::vec2> transformedVertices;
 			for (const auto& vertex : vertices) {

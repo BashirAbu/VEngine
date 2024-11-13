@@ -59,10 +59,15 @@ namespace VE
 	}
 	void SpriteComponent::DrawEditorUI()
 	{
-		ImGui::Text("Sprite Component");
-		ImGui::Spacing();
-		EditorElement::Vec2(origin, "Origin");
-		ImGui::Spacing();
-		EditorElement::Color(tintColor, "Tint Color");
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)this), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Component");
+		if (opened)
+		{
+			ImGui::Spacing();
+			EditorElement::Vec2(origin, "Origin");
+			ImGui::Spacing();
+			EditorElement::Color(tintColor, "Tint Color");
+			ImGui::TreePop();
+		}
+		
 	}
 }

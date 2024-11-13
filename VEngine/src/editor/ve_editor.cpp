@@ -58,11 +58,7 @@ namespace VE
 	{
 		ImGui::Begin("Hierarchy");
 
-		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow) && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
-		{
-			ImGui::OpenPopup("RightClickHierarchyPopup");
-		}
-		if (ImGui::BeginPopup("RightClickHierarchyPopup"))
+		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
 			if (ImGui::BeginMenu("Add Entity"))
 			{
@@ -89,36 +85,34 @@ namespace VE
 		for (auto itr = engine->sceneManager->currentScene->entities.begin(); itr != engine->sceneManager->currentScene->entities.end(); itr++)
 		{
 			ImGui::PushID((int)index);
-			if (ImGui::TreeNode(((*itr)->GetName()).c_str()))
+			ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == *itr)? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+			bool opened = ImGui::TreeNodeEx((void*)((uint64_t)*itr), flags, (*itr)->GetName().c_str());
+			
+			if (ImGui::IsItemClicked())
 			{
-				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && ImGui::IsItemHovered(0))
-				{
-					engine->sceneManager->selectedEntity = *itr;
-				}
+				engine->sceneManager->selectedEntity = *itr;
+			}
 
-				if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && ImGui::IsItemHovered(0))
+			if (ImGui::BeginPopupContextItem(0, 1))
+			{
+				if (ImGui::MenuItem("Remove"))
 				{
-					ImGui::OpenPopup("NodePopup");
-				}
-				if (ImGui::BeginPopup("NodePopup"))
-				{
-					if (ImGui::MenuItem("Remove"))
+					if (*itr == engine->sceneManager->selectedEntity)
 					{
-						if (*itr == engine->sceneManager->selectedEntity)
-						{
-							engine->sceneManager->selectedEntity = nullptr;
-						}
-						delete* itr;
-						itr = engine->sceneManager->currentScene->entities.erase(itr);
-
+						engine->sceneManager->selectedEntity = nullptr;
 					}
+					delete* itr;
+					itr = engine->sceneManager->currentScene->entities.erase(itr);
 
-					ImGui::EndPopup();
 				}
-
-
+				ImGui::EndPopup();
+			}
+			if (opened)
+			{
+				//if node is expaneded, draw children.
 				ImGui::TreePop();
 			}
+			
 			ImGui::PopID();
 			index++;
 			if (itr == engine->sceneManager->currentScene->entities.end() || engine->sceneManager->currentScene->entities.size() == 0)
@@ -268,9 +262,6 @@ namespace VE
 		ImGui::Begin("Inspector");
 		if (engine->sceneManager->selectedEntity)
 		{
-			ImGui::Text("%s", engine->sceneManager->selectedEntity->GetName().c_str());
-			ImGui::Separator();
-			ImGui::Spacing();
 			engine->sceneManager->selectedEntity->ComponentDrawEditorUI();
 			engine->sceneManager->selectedEntity->DrawEditorUI();
 		}

@@ -55,12 +55,18 @@ namespace VE
 	}
 	void Camera2DEntity::DrawEditorUI()
 	{
-		ImGui::Text("Camera 2D");
-		ImGui::Spacing();
-		ImGui::DragFloat("Zoom", &camera2D.zoom);
-		ImGui::Spacing();
-		glm::vec2 offset = {camera2D.offset.x, camera2D.offset.y};
-		EditorElement::Vec2(offset, "Offset");
-		camera2D.offset = Vector2{offset.x, offset.y};
+		
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)this), ImGuiTreeNodeFlags_DefaultOpen, "Camera 2D");
+		if (opened)
+		{
+			ImGui::Spacing();
+			ImGui::DragFloat("Zoom", &camera2D.zoom);
+			ImGui::Spacing();
+			glm::vec2 offset = { camera2D.offset.x, camera2D.offset.y };
+			EditorElement::Vec2(offset, "Offset");
+			camera2D.offset = Vector2{ offset.x, offset.y };
+			ImGui::TreePop();
+		}
+		
 	}
 }
