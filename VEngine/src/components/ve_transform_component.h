@@ -18,6 +18,9 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) override;
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
+
+		glm::mat4 GetTransformMatrix();
+
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;

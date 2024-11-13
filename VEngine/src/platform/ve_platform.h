@@ -3,6 +3,6 @@
 #include <filesystem>
 namespace VE 
 {
-	std::filesystem::path SaveFileDialog();
-	std::filesystem::path OpenFileDialog();
+	VE_API std::filesystem::path SaveFileDialog(std::string extension = "");
+	VE_API std::filesystem::path OpenFileDialog();
 }

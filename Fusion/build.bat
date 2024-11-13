@@ -10,7 +10,7 @@ set DEBUG_LIBS=..\VEngine\third_party\raylib\build\raylib\Debug\raylib.lib
 set RELEASE_LIBS=..\VEngine\third_party\raylib\build\raylib\Release\raylib.lib
 set EXE_NAME=Fusion.exe
 set LIBS_FLAGS=/SUBSYSTEM:CONSOLE
-set INCLUDES=/I src /I ..\VEngine\src\ /I ..\VEngine\third_party\raylib\build\raylib\include /I ..\VEngine\third_party\nlohmann_json\include\ /I ..\VEngine\third_party\glm\
+set INCLUDES=/I src /I ..\VEngine\src\ /I ..\VEngine\third_party\raylib\build\raylib\include /I ..\VEngine\third_party\nlohmann_json\include\ /I ..\VEngine\third_party\glm\ /I ..\VEngine\third_party\imgui\ /I ..\VEngine\third_party\rlImGui\
 set DEFINES=/DUSE_LIBTYPE_SHARED
 set SRC=src\*.cpp
 if not defined DevEnvDir (

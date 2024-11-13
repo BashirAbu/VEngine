@@ -1,2 +1,2 @@
-heob64.exe bin/Fusion.exe -p ../test_project/test_project.VEProject
+heob64.exe bin/Fusion.exe
 pause

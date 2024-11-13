@@ -13,6 +13,7 @@
 #include <raymath.h>
 #include "entities/ve_camera_2d_entity.h"
 #include "scenes/ve_scene_2d.h"
+#include "editor/ve_editor_elements.h"
 namespace VE 
 {
 	Editor* Editor::singleton = nullptr;
@@ -57,7 +58,10 @@ namespace VE
 	void Editor::DrawHierarchy()
 	{
 		ImGui::Begin("Hierarchy");
-
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered(ImGuiHoveredFlags_None))
+		{
+			engine->sceneManager->selectedEntity = nullptr;
+		}
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
 			if (ImGui::BeginMenu("Add Entity"))
@@ -137,18 +141,30 @@ namespace VE
 					engine->sceneManager->LoadScene(scenePath);
 				}
 			}
-			if (ImGui::MenuItem("Create Scene"))
+			if (ImGui::BeginMenu("New Scene"))
 			{
-				std::filesystem::path scenePath = VE::SaveFileDialog();
-				engine->sceneManager->UnloadScene();
-				//TODO: show a dialog to choose scene type 2d or 3d.
-				engine->sceneManager->currentScene = new Scene2D();
-				engine->sceneManager->currentScene->sceneType = SceneType::Scene2D;
-				engine->sceneManager->currentScene->scenePath = scenePath;
-				engine->sceneManager->currentScene->name = scenePath.filename().string();
-				//Add default entites like camera and basic lighting.
-
-				engine->sceneManager->SaveScene();
+				if (ImGui::MenuItem("2D scene"))
+				{
+					std::filesystem::path scenePath = VE::SaveFileDialog();
+					if (!scenePath.empty())
+					{
+						engine->sceneManager->UnloadScene();
+						//TODO: show a dialog to choose scene type 2d or 3d.
+						engine->sceneManager->currentScene = new Scene2D();
+						engine->sceneManager->currentScene->sceneType = SceneType::Scene2D;
+						engine->sceneManager->currentScene->scenePath = scenePath;
+						engine->sceneManager->currentScene->name = scenePath.filename().string();
+						//Add default entites like camera and basic lighting.
+						engine->sceneManager->SaveScene();
+					}
+					
+				}
+				if (ImGui::MenuItem("3D scene"))
+				{
+					//handle 3d scene creation.
+				}
+				ImGui::EndMenu();
+				
 			}
 			if (ImGui::MenuItem("Save Scene"))
 			{
@@ -171,30 +187,34 @@ namespace VE
 			if (ImGui::Button("Start"))
 			{
 				engine->sceneManager->SaveScene();
-				engine->sceneManager->mode = SceneMode::Game;
-				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-				SceneType sceneType = engine->sceneManager->currentScene->GetSceneType();
-				Camera2D editorCameraSate;
-				if (sceneType == SceneType::Scene2D)
+				if (!engine->sceneManager->currentScene->scenePath.empty())
 				{
-					editorCameraSate = ((Scene2D*)(engine->sceneManager->currentScene))->editorCamera;
+					engine->sceneManager->mode = SceneMode::Game;
+					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
+					SceneType sceneType = engine->sceneManager->currentScene->GetSceneType();
+					Camera2D editorCameraSate;
+					if (sceneType == SceneType::Scene2D)
+					{
+						editorCameraSate = ((Scene2D*)(engine->sceneManager->currentScene))->editorCamera;
+					}
+					else
+					{
+						//handle 3d scene
+					}
+					engine->sceneManager->UnloadScene();
+					engine->ReloadProjectSharedLibrary();
+					engine->sceneManager->LoadScene(reloadScenePath);
+					if (sceneType == SceneType::Scene2D)
+					{
+						((Scene2D*)(engine->sceneManager->currentScene))->editorCamera = editorCameraSate;
+					}
+					else
+					{
+						//handle 3d scene
+					}
+					ImGui::SetWindowFocus("GameViewport");
 				}
-				else 
-				{
-					//handle 3d scene
-				}
-				engine->sceneManager->UnloadScene();
-				engine->ReloadProjectSharedLibrary();
-				engine->sceneManager->LoadScene(reloadScenePath);
-				if (sceneType == SceneType::Scene2D)
-				{
-					((Scene2D*)(engine->sceneManager->currentScene))->editorCamera = editorCameraSate;
-				}
-				else
-				{
-					//handle 3d scene
-				}
-				ImGui::SetWindowFocus("GameViewport");
+				
 			}
 
 			ImGui::SameLine();
@@ -265,6 +285,15 @@ namespace VE
 			engine->sceneManager->selectedEntity->ComponentDrawEditorUI();
 			engine->sceneManager->selectedEntity->DrawEditorUI();
 		}
+		else
+		{
+			//Scene Settings
+			if (engine->sceneManager->currentScene->sceneType == SceneType::Scene2D)
+			{
+				Scene2D* s2d = (Scene2D*)engine->sceneManager->currentScene;
+				EditorElement::Color(s2d->clearColor, "Clear Color");
+			}
+		}
 		ImGui::End();
 	}
 
@@ -303,21 +332,18 @@ namespace VE
 				ImGuizmo::SetDrawlist();
 
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
-				glm::mat4 pm = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
+				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
 
-				glm::mat4 trsMat = glm::translate(glm::mat4(1.0f), selectedEntity->transformComponent->position)
-					* glm::rotate(glm::mat4(1.0f), glm::radians(selectedEntity->transformComponent->rotation.z), glm::vec3(0.0f, 0.0f, 1.0f))
-					* glm::scale(glm::mat4(1.0f), selectedEntity->transformComponent->scale);
-				// Set up matrices for ImGuizmo
-				Matrix vvm = GetCameraMatrix2D(s2d->editorCamera);
-				ImGuizmo::Manipulate(MatrixToFloat(vvm), glm::value_ptr(pm), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(trsMat));
+				glm::mat4 transformMatrix = selectedEntity->transformComponent->GetTransformMatrix();
+				Matrix camreaViewMatrix = GetCameraMatrix2D(s2d->editorCamera);
+				ImGuizmo::Manipulate(MatrixToFloat(camreaViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transformMatrix));
 
 				if (ImGuizmo::IsUsing())
 				{
 					glm::vec3 skew;
 					glm::vec4 pres;
 					glm::quat rot;
-					glm::decompose(trsMat, selectedEntity->transformComponent->scale, rot, selectedEntity->transformComponent->position, skew, pres);
+					glm::decompose(transformMatrix, selectedEntity->transformComponent->scale, rot, selectedEntity->transformComponent->position, skew, pres);
 
 					glm::vec3 eulerAngles = glm::eulerAngles(rot);
 					eulerAngles = glm::degrees(eulerAngles);

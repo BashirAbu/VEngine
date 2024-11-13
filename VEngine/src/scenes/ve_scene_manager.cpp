@@ -107,10 +107,28 @@ namespace VE
 		sceneFile << sceneJson;
 		sceneFile.close();
 	}
+	Scene* SceneManager::CreateEmptyScene(SceneType type)
+	{
+		Scene* scene = nullptr;
+		if (currentScene)
+		{
+			UnloadScene();
+		}
+		if (type == SceneType::Scene2D)
+		{
+			scene = new Scene2D();
+		}
+		else 
+		{
+			//3d scene stuff
+		}
+		currentScene = scene;
+		return scene;
+	}
 	void SceneManager::SaveSceneAs()
 	{
 		//show file dialog.
-		currentScene->scenePath = VE::SaveFileDialog();
+		currentScene->scenePath = VE::SaveFileDialog(VE_SCENE_FILE_EXTENSION);
 		if (currentScene->scenePath.empty())
 			return;
 		if (currentScene->scenePath.extension().string() != ("." + (std::string)VE_SCENE_FILE_EXTENSION))

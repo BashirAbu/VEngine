@@ -6,7 +6,7 @@
 
 namespace VE 
 {
-	std::filesystem::path SaveFileDialog() 
+	std::filesystem::path SaveFileDialog(std::string extension) 
 	{
 		std::filesystem::path path;
 		
@@ -19,7 +19,7 @@ namespace VE
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
         ofn.lpstrFilter = "All\0*.*\0";
-        ofn.lpstrDefExt = VE_SCENE_FILE_EXTENSION;
+        ofn.lpstrDefExt = extension.c_str();
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;

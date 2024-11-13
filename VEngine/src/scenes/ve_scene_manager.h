@@ -24,6 +24,7 @@ namespace VE
 		void SaveSceneAs();
 		//editor function
 		void SaveScene();
+		Scene* CreateEmptyScene(SceneType type);
 		Scene* currentScene;
 		SceneMode mode;
 		Entity* selectedEntity;

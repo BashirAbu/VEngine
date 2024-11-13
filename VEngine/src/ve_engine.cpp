@@ -23,7 +23,6 @@ namespace VE
 		engineDesc.projectDetails.height = projectJson["height"];
 		engineDesc.projectDetails.renderWidth = projectJson["render_width"];
 		engineDesc.projectDetails.renderHeight = projectJson["render_height"];
-		engineDesc.projectDetails.mainScenePath = (std::string)projectJson["main_scene_path"];
 		engineDesc.projectDetails.vsync = projectJson["vsync"];
 		engineDesc.projectDetails.assetsPath = engineDesc.projectDetails.path.parent_path().string() + "/assets/";
 		desc = engineDesc;
@@ -41,11 +40,19 @@ namespace VE
 
 		LoadProjectSharedLibrary();
 
-		std::string scenePath = engineDesc.projectDetails.path.parent_path().string();
-		scenePath += "/" + engineDesc.projectDetails.mainScenePath.string();
 		sceneManager = new SceneManager();
-		sceneManager->LoadScene(scenePath);
+		if (engineDesc.projectDetails.mainScenePath.empty())
+		{
+			sceneManager->CreateEmptyScene(SceneType::Scene2D);
+		}
+		else 
+		{
+			std::string scenePath = engineDesc.projectDetails.path.parent_path().string();
+			scenePath += "/" + engineDesc.projectDetails.mainScenePath.string();
+			sceneManager->LoadScene(scenePath);
+		}
 
+		
 		editor = new Editor(this);
 		
 		//Register builtin entities.
@@ -105,14 +112,14 @@ namespace VE
 	}
 	void Engine::LoadProjectSharedLibrary()
 	{
-		std::ifstream srcSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + desc.projectDetails.name + ".dll", std::ios::binary);
-		std::ofstream destSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + desc.projectDetails.name + "_temp.dll", std::ios::binary);
+		std::ifstream srcSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + ".dll", std::ios::binary);
+		std::ofstream destSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + "_temp.dll", std::ios::binary);
 
 		destSharedLib << srcSharedLib.rdbuf();
 
 		srcSharedLib.close();
 		destSharedLib.close();
-		projectSharedLibrary->Load(desc.projectDetails.path.parent_path().string() + "/bin/" + desc.projectDetails.name + "_temp");
+		projectSharedLibrary->Load(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + "_temp");
 
 		CreateProjectEntity = (PFN_CreateProjectEntity)projectSharedLibrary->GetProcAddress("CreateProjectEntity");
 		VE_ASSERT(CreateProjectEntity);
