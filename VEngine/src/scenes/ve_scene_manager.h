@@ -25,10 +25,16 @@ namespace VE
 		//editor function
 		void SaveScene();
 		Scene* CreateEmptyScene(SceneType type);
+
+		const Scene* GetCurrentScene() const { return currentScene; }
+	private:
 		Scene* currentScene;
 		SceneMode mode;
 		Entity* selectedEntity;
-	private:
-
+		friend class Editor;
+		friend class Engine;
+		friend class Scene;
+		friend class Scene2D;
+		friend class Camera2DEntity;
 	};
 }

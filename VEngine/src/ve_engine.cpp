@@ -25,6 +25,7 @@ namespace VE
 		engineDesc.projectDetails.renderHeight = projectJson["render_height"];
 		engineDesc.projectDetails.vsync = projectJson["vsync"];
 		engineDesc.projectDetails.assetsPath = engineDesc.projectDetails.path.parent_path().string() + "/assets/";
+		engineDesc.projectDetails.mainScenePath = (std::string)projectJson["main_scene_path"];
 		desc = engineDesc;
 		
 		uint32_t configFlags = 0;

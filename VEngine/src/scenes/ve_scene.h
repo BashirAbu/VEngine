@@ -29,17 +29,18 @@ namespace VE
 
 		const SceneType GetSceneType() const { return sceneType; }
 		const RenderTexture GetEditorCameraRenderTarget() const { return editorCameraRenderTarget; }
+		virtual const Entity* GetMainCamera() const = 0;
+	protected:
 		std::string name;
 		bool started = false;
-		std::list<class Entity*> entities;
 		std::filesystem::path scenePath;
 		std::list<class Entity*> cameras;
-
-	private:
-	protected:
+		std::list<class Entity*> entities;
 		RenderTexture editorCameraRenderTarget;
 		SceneType sceneType;
 
 		friend class Editor;
+		friend class Camera2DEntity;
+		friend class SceneManager;
 	};
 }

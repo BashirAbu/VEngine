@@ -38,8 +38,8 @@ namespace VE
 		{
 			glm::vec2 vec;
 
-			vec.x = json["x"];
-			vec.y = json["y"];
+			vec.x = json.contains("x") ? (float)json["x"] : 0.0f;
+			vec.y = json.contains("y")? (float)json["y"] : 0.0f;
 
 			return vec;
 		}
@@ -47,9 +47,9 @@ namespace VE
 		{
 			glm::vec3 vec;
 
-			vec.x = json["x"];
-			vec.y = json["y"];
-			vec.z = json["z"];
+			vec.x = json.contains("x") ? (float)json["x"] : 0.0f;
+			vec.y = json.contains("y") ? (float)json["y"] : 0.0f;
+			vec.z = json.contains("z") ? (float)json["z"] : 0.0f;
 
 			return vec;
 		}
@@ -57,10 +57,10 @@ namespace VE
 		{
 			glm::vec4 vec;
 
-			vec.x = json["x"];
-			vec.y = json["y"];
-			vec.z = json["z"];
-			vec.w = json["w"];
+			vec.x = json.contains("x") ? (float)json["x"] : 0.0f;
+			vec.y = json.contains("y") ? (float)json["y"] : 0.0f;
+			vec.z = json.contains("z") ? (float)json["z"] : 0.0f;
+			vec.w = json.contains("w") ? (float)json["w"] : 0.0f;
 
 			return vec;
 		}

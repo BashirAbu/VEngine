@@ -81,6 +81,7 @@ namespace VE
 
 		//savescene.
 		nlohmann::json sceneJson;
+		currentScene->name = currentScene->scenePath.stem().string();
 		sceneJson["name"] = currentScene->name;
 		if (SceneType::Scene2D == currentScene->GetSceneType())
 		{
@@ -94,7 +95,6 @@ namespace VE
 		for (Entity* entity : currentScene->entities)
 		{
 			nlohmann::json entityJson;
-			entityJson["tag"] = entity->tag;
 			entityJson["name"] = entity->name;
 			entity->Serialize(entityJson);
 			entity->ComponentsSerialize(entityJson["components"]);

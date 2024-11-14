@@ -48,14 +48,17 @@ namespace VE
 
 	void SpriteComponent::Serialize(nlohmann::json& json)
 	{
-		json["sprite_component"]["origin"] = Serialize::Vec2(origin);
-		json["sprite_component"]["tint_color"] = Serialize::Vec4(tintColor);
+		/*json["sprite_component"]["origin"] = Serialize::Vec2(origin);
+		json["sprite_component"]["tint_color"] = Serialize::Vec4(tintColor);*/
 		
 	}
 	void SpriteComponent::Deserialize(nlohmann::json& json)
 	{
-		origin = Deserialze::Vec2(json["sprite_component"]["origin"]);
-		tintColor = Deserialze::Vec4(json["sprite_component"]["tint_color"]);
+		/*if (json.contains("sprite_component"))
+		{
+			origin = Deserialze::Vec2(json["sprite_component"]["origin"]);
+			tintColor = Deserialze::Vec4(json["sprite_component"]["tint_color"]);
+		}*/
 	}
 	void SpriteComponent::DrawEditorUI()
 	{

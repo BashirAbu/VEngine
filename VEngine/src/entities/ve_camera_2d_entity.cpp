@@ -18,7 +18,7 @@ namespace VE
 		renderTargetHeight = Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight;
 		renderTarget = LoadRenderTexture(renderTargetWidth, renderTargetHeight, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		SetTextureFilter(renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-
+		SetTextureWrap(renderTarget.texture, TEXTURE_WRAP_CLAMP);
 		camera2D = {};
 		camera2D.zoom = 1.0f;
 	}

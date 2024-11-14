@@ -23,6 +23,9 @@ del bin\*.dll 2> NUL
 del bin\*.pdb 2> NUL
 del bin\int\*.obj 2> NUL
 
+
+build_imgui.bat %build_type%
+
 if "%build_type%"=="Debug" (
     del bin\int\*.obj 2> NUL
     cl.exe /c %SRC% /Fo:bin\int\ %DEFINES% %COMMON_FLAGS% %DEBUG_FLAGS% %INCLUDES% 
@@ -36,3 +39,4 @@ if "%build_type%"=="Release" (
 if "%build_type%"=="Clean" (
     del bin\int\*.obj 
 )
+

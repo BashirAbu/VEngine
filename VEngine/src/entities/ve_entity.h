@@ -32,10 +32,10 @@ namespace VE
 		std::string GetTag() { return tag; }
 
 
-		LayerMask layer;
-	protected:
-		std::string tag;
 		TransformComponent* transformComponent;
+	protected:
+		LayerMask layer;
+		std::string tag;
 	private:
 		void ComponentsStart();
 		void ComponentsUpdate(float deltaTime);
@@ -43,8 +43,12 @@ namespace VE
 		void ComponentsSerialize(nlohmann::json& json);
 		void ComponentsDeserialize(nlohmann::json& json);
 		void ComponentDrawEditorUI();
+
+
 		std::string name;
 		std::list<Component*> components;
+
+
 		friend class Scene;
 		friend class SceneManager;
 		friend class Engine;

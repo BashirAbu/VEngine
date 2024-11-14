@@ -179,7 +179,7 @@ namespace VE
 		}
 
 		float menuBarWidth = ImGui::GetWindowWidth();
-		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload").x + ImGui::GetStyle().ItemSpacing.x * 4;
+		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload Project").x + ImGui::GetStyle().ItemSpacing.x * 4;
 		float spacing = (menuBarWidth - buttonWidth) / 2.0f;
 		ImGui::SameLine(spacing);
 		if (engine->sceneManager->mode == SceneMode::Editor)
@@ -318,7 +318,7 @@ namespace VE
 
 
 		const RenderTexture* sceneViewTex = &engine->sceneManager->currentScene->editorCameraRenderTarget;
-		rlImGuiImageRenderTextureFit(sceneViewTex, false);
+		rlImGuiImageRenderTextureFit(&sceneViewTex->texture, false);
 
 		//Draw ImGuizmo stuff here.
 		if (SceneType::Scene2D == engine->GetSceneManager()->currentScene->sceneType)
@@ -375,7 +375,8 @@ namespace VE
 			if (s2d->mainCamera)
 			{
 				const RenderTexture2D* gameViewTex = s2d->mainCamera->GetRenderTarget();
-				rlImGuiImageRenderTextureFit(gameViewTex, true);
+
+				rlImGuiImageRenderTextureFit(&gameViewTex->texture, true);
 			}
 		}
 		else 

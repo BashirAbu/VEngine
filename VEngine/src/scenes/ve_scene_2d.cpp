@@ -108,4 +108,9 @@ namespace VE
 		}
 	}
 
+	const Entity* Scene2D::GetMainCamera() const
+	{
+		return mainCamera;
+	}
+
 }

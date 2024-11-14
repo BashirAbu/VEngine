@@ -31,9 +31,12 @@ namespace VE
 	}
 	void TransformComponent::Deserialize(nlohmann::json& json)
 	{
-		position = Deserialze::Vec3(json["transform_component"]["position"]);
-		rotation = Deserialze::Vec3(json["transform_component"]["rotation"]);
-		scale = Deserialze::Vec3(json["transform_component"]["scale"]);
+		if (json.contains("transform_component"))
+		{
+			position = Deserialze::Vec3(json["transform_component"]["position"]);
+			rotation = Deserialze::Vec3(json["transform_component"]["rotation"]);
+			scale = Deserialze::Vec3(json["transform_component"]["scale"]);
+		}
 	}
 	void TransformComponent::DrawEditorUI()
 	{
