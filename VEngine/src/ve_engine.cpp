@@ -36,7 +36,7 @@ namespace VE
 		SetConfigFlags(configFlags);
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
 		SetWindowState(FLAG_WINDOW_RESIZABLE);
-
+		InitAudioDevice();
 		projectSharedLibrary = new SharedLibrary();
 
 		LoadProjectSharedLibrary();

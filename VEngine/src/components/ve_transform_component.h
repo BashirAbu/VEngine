@@ -19,11 +19,22 @@ namespace VE
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
 
+		glm::vec3 GetWorldPosition() { return worldPosition; }
+		glm::vec3 GetWorldScale() { return worldScale; }
+		glm::vec3 GetWorldRotation() { return worldRotation; }
+
 		glm::mat4 GetTransformMatrix();
 
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
 	private:
+		//Only use these if the entity is a child of another.
+		glm::vec3 worldPosition;
+		glm::vec3 worldRotation;
+		glm::vec3 worldScale;
+
+		friend class SpriteComponent;
+		friend class Editor;
 	};
 }

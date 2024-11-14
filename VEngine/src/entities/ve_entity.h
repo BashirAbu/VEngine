@@ -31,6 +31,8 @@ namespace VE
 		void SetParent(Entity* parent);
 		void AddChild(Entity* child);
 
+		Entity* GetParent() { return parent; }
+		std::list<Entity*> GetChildren() { return children; }
 		std::string GetName() { return name; }
 		std::string GetTag() { return tag; }
 
@@ -53,7 +55,7 @@ namespace VE
 
 		Entity* parent;
 		std::list<Entity*> children;
-
+		bool started = false;
 		friend class Scene;
 		friend class SceneManager;
 		friend class Engine;

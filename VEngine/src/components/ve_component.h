@@ -16,7 +16,7 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) {}
 		virtual void Deserialize(nlohmann::json& json) {}
 		virtual void DrawEditorUI() {}
-	private:
+	protected:
 		//Owner
 		Entity* entity;
 	};

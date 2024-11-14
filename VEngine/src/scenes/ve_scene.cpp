@@ -45,12 +45,18 @@ namespace VE
 		{
 			entity->Start();
 			entity->ComponentsStart();
+			entity->started = true;
 		}
 	}
 	void Scene::Update(float deltaTime)
 	{
 		for (Entity* entity : entities)
 		{
+			if (!entity->started)
+			{
+				entity->started = true;
+				entity->Start();
+			}
 			entity->Update(deltaTime);
 			entity->ComponentsUpdate(deltaTime);
 		}

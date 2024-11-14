@@ -389,19 +389,39 @@ namespace VE
 				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
 
 				glm::mat4 transformMatrix = selectedEntity->transformComponent->GetTransformMatrix();
+				if (selectedEntity->GetParent())
+				{
+					transformMatrix = selectedEntity->GetParent()->transformComponent->GetTransformMatrix() * transformMatrix;
+				}
 				Matrix camreaViewMatrix = GetCameraMatrix2D(s2d->editorCamera);
 				ImGuizmo::Manipulate(MatrixToFloat(camreaViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transformMatrix));
 
 				if (ImGuizmo::IsUsing())
 				{
 					glm::vec3 skew;
+					glm::vec3 pos;
+					glm::vec3 scl;
 					glm::vec4 pres;
 					glm::quat rot;
-					glm::decompose(transformMatrix, selectedEntity->transformComponent->scale, rot, selectedEntity->transformComponent->position, skew, pres);
+					if (selectedEntity->GetParent())
+					{
+						glm::decompose(transformMatrix, scl, rot, pos, skew, pres);
 
-					glm::vec3 eulerAngles = glm::eulerAngles(rot);
-					eulerAngles = glm::degrees(eulerAngles);
-					selectedEntity->transformComponent->rotation = eulerAngles;
+						selectedEntity->transformComponent->position += pos - selectedEntity->transformComponent->worldPosition;
+						selectedEntity->transformComponent->scale += scl - selectedEntity->transformComponent->worldScale;
+						glm::vec3 eulerAngles = glm::eulerAngles(rot);
+						eulerAngles = glm::degrees(eulerAngles);
+						selectedEntity->transformComponent->rotation += eulerAngles - selectedEntity->transformComponent->worldRotation;
+					}
+					else 
+					{
+						glm::decompose(transformMatrix, selectedEntity->transformComponent->scale, rot, selectedEntity->transformComponent->position, skew, pres);
+						glm::vec3 eulerAngles = glm::eulerAngles(rot);
+						eulerAngles = glm::degrees(eulerAngles);
+						selectedEntity->transformComponent->rotation = eulerAngles;
+					}
+
+					
 				}
 
 			}

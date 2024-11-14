@@ -15,6 +15,7 @@ namespace VE
 
 		Texture* LoadTexture(std::filesystem::path filepath);
 		Image* LoadImage(std::filesystem::path filepath);
+		Sound* LoadSound(std::filesystem::path filepath);
 
 	private:
 		AssetsManager();
@@ -23,6 +24,7 @@ namespace VE
 		std::filesystem::path assetsFolderPath;
 		std::unordered_map<std::string, Texture> textures;
 		std::unordered_map<std::string, Image> images;
+		std::unordered_map<std::string, Sound> sounds;
 		friend class SceneManager;
 		friend class Engine;
 	};

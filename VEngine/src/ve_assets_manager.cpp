@@ -44,6 +44,18 @@ namespace VE
 			return &images[filepath.string()];
 		}
 	}
+	Sound* AssetsManager::LoadSound(std::filesystem::path filepath)
+	{
+		if (sounds.find(filepath.string()) != sounds.end())
+		{
+			return &sounds[filepath.string()];
+		}
+		else
+		{
+			sounds[filepath.string()] = ::LoadSound((assetsFolderPath.string() + filepath.string()).c_str());
+			return &sounds[filepath.string()];
+		}
+	}
 	void AssetsManager::Clear()
 	{
 		for (auto img : images)
@@ -56,5 +68,12 @@ namespace VE
 			UnloadTexture(tex.second);
 		}
 		textures.clear();
+
+
+		for (auto sound : sounds)
+		{
+			UnloadSound(sound.second);
+		}
+		sounds.clear();
 	}
 }
