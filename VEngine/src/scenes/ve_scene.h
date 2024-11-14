@@ -31,6 +31,7 @@ namespace VE
 		const RenderTexture GetEditorCameraRenderTarget() const { return editorCameraRenderTarget; }
 		virtual const Entity* GetMainCamera() const = 0;
 	protected:
+		void DeleteEntityChildren(Entity* entity);
 		std::string name;
 		bool started = false;
 		std::filesystem::path scenePath;
@@ -40,6 +41,7 @@ namespace VE
 		SceneType sceneType;
 
 		friend class Editor;
+		friend class Entity;
 		friend class Camera2DEntity;
 		friend class SceneManager;
 	};

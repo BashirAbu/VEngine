@@ -1,6 +1,7 @@
 #include "ve_camera_2d_entity.h"
 #include "ve_engine.h"
 #include "editor/ve_editor_elements.h"
+#include "scenes/ve_scene_2d.h"
 namespace VE 
 {
 	Camera2DEntity::Camera2DEntity(std::string name) : Entity(name)
@@ -31,6 +32,10 @@ namespace VE
 		{
 			if (*itr == this)
 			{
+				if (Engine::GetSingleton()->GetSceneManager()->currentScene->GetMainCamera() == *itr)
+				{
+					((Scene2D*)Engine::GetSingleton()->GetSceneManager()->currentScene)->mainCamera = nullptr;
+				}
 				Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.erase(itr);
 				break;
 			}

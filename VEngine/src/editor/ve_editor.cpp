@@ -55,6 +55,79 @@ namespace VE
 		rlImGuiEnd();
 	}
 
+	void Editor::DrawChildren(Entity* entity, std::list<Entity*>& deletedEntities)
+	{
+		for (auto* child : entity->children) 
+		{
+			if (child->children.size() == 0)
+			{
+				ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == (child)) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+				bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child->GetName().c_str());
+				if (open)
+				{
+					ImGui::TreePop();
+				}
+				if (ImGui::IsItemClicked())
+				{
+					engine->sceneManager->selectedEntity = child;
+				}
+
+				if (ImGui::BeginPopupContextItem(0, 1))
+				{
+					if (ImGui::MenuItem("Remove"))
+					{
+						if (child == engine->sceneManager->selectedEntity)
+						{
+							engine->sceneManager->selectedEntity = nullptr;
+						}
+						deletedEntities.push_back(child);
+					}
+					ImGui::EndPopup();
+				}
+			}
+			else 
+			{
+				DrawChildren(child, deletedEntities);
+			}
+		}
+	}
+
+	void Editor::AddEntityNode(Entity* entity, std::list<Entity*>& deletedEntities)
+	{
+		if (entity->parent && entity->children.size() == 0)
+		{
+			return;
+		}
+		ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)entity), flags, entity->GetName().c_str());
+		if (ImGui::IsItemClicked())
+		{
+			engine->sceneManager->selectedEntity = entity;
+		}
+
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if (ImGui::MenuItem("Remove"))
+			{
+				if (entity == engine->sceneManager->selectedEntity)
+				{
+					engine->sceneManager->selectedEntity = nullptr;
+				}
+				deletedEntities.push_back(entity);
+			}
+			ImGui::EndPopup();
+		}
+		if (opened)
+		{
+			if (entity->children.size() != 0)
+			{
+				//if node is expaneded, draw children.
+				DrawChildren(entity, deletedEntities);
+			}
+			ImGui::TreePop();
+		}
+
+	}
 	void Editor::DrawHierarchy()
 	{
 		ImGui::Begin("Hierarchy");
@@ -78,7 +151,6 @@ namespace VE
 							TraceLog(LOG_ERROR, "Failed to create entity (%s)!", entityName.c_str());
 							continue;
 						}
-						engine->sceneManager->currentScene->AddEntity(createdEntity);
 					}
 				}
 				ImGui::EndMenu();
@@ -86,43 +158,25 @@ namespace VE
 			ImGui::EndPopup();
 		}
 		size_t index = 0;
+		std::list<Entity*> deletedEntities;
 		for (auto itr = engine->sceneManager->currentScene->entities.begin(); itr != engine->sceneManager->currentScene->entities.end(); itr++)
 		{
-			ImGui::PushID((int)index);
-			ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == *itr)? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx((void*)((uint64_t)*itr), flags, (*itr)->GetName().c_str());
-			
-			if (ImGui::IsItemClicked())
-			{
-				engine->sceneManager->selectedEntity = *itr;
-			}
-
-			if (ImGui::BeginPopupContextItem(0, 1))
-			{
-				if (ImGui::MenuItem("Remove"))
-				{
-					if (*itr == engine->sceneManager->selectedEntity)
-					{
-						engine->sceneManager->selectedEntity = nullptr;
-					}
-					delete* itr;
-					itr = engine->sceneManager->currentScene->entities.erase(itr);
-
-				}
-				ImGui::EndPopup();
-			}
-			if (opened)
-			{
-				//if node is expaneded, draw children.
-				ImGui::TreePop();
-			}
-			
-			ImGui::PopID();
-			index++;
+			AddEntityNode(*itr, deletedEntities);
 			if (itr == engine->sceneManager->currentScene->entities.end() || engine->sceneManager->currentScene->entities.size() == 0)
 			{
 				break;
 			}
+		}
+
+		for (auto ent : deletedEntities)
+		{
+			engine->sceneManager->currentScene->DeleteEntityChildren(ent);
+			engine->sceneManager->currentScene->entities.remove(ent);
+			if (ent->parent)
+			{
+				ent->parent->children.remove(ent);
+			}
+			delete ent;
 		}
 
 		ImGui::End();
@@ -421,5 +475,7 @@ namespace VE
 			
 		}
 	}
+
+
 
 }

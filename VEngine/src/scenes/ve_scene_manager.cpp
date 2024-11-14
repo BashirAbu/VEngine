@@ -58,7 +58,7 @@ namespace VE
 				}
 				entity->Deserialize(entityJson);
 				entity->ComponentsDeserialize(entityJson["components"]);
-				currentScene->entities.push_back(entity);
+				//currentScene->entities.push_back(entity);
 			}
 		}
 
@@ -94,6 +94,10 @@ namespace VE
 		size_t index = 0;
 		for (Entity* entity : currentScene->entities)
 		{
+			if (entity->parent)
+			{
+				continue;
+			}
 			nlohmann::json entityJson;
 			entityJson["name"] = entity->name;
 			entity->Serialize(entityJson);

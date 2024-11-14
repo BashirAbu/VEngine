@@ -1,21 +1,39 @@
 #include "ve_engine.h"
 #include "ve_entity.h"
 #include <imgui.h>
+#include "ve_engine.h"
 namespace VE 
 {
-	Entity::Entity(std::string name)
+	Entity::Entity(std::string name) : parent(nullptr)
 	{
 		this->name = name;
 		transformComponent = new TransformComponent(this);
 		components.push_back(transformComponent);
+
+		VE::Engine::GetSingleton()->GetSceneManager()->GetCurrentScene()->entities.push_back(this);
 	}
 	Entity::~Entity()
 	{
+		for (auto itr = children.begin(); itr != children.end();)
+		{
+			Engine::GetSingleton()->GetSceneManager()->GetCurrentScene()->entities.remove(*itr);
+			delete (*itr);
+		}
+		children.clear();
 		for (Component* comp : components)
 		{
 			delete comp;
 		}
 		components.clear();
+	}
+	void Entity::SetParent(Entity* parent)
+	{
+		this->parent = parent;
+	}
+	void Entity::AddChild(Entity* child)
+	{
+		child->parent = this;
+		children.push_back(child);
 	}
 	void Entity::ComponentsStart()
 	{

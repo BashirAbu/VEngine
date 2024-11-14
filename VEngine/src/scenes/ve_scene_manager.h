@@ -26,7 +26,7 @@ namespace VE
 		void SaveScene();
 		Scene* CreateEmptyScene(SceneType type);
 
-		const Scene* GetCurrentScene() const { return currentScene; }
+		Scene* GetCurrentScene() { return currentScene; }
 	private:
 		Scene* currentScene;
 		SceneMode mode;

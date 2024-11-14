@@ -28,6 +28,9 @@ namespace VE
 		template <typename T>
 		void RemoveComponent();
 
+		void SetParent(Entity* parent);
+		void AddChild(Entity* child);
+
 		std::string GetName() { return name; }
 		std::string GetTag() { return tag; }
 
@@ -48,6 +51,8 @@ namespace VE
 		std::string name;
 		std::list<Component*> components;
 
+		Entity* parent;
+		std::list<Entity*> children;
 
 		friend class Scene;
 		friend class SceneManager;

@@ -20,6 +20,8 @@ namespace VE
 
 		void UpdateEditor(float deltaTime);
 
+		void AddEntityNode(class Entity* entity, std::list<Entity*>& deletedEntities);
+		void DrawChildren(class Entity* entity, std::list<Entity*>& deletedEntities);
 		const bool IsGameViewportFocused() const { return gameViewportFocused; }
 		const bool IsSceneViewportFocused() const { return sceneViewportFocused; }
 		const glm::vec2 GetSceneViewportSize() const { return sceneViewportSize; }

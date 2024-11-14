@@ -56,7 +56,7 @@ namespace VE
 
 
 
-		const SceneManager* GetSceneManager() const { return sceneManager; };
+		SceneManager* GetSceneManager() { return sceneManager; };
 		const EngineDesc* GetDesc() const { return &desc; }
 
 

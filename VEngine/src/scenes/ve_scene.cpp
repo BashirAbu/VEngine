@@ -12,12 +12,29 @@ namespace VE
 	{
 
 	}
-
+	void Scene::DeleteEntityChildren(Entity* entity)
+	{
+		for (auto itr = entity->children.begin(); itr != entity->children.end();)
+		{
+			if ((*itr)->children.size() == 0)
+			{
+				entities.remove(*itr);
+				delete *itr;
+				itr = entity->children.erase(itr);
+			}
+			else 
+			{
+				DeleteEntityChildren(*itr);
+				itr++;
+			}
+		}
+	}
 	Scene::~Scene()
 	{
 		UnloadRenderTexture(editorCameraRenderTarget);
 		for (Entity* entity : entities) 
 		{
+			DeleteEntityChildren(entity);
 			delete entity;
 		}
 		entities.clear();
@@ -62,4 +79,5 @@ namespace VE
 			}
 		}
 	}
+
 }
