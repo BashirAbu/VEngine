@@ -17,6 +17,7 @@ namespace VE
 	}
 	Scene2D::~Scene2D()
 	{
+		mainCamera = nullptr;
 	}
 	void Scene2D::Render()
 	{

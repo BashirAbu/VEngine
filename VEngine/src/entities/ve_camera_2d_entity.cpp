@@ -32,9 +32,11 @@ namespace VE
 		{
 			if (*itr == this)
 			{
-				if (Engine::GetSingleton()->GetSceneManager()->currentScene->GetMainCamera() == *itr)
+				if (((Scene2D*)Engine::GetSingleton()->GetSceneManager()->currentScene)->mainCamera == this)
 				{
+					
 					((Scene2D*)Engine::GetSingleton()->GetSceneManager()->currentScene)->mainCamera = nullptr;
+					
 				}
 				Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.erase(itr);
 				break;
