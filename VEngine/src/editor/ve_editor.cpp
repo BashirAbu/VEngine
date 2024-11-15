@@ -433,29 +433,26 @@ namespace VE
 
 				if (ImGuizmo::IsUsing())
 				{
+					
+
 					glm::vec3 skew;
 					glm::vec3 pos;
 					glm::vec3 scl;
 					glm::vec4 pres;
 					glm::quat rot;
-					if (selectedEntity->GetParent())
-					{
-						glm::decompose(transformMatrix, scl, rot, pos, skew, pres);
+					
+					glm::decompose(transformMatrix, scl, rot, pos, skew, pres);
 
-						selectedEntity->transformComponent->position += pos - selectedEntity->transformComponent->worldPosition;
-						selectedEntity->transformComponent->scale += scl - selectedEntity->transformComponent->worldScale;
-						glm::vec3 eulerAngles = glm::eulerAngles(rot);
-						eulerAngles = glm::degrees(eulerAngles);
-						selectedEntity->transformComponent->rotation += eulerAngles - selectedEntity->transformComponent->worldRotation;
-					}
-					else 
-					{
-						glm::decompose(transformMatrix, selectedEntity->transformComponent->scale, rot, selectedEntity->transformComponent->position, skew, pres);
-						glm::vec3 eulerAngles = glm::eulerAngles(rot);
-						eulerAngles = glm::degrees(eulerAngles);
-						selectedEntity->transformComponent->rotation = eulerAngles;
-					}
+					glm::vec3 eulerAngles = glm::eulerAngles(rot);
+					eulerAngles = glm::degrees(eulerAngles);
 
+					glm::vec4 localPos(1.0f);
+					
+					localPos = selectedEntity->GetParent()? glm::inverse( selectedEntity->GetParent()->transformComponent->GetWorldTransformMatrix()) * glm::vec4(pos, 1.0f) : glm::vec4(pos, 1.0f);
+					
+					selectedEntity->transformComponent->position = localPos;
+					selectedEntity->transformComponent->scale += scl - selectedEntity->transformComponent->worldScale;
+					selectedEntity->transformComponent->rotation += eulerAngles - selectedEntity->transformComponent->worldRotation;
 					
 				}
 
