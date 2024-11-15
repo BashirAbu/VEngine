@@ -429,7 +429,7 @@ namespace VE
 
 				glm::mat4 transformMatrix = selectedEntity->transformComponent->GetWorldTransformMatrix();
 				Matrix camreaViewMatrix = GetCameraMatrix2D(s2d->editorCamera);
-				ImGuizmo::Manipulate(MatrixToFloat(camreaViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transformMatrix));
+				ImGuizmo::Manipulate(MatrixToFloat(camreaViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
 
 				if (ImGuizmo::IsUsing())
 				{
