@@ -33,10 +33,10 @@ namespace VE
 		{
 			configFlags |= FLAG_VSYNC_HINT;
 		}
+		InitAudioDevice();
 		SetConfigFlags(configFlags);
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
 		SetWindowState(FLAG_WINDOW_RESIZABLE);
-		InitAudioDevice();
 		projectSharedLibrary = new SharedLibrary();
 
 		LoadProjectSharedLibrary();
@@ -68,6 +68,7 @@ namespace VE
 		delete sceneManager;
 		delete projectSharedLibrary;
 		delete AssetsManager::GetSingleton();
+		CloseAudioDevice();
 		CloseWindow();
 	}
 	Engine* Engine::GetSingleton()
@@ -88,28 +89,31 @@ namespace VE
 			EndDrawing();
 		}
 	}
-	void Engine::RegisterEntity(std::string entityName)
+	void Engine::RegisterEntity(std::string entity)
 	{
 		for (std::string name : entitiesRegistry) 
 		{
-			if (name == entityName)
+			if (name == entity)
 			{
 				return;
 			}
 		}
-		entitiesRegistry.push_back(entityName);
+		entitiesRegistry.push_back(entity);
 	}
-	Entity* Engine::CreateBuiltinEntity(std::string entityName)
+	Entity* Engine::CreateBuiltinEntity(std::string entity)
 	{
-		if (entityName == "Camera2DEntity")
+		Entity* ent = nullptr;
+		if (entity == "Camera2DEntity")
 		{
-			return new Camera2DEntity(VE_STRINGIFY(Camera2DEntity));
+			ent = new Camera2DEntity(entity);
+			ent->internalName = entity;
 		}
-		else if (entityName == "EmptyEntity") 
+		else if (entity == "EmptyEntity")
 		{
-			return new EmptyEntity(VE_STRINGIFY(EmptyEntity));
+			ent = new EmptyEntity(entity);
+			ent->internalName = entity;
 		}
-		return nullptr;
+		return ent;
 	}
 	void Engine::LoadProjectSharedLibrary()
 	{

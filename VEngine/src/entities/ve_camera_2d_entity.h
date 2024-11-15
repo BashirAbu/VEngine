@@ -7,7 +7,7 @@ namespace VE
 	class VE_API Camera2DEntity : public Entity 
 	{
 	public:
-		Camera2DEntity(std::string name);
+		Camera2DEntity(std::string name = "");
 		~Camera2DEntity();
 
 		virtual void Start() override;

@@ -24,11 +24,13 @@ namespace VE
 		glm::vec3 GetWorldRotation() { return worldRotation; }
 
 		glm::mat4 GetTransformMatrix();
-
+		glm::mat4 GetWorldTransformMatrix();
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
 	private:
+		void ApplyChildren(Entity* entity, glm::mat4 parentTransform);
+
 		//Only use these if the entity is a child of another.
 		glm::vec3 worldPosition;
 		glm::vec3 worldRotation;

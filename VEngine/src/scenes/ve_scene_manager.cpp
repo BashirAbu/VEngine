@@ -9,6 +9,7 @@
 #include "ve_assets_manager.h"
 #include "entities/ve_entity.h"
 #include "ve_scene_2d.h"
+#include "entities/ve_empty_entity.h"
 namespace VE 
 {
 	SceneManager::SceneManager() : currentScene(nullptr), mode(SceneMode::Editor), selectedEntity(nullptr)
@@ -20,6 +21,10 @@ namespace VE
 	}
 	void SceneManager::LoadScene(std::filesystem::path scenePath)
 	{
+		if (scenePath.empty()) 
+		{
+			return;
+		}
 		std::ifstream sceneFile(scenePath);
 		nlohmann::json sceneJson = nlohmann::json::parse(sceneFile);
 
@@ -50,19 +55,29 @@ namespace VE
 		{
 			for (nlohmann::json entityJson : sceneJson["entities"])
 			{
-				std::string entName = entityJson["name"];
-				Entity* entity = CreateProjectEntity(entName);
-				if (!entity)
-				{
-					entity = Engine::GetSingleton()->CreateBuiltinEntity(entName);
-				}
-				entity->Deserialize(entityJson);
-				entity->ComponentsDeserialize(entityJson["components"]);
-				//currentScene->entities.push_back(entity);
+				DeserializeChildren(entityJson);
 			}
 		}
 
 	}
+	Entity* SceneManager::DeserializeChildren(nlohmann::json entityJson)
+	{
+		std::string entName = entityJson["internal_name"];
+		Entity* entity = CreateProjectEntity(entName);
+		if (!entity)
+		{
+			entity = Engine::GetSingleton()->CreateBuiltinEntity(entName);
+		}
+		entity->Deserialize(entityJson);
+		entity->ComponentsDeserialize(entityJson["components"]);
+		for (nlohmann::json childJson : entityJson["children"])
+		{
+			Entity* child = DeserializeChildren(childJson);
+			entity->AddChild(child);
+		}
+		return entity;
+	}
+
 	void SceneManager::UnloadScene()
 	{
 		if(currentScene)
@@ -99,9 +114,7 @@ namespace VE
 				continue;
 			}
 			nlohmann::json entityJson;
-			entityJson["name"] = entity->name;
-			entity->Serialize(entityJson);
-			entity->ComponentsSerialize(entityJson["components"]);
+			entityJson = SerializeChildren(entity, index);
 			std::string genName = "entity" + std::to_string(index);
 			sceneJson["entities"][genName] = entityJson;
 			index++;
@@ -111,6 +124,24 @@ namespace VE
 		sceneFile << sceneJson;
 		sceneFile.close();
 	}
+	nlohmann::json SceneManager::SerializeChildren(Entity* entity, size_t& index)
+	{
+
+		nlohmann::json entityJson;
+		entityJson["internal_name"] = entity->internalName;
+		entity->Serialize(entityJson);
+		entity->ComponentsSerialize(entityJson["components"]);
+		
+		for (auto child : entity->children)
+		{
+			
+			std::string childGenName = "entity" + std::to_string(index);
+			entityJson["children"][childGenName] = SerializeChildren(child, index);
+			index++;
+		}
+		return entityJson;
+	}
+
 	Scene* SceneManager::CreateEmptyScene(SceneType type)
 	{
 		Scene* scene = nullptr;
@@ -128,6 +159,39 @@ namespace VE
 		}
 		currentScene = scene;
 		return scene;
+	}
+	Entity* SceneManager::LoadConstruct(std::filesystem::path constructPath)
+	{
+		if (constructPath.empty())
+		{
+			return nullptr;
+		}
+		std::fstream constructFile(constructPath);
+		nlohmann::json constructJson = nlohmann::json::parse(constructFile);
+		constructFile.close();
+		constructJson["name"];
+		Entity* construct = new EmptyEntity(constructJson["name"]);
+		construct->SetInternalName(constructJson["name"]);
+
+
+		if (constructJson.contains("entities"))
+		{
+			for (nlohmann::json entityJson : constructJson["entities"])
+			{
+				std::string entName = entityJson["internal_name"];
+				Entity* entity = CreateProjectEntity(entName);
+				if (!entity)
+				{
+					entity = Engine::GetSingleton()->CreateBuiltinEntity(entName);
+				}
+				entity->Deserialize(entityJson);
+				entity->ComponentsDeserialize(entityJson["components"]);
+				//currentScene->entities.push_back(entity);
+			}
+		}
+
+		return construct;
+
 	}
 	void SceneManager::SaveSceneAs()
 	{

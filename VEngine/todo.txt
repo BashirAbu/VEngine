@@ -1,11 +1,8 @@
+- see if you can use IDS insted of strings. 
+
+-add a way to load scenes as CONSTRUCTS.
+
 -UI render target (res same to the main render target).
-
--Add parent child stuff.
-
--add scene setting to inspector somehow. or add a window.
-
--show dialog window when creating newscene to choose 2d or 3d scene.
-
 
 -add setting window.
 	-set backbuffer width and height.

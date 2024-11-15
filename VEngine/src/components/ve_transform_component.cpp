@@ -22,28 +22,37 @@ namespace VE
 	void TransformComponent::Update(float deltaTime)
 	{
 	}
-	void TransformComponent::Render()
+
+	void TransformComponent::ApplyChildren(Entity* entity, glm::mat4 parentTransform)
 	{
-		if (entity->GetParent())
+		for (auto* child : entity->GetChildren())
 		{
-			glm::mat4 parentTransform = entity->GetParent()->transformComponent->GetTransformMatrix();
-			glm::mat4 childTransform = GetTransformMatrix();
+			glm::mat4 childTransform = child->transformComponent->GetTransformMatrix();
 
 			glm::mat4 worldTransform = parentTransform * childTransform;
 			glm::quat rot;
 			glm::vec3 skew;
 			glm::vec4 pres;
-			glm::decompose(worldTransform, worldScale, rot, worldPosition, skew, pres);
+			glm::decompose(worldTransform, child->transformComponent->worldScale, rot, child->transformComponent->worldPosition, skew, pres);
 
-			worldRotation = glm::degrees(glm::eulerAngles(rot));
+			child->transformComponent->worldRotation = glm::degrees(glm::eulerAngles(rot));
+			if (child->GetChildren().size() > 0)
+			{
+				ApplyChildren(child,child->transformComponent->GetWorldTransformMatrix());
+			}
 		}
-		else 
+	}
+
+	void TransformComponent::Render()
+	{
+		
+		if (entity->GetChildren().size() > 0 && !entity->GetParent())
 		{
 			worldPosition = position;
-			worldScale = scale;
 			worldRotation = rotation;
+			worldScale = scale;
+			ApplyChildren(entity, GetTransformMatrix());
 		}
-		
 	}
 	void TransformComponent::Serialize(nlohmann::json& json)
 	{
@@ -84,4 +93,15 @@ namespace VE
 			* glm::scale(glm::mat4(1.0f), scale);
 		return transformMatrix;
 	}
+	glm::mat4 TransformComponent::GetWorldTransformMatrix()
+	{
+		glm::mat4 transformMatrix = glm::mat4(1.0f);
+		transformMatrix = glm::translate(glm::mat4(1.0f), worldPosition)
+			* glm::rotate(glm::mat4(1.0f), glm::radians(worldRotation.z), glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::rotate(glm::mat4(1.0f), glm::radians(worldRotation.y), glm::vec3(0.0f, 1.0f, 0.0f))
+			* glm::rotate(glm::mat4(1.0f), glm::radians(worldRotation.x), glm::vec3(1.0f, 0.0f, 0.0f))
+			* glm::scale(glm::mat4(1.0f), worldScale);
+		return transformMatrix;
+	}
+
 }

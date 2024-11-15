@@ -57,7 +57,8 @@ extern "C" VE_PROJECT_API VE::Entity* CreateProjectEntity(std::string entityName
 #define VE_REGISTER_ENTITY(entity)\
     else if(#entity == entityName)\
     {\
-        VE::Entity* ent = new entity( entityName );\
+        VE::Entity* ent = new entity(#entity);\
+        ent->SetInternalName(entityName);\
         return ent;\
     }
 

@@ -16,16 +16,20 @@ namespace VE
 	{
 		for (auto itr = entity->children.begin(); itr != entity->children.end();)
 		{
-			if ((*itr)->children.size() == 0)
+			if ((*itr)->children.size() > 0)
 			{
+				DeleteEntityChildren(*itr);
+				
 				entities.remove(*itr);
-				delete *itr;
+				delete* itr;
 				itr = entity->children.erase(itr);
+				
 			}
 			else 
 			{
-				DeleteEntityChildren(*itr);
-				itr++;
+				entities.remove(*itr);
+				delete* itr;
+				itr = entity->children.erase(itr);
 			}
 		}
 	}
@@ -34,7 +38,10 @@ namespace VE
 		UnloadRenderTexture(editorCameraRenderTarget);
 		for (Entity* entity : entities) 
 		{
-			DeleteEntityChildren(entity);
+			if (entity->children.size() > 0)
+			{
+				DeleteEntityChildren(entity);
+			}
 			delete entity;
 		}
 		entities.clear();

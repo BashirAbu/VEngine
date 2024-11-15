@@ -22,71 +22,46 @@ namespace VE
 	}
 	void SpriteComponent::Render()
 	{
-		if (entity->GetParent())
+		
+		Rectangle src, dest;
+		src.x = 0.0f;
+		src.width = (float)texture->width;
+		src.y = 0.0f;
+		src.height = (float)texture->height;
+		if (transformComponent->worldScale.x < 0.0f)
 		{
-			Rectangle src, dest;
-			src.x = 0.0f;
-			src.width = (float)texture->width;
-			src.y = 0.0f;
-			src.height = (float)texture->height;
-			if (transformComponent->worldScale.x < 0.0f)
-			{
-				src.width *= -1.0f;
-			}
-			if (transformComponent->worldScale.y < 0.0f)
-			{
-				src.height *= -1.0f;
-			}
-
-			dest.x = transformComponent->worldPosition.x;
-			dest.y = transformComponent->worldPosition.y;
-			dest.width = glm::abs(texture->width * transformComponent->worldScale.x);
-			dest.height = glm::abs(texture->height * transformComponent->worldScale.y);
-
-			Vector2 org = { dest.width * origin.x, dest.height * origin.y };
-			Color col = { uint8_t(tintColor.x * 255.0f), uint8_t(tintColor.y * 255.0f), uint8_t(tintColor.z * 255.0f), uint8_t(tintColor.w * 255.0f) };
-			DrawTexturePro(*texture, src, dest, org, transformComponent->worldRotation.z, col);
+			src.width *= -1.0f;
 		}
-		else 
+		if (transformComponent->worldScale.y < 0.0f)
 		{
-			Rectangle src, dest;
-			src.x = 0.0f;
-			src.width = (float)texture->width;
-			src.y = 0.0f;
-			src.height = (float)texture->height;
-			if (transformComponent->scale.x < 0.0f)
-			{
-				src.width *= -1.0f;
-			}
-			if (transformComponent->scale.y < 0.0f)
-			{
-				src.height *= -1.0f;
-			}
-
-			dest.x = transformComponent->position.x;
-			dest.y = transformComponent->position.y;
-			dest.width = glm::abs(texture->width * transformComponent->scale.x);
-			dest.height = glm::abs(texture->height * transformComponent->scale.y);
-
-			Vector2 org = { dest.width * origin.x, dest.height * origin.y };
-			Color col = { uint8_t(tintColor.x * 255.0f), uint8_t(tintColor.y * 255.0f), uint8_t(tintColor.z * 255.0f), uint8_t(tintColor.w * 255.0f) };
-			DrawTexturePro(*texture, src, dest, org, transformComponent->rotation.z, col);
+			src.height *= -1.0f;
 		}
+
+		dest.x = transformComponent->worldPosition.x;
+		dest.y = transformComponent->worldPosition.y;
+		dest.width = glm::abs(texture->width * transformComponent->worldScale.x);
+		dest.height = glm::abs(texture->height * transformComponent->worldScale.y);
+
+		Vector2 org = { dest.width * origin.x, dest.height * origin.y };
+		Color col = { uint8_t(tintColor.x * 255.0f), uint8_t(tintColor.y * 255.0f), uint8_t(tintColor.z * 255.0f), uint8_t(tintColor.w * 255.0f) };
+		DrawTexturePro(*texture, src, dest, org, transformComponent->worldRotation.z, col);
+		
+		
 	}
 
 	void SpriteComponent::Serialize(nlohmann::json& json)
 	{
-		/*json["sprite_component"]["origin"] = Serialize::Vec2(origin);
-		json["sprite_component"]["tint_color"] = Serialize::Vec4(tintColor);*/
+		json["sprite_component"]["origin"] = Serialize::Vec2(origin);
+		json["sprite_component"]["tint_color"] = Serialize::Vec4(tintColor);
 		
 	}
 	void SpriteComponent::Deserialize(nlohmann::json& json)
 	{
-		/*if (json.contains("sprite_component"))
+		if (json.contains("sprite_component"))
 		{
 			origin = Deserialze::Vec2(json["sprite_component"]["origin"]);
 			tintColor = Deserialze::Vec4(json["sprite_component"]["tint_color"]);
-		}*/
+		}
 	}
 	void SpriteComponent::DrawEditorUI()
 	{

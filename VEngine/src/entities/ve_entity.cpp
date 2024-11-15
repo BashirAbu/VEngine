@@ -7,6 +7,7 @@ namespace VE
 	Entity::Entity(std::string name) : parent(nullptr)
 	{
 		this->name = name;
+		internalName = name;
 		transformComponent = new TransformComponent(this);
 		components.push_back(transformComponent);
 

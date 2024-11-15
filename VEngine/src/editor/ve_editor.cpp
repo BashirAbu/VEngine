@@ -59,47 +59,63 @@ namespace VE
 	{
 		for (auto* child : entity->children) 
 		{
-			if (child->children.size() == 0)
+			ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == (child)) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child->name.c_str());
+			
+			if (ImGui::IsItemClicked())
 			{
-				ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == (child)) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-				bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child->GetName().c_str());
-				if (open)
+				engine->sceneManager->selectedEntity = child;
+			}
+
+			if (ImGui::BeginPopupContextItem(0, 1))
+			{
+				engine->sceneManager->selectedEntity = child;
+				if (ImGui::BeginMenu("Add Child"))
 				{
-					ImGui::TreePop();
-				}
-				if (ImGui::IsItemClicked())
-				{
-					engine->sceneManager->selectedEntity = child;
+					for (std::string entityName : engine->entitiesRegistry)
+					{
+						if (ImGui::MenuItem(entityName.c_str()))
+						{
+							Entity* childEntity = CreateProjectEntity(entityName);
+							if (!childEntity)
+							{
+								childEntity = engine->CreateBuiltinEntity(entityName);
+							}
+							engine->sceneManager->selectedEntity->AddChild(childEntity);
+						}
+					}
+					ImGui::EndMenu();
 				}
 
-				if (ImGui::BeginPopupContextItem(0, 1))
+				if (ImGui::MenuItem("Remove"))
 				{
-					if (ImGui::MenuItem("Remove"))
+					if (child == engine->sceneManager->selectedEntity)
 					{
-						if (child == engine->sceneManager->selectedEntity)
-						{
-							engine->sceneManager->selectedEntity = nullptr;
-						}
-						deletedEntities.push_back(child);
+						engine->sceneManager->selectedEntity = nullptr;
 					}
-					ImGui::EndPopup();
+					deletedEntities.push_back(child);
 				}
+				ImGui::EndPopup();
 			}
-			else 
+			if (open)
 			{
-				DrawChildren(child, deletedEntities);
+				if (child->children.size() > 0)
+				{
+					DrawChildren(child, deletedEntities);
+				}
+				ImGui::TreePop();
 			}
 		}
 	}
 
 	void Editor::AddEntityNode(Entity* entity, std::list<Entity*>& deletedEntities)
 	{
-		if (entity->parent && entity->children.size() == 0)
+		if (entity->parent)
 		{
 			return;
 		}
 		ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)entity), flags, entity->GetName().c_str());
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)entity), flags, entity->name.c_str());
 		if (ImGui::IsItemClicked())
 		{
 			engine->sceneManager->selectedEntity = entity;
@@ -107,6 +123,23 @@ namespace VE
 
 		if (ImGui::BeginPopupContextItem(0, 1))
 		{
+			engine->sceneManager->selectedEntity = entity;
+			if (ImGui::BeginMenu("Add Child"))
+			{
+				for (std::string entityName : engine->entitiesRegistry)
+				{
+					if (ImGui::MenuItem(entityName.c_str()))
+					{
+						Entity* childEntity = CreateProjectEntity(entityName);
+						if (!childEntity)
+						{
+							childEntity = engine->CreateBuiltinEntity(entityName);
+						}
+						engine->sceneManager->selectedEntity->AddChild(childEntity);
+					}
+				}
+				ImGui::EndMenu();
+			}
 			if (ImGui::MenuItem("Remove"))
 			{
 				if (entity == engine->sceneManager->selectedEntity)
@@ -119,7 +152,7 @@ namespace VE
 		}
 		if (opened)
 		{
-			if (entity->children.size() != 0)
+			if (entity->children.size() > 0)
 			{
 				//if node is expaneded, draw children.
 				DrawChildren(entity, deletedEntities);
@@ -154,6 +187,12 @@ namespace VE
 					}
 				}
 				ImGui::EndMenu();
+			}
+			if (ImGui::MenuItem("Add Construct"))
+			{
+				std::filesystem::path constructPath = VE::OpenFileDialog();
+				Engine::GetSingleton()->GetSceneManager()->LoadScene(constructPath);
+				//add construct
 			}
 			ImGui::EndPopup();
 		}
@@ -388,11 +427,7 @@ namespace VE
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
 				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
 
-				glm::mat4 transformMatrix = selectedEntity->transformComponent->GetTransformMatrix();
-				if (selectedEntity->GetParent())
-				{
-					transformMatrix = selectedEntity->GetParent()->transformComponent->GetTransformMatrix() * transformMatrix;
-				}
+				glm::mat4 transformMatrix = selectedEntity->transformComponent->GetWorldTransformMatrix();
 				Matrix camreaViewMatrix = GetCameraMatrix2D(s2d->editorCamera);
 				ImGuizmo::Manipulate(MatrixToFloat(camreaViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transformMatrix));
 

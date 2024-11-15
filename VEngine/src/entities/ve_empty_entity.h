@@ -7,7 +7,7 @@ namespace VE
 	class VE_API EmptyEntity : public Entity 
 	{
 	public:
-		EmptyEntity(std::string name);
+		EmptyEntity(std::string name = "");
 		~EmptyEntity();
 
 		virtual void Start() override;

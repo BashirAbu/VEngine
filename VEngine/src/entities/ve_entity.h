@@ -11,7 +11,7 @@ namespace VE
 	class VE_API Entity
 	{
 	public:
-		Entity(std::string name);
+		Entity(std::string name = "");
 
 		virtual ~Entity();
 
@@ -33,14 +33,15 @@ namespace VE
 
 		Entity* GetParent() { return parent; }
 		std::list<Entity*> GetChildren() { return children; }
-		std::string GetName() { return name; }
 		std::string GetTag() { return tag; }
 
+		void SetInternalName(std::string internalName) { this->internalName = internalName; };
 
 		TransformComponent* transformComponent;
+		std::string name;
+		std::string tag;
 	protected:
 		LayerMask layer;
-		std::string tag;
 	private:
 		void ComponentsStart();
 		void ComponentsUpdate(float deltaTime);
@@ -49,13 +50,14 @@ namespace VE
 		void ComponentsDeserialize(nlohmann::json& json);
 		void ComponentDrawEditorUI();
 
-
-		std::string name;
+		std::string internalName;
 		std::list<Component*> components;
 
 		Entity* parent;
 		std::list<Entity*> children;
 		bool started = false;
+
+
 		friend class Scene;
 		friend class SceneManager;
 		friend class Engine;
