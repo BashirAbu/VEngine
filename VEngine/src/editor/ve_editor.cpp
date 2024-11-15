@@ -441,19 +441,17 @@ namespace VE
 					glm::vec4 pres;
 					glm::quat rot;
 					
-					glm::decompose(transformMatrix, scl, rot, pos, skew, pres);
+					glm::decompose(selectedEntity->GetParent()? glm::inverse(selectedEntity->GetParent()->transformComponent->GetWorldTransformMatrix()) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
 
 					glm::vec3 eulerAngles = glm::eulerAngles(rot);
 					eulerAngles = glm::degrees(eulerAngles);
 
-					glm::vec4 localPos(1.0f);
-					
-					localPos = selectedEntity->GetParent()? glm::inverse( selectedEntity->GetParent()->transformComponent->GetWorldTransformMatrix()) * glm::vec4(pos, 1.0f) : glm::vec4(pos, 1.0f);
-					
-					selectedEntity->transformComponent->position = localPos;
-					selectedEntity->transformComponent->scale += scl - selectedEntity->transformComponent->worldScale;
-					selectedEntity->transformComponent->rotation += eulerAngles - selectedEntity->transformComponent->worldRotation;
-					
+					selectedEntity->transformComponent->position = pos;
+					selectedEntity->transformComponent->scale = scl;
+					selectedEntity->transformComponent->rotation = eulerAngles;
+
+
+					TraceLog(LOG_INFO, "x: %f y: %f", eulerAngles.z, eulerAngles.z);
 				}
 
 			}
