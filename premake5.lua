@@ -8,7 +8,6 @@ workspace "VEngine"
     }
 
 outputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
-
 project "ImGui"
     location "VEngine"
     kind "SharedLib"
@@ -55,6 +54,16 @@ project "ImGui"
         {
             "IMGUI_EXPORT"
         }
+        
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config %{cfg.buildcfg}"
+        }
+
         postbuildcommands
         {
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")

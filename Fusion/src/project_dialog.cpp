@@ -174,7 +174,7 @@ bool ProjectDialog::Run(VE::ProjectDetails* projectDetails)
 
 								projectDetails->path = (projectDetails->path.parent_path().string() + "/" + projectDetails->path.stem().string() + "/" + projectDetails->path.stem().string() + "." + VE_PROJECT_FILE_EXTENSION);
 							}
-							std::string changeDirectoryCommand = "cd " + projectDetails->path.parent_path().string() + "/" + "&& build_project.bat Debug";
+							std::string changeDirectoryCommand = "cd " + projectDetails->path.parent_path().string() + "/" + "&& gen_vs.bat";
 
 							// Run the command
 							system(changeDirectoryCommand.c_str());

@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\VEngine - Copy\bin\Debug_windows_x86_64\Fusion\Fusion.exe</FullPath>
+      <FullPath>D:\VEngine\bin\Debug_windows_x86_64\Fusion\Fusion.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
