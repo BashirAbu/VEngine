@@ -13,25 +13,42 @@ namespace VE
 		TransformComponent(Entity* entity);
 		~TransformComponent();
 		virtual void Start() override;
+		virtual void PreUpdate(float deltaTime) override;
 		virtual void Update(float deltaTime) override;
 		virtual void Render() override;
 		virtual void Serialize(nlohmann::json& json) override;
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
 
-		glm::vec3 GetWorldPosition() { return worldPosition; }
-		glm::vec3 GetWorldScale() { return worldScale; }
-		glm::vec3 GetWorldRotation() { return worldRotation; }
+		void Translate(glm::vec3);
+		void SetPosition(glm::vec3 vec);
+		glm::vec3 GetPosition() { return worldPosition; }
+
+		void SetRotation(glm::vec3 vec);
+		glm::vec3 GetRotation() { return worldRotation; }
+
+		void SetScale(glm::vec3 vec);
+		glm::vec3 GetScale() { return worldScale; }
+
+		void SetLocalPosition(glm::vec3 vec) { position = vec; }
+		glm::vec3 GetLocalPosition() { return position; }
+
+		void SetLocalRotation(glm::vec3 vec) { rotation = vec; }
+		glm::vec3 GetLocalRotation() { return rotation; }
+
+		void SetLocalScale(glm::vec3 vec) { scale = vec; }
+		glm::vec3 GetLocalScale() { return scale; }
 
 		glm::mat4 GetTransformMatrix();
 		glm::mat4 GetWorldTransformMatrix();
+	private:
+		void ApplyParentTransform(Entity* entity, glm::mat4 parentTransform);
+		void UpdateWolrdTransform();
+
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scale;
-	private:
-		void ApplyChildren(Entity* entity, glm::mat4 parentTransform);
 
-		//Only use these if the entity is a child of another.
 		glm::vec3 worldPosition;
 		glm::vec3 worldRotation;
 		glm::vec3 worldScale;

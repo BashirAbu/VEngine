@@ -64,8 +64,23 @@ namespace VE
 				entity->started = true;
 				entity->Start();
 			}
-			entity->Update(deltaTime);
-			entity->ComponentsUpdate(deltaTime);
+		}
+		for (Entity* entity : entities)
+		{
+			if (entity->started)
+			{
+				entity->PreUpdate(deltaTime);
+				entity->ComponentsPreUpdate(deltaTime);
+			}
+		}
+
+		for (Entity* entity : entities)
+		{
+			if (entity->started)
+			{
+				entity->Update(deltaTime);
+				entity->ComponentsUpdate(deltaTime);
+			}
 		}
 	}
 	void Scene::DrawEditorUI()

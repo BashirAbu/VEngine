@@ -32,6 +32,8 @@ namespace VE
 		Scene* GetCurrentScene() { return currentScene; }
 
 		Entity* LoadConstruct(std::filesystem::path constructPath);
+
+		SceneMode GetSceneMode() { return mode; }
 	private:
 		Scene* currentScene;
 		SceneMode mode;

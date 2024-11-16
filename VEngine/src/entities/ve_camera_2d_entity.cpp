@@ -51,8 +51,8 @@ namespace VE
 	}
 	void Camera2DEntity::Render()
 	{
-		camera2D.target = Vector2{ transformComponent->position.x, transformComponent->position.y };
-		camera2D.rotation = transformComponent->rotation.z;
+		camera2D.target = Vector2{ transformComponent->GetPosition().x,transformComponent->GetPosition().y};
+		camera2D.rotation = transformComponent->GetRotation().z;
 	}
 	void Camera2DEntity::Serialize(nlohmann::json& json)
 	{

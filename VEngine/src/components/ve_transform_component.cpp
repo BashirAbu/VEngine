@@ -8,6 +8,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "entities/ve_entity.h"
+#include "ve_engine.h"
 namespace VE 
 {
 	TransformComponent::TransformComponent(Entity* entity) : Component(entity), position(0.0f), rotation(0.0f), scale(1.0f), worldPosition(0.0f), worldRotation(0.0f), worldScale(0.0f)
@@ -22,12 +23,16 @@ namespace VE
 	void TransformComponent::Start()
 	{
 	}
+	void TransformComponent::PreUpdate(float deltaTime)
+	{
+		UpdateWolrdTransform();
+	}
 	void TransformComponent::Update(float deltaTime)
 	{
 
 	}
 
-	void TransformComponent::ApplyChildren(Entity* entity, glm::mat4 parentTransform)
+	void TransformComponent::ApplyParentTransform(Entity* entity, glm::mat4 parentTransform)
 	{
 		for (auto* child : entity->GetChildren())
 		{
@@ -42,25 +47,33 @@ namespace VE
 			child->transformComponent->worldRotation = glm::degrees(glm::eulerAngles(rot));
 			if (child->GetChildren().size() > 0)
 			{
-				ApplyChildren(child,child->transformComponent->GetWorldTransformMatrix());
+				ApplyParentTransform(child,child->transformComponent->GetWorldTransformMatrix());
 			}
 		}
 	}
 
-	void TransformComponent::Render()
+	void TransformComponent::UpdateWolrdTransform()
 	{
 		if (entity->GetChildren().size() > 0 && !entity->GetParent())
 		{
 			worldPosition = position;
 			worldRotation = rotation;
 			worldScale = scale;
-			ApplyChildren(entity, GetTransformMatrix());
+			ApplyParentTransform(entity, GetTransformMatrix());
 		}
 		else if (entity->GetChildren().size() == 0 && !entity->GetParent())
 		{
 			worldPosition = position;
 			worldRotation = rotation;
 			worldScale = scale;
+		}
+	}
+
+	void TransformComponent::Render()
+	{
+		if (Engine::GetSingleton()->GetSceneManager()->GetSceneMode() == SceneMode::Editor)
+		{
+			UpdateWolrdTransform();
 		}
 	}
 	void TransformComponent::Serialize(nlohmann::json& json)
@@ -92,6 +105,70 @@ namespace VE
 			ImGui::TreePop();
 		}
 	}
+
+	void TransformComponent::Translate(glm::vec3 vec)
+	{
+		position += vec;
+	}
+
+	void TransformComponent::SetPosition(glm::vec3 vec)
+	{
+		if (entity->GetParent())
+		{
+
+			glm::vec4 localPos = glm::inverse(entity->GetParent()->transformComponent->GetWorldTransformMatrix()) * glm::vec4(vec, 1.0f);
+
+			position = localPos;
+		}
+		else 
+		{
+			position = vec;
+		}
+
+		UpdateWolrdTransform();
+
+	}
+	void TransformComponent::SetRotation(glm::vec3 vec)
+	{
+		if (entity->GetParent())
+		{
+			glm::quat worldRotQuat = glm::quat(glm::vec3(glm::radians(vec)));
+
+			glm::quat parentWorldRotQuat = glm::normalize(glm::quat(entity->GetParent()->transformComponent->GetWorldTransformMatrix()));
+
+			glm::quat localRotQuat = glm::inverse(parentWorldRotQuat) * worldRotQuat;
+
+			glm::vec3 localRotEulerAngles = glm::eulerAngles(localRotQuat);
+
+			rotation = glm::degrees(localRotEulerAngles);
+		}
+		else 
+		{
+			rotation = vec;
+		}
+		UpdateWolrdTransform();
+
+
+	}
+	void TransformComponent::SetScale(glm::vec3 vec)
+	{
+
+		if (entity->GetParent())
+		{
+
+			glm::vec4 localScl = glm::inverse(entity->GetParent()->transformComponent->GetWorldTransformMatrix()) * glm::vec4(vec, 1.0f);
+
+			scale = localScl;
+		}
+		else
+		{
+			scale = vec;
+		}
+
+		UpdateWolrdTransform();
+	}
+
+
 	glm::mat4 TransformComponent::GetTransformMatrix()
 	{
 		glm::mat4 transformMatrix = glm::mat4(1.0f);

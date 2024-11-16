@@ -16,6 +16,7 @@ namespace VE
 		virtual ~Entity();
 
 		virtual void Start() = 0;
+		virtual void PreUpdate(float deltaTime) {};
 		virtual void Update(float deltaTime) = 0;
 		virtual void Render() {}
 		virtual void Serialize(nlohmann::json& json) {}
@@ -45,6 +46,7 @@ namespace VE
 	private:
 		void ComponentsStart();
 		void ComponentsUpdate(float deltaTime);
+		void ComponentsPreUpdate(float deltaTime);
 		void ComponentsRender();
 		void ComponentsSerialize(nlohmann::json& json);
 		void ComponentsDeserialize(nlohmann::json& json);

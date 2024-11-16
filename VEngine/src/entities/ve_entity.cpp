@@ -50,6 +50,13 @@ namespace VE
 			comp->Update(deltaTime);
 		}
 	}
+	void Entity::ComponentsPreUpdate(float deltaTime)
+	{
+		for (Component* comp : components)
+		{
+			comp->PreUpdate(deltaTime);
+		}
+	}
 	void Entity::ComponentsRender()
 	{
 		for (Component* comp : components)
