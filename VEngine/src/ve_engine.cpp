@@ -102,6 +102,7 @@ namespace VE
 	}
 	Entity* Engine::CreateBuiltinEntity(std::string entity)
 	{
+
 		Entity* ent = nullptr;
 		if (entity == "Camera2DEntity")
 		{
