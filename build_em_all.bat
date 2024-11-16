@@ -18,9 +18,6 @@ cd ..
 call build_imgui.bat %build_type%
 call build.bat %build_type%
 cd ..
-cd test_project
-call build.bat %build_type%
-cd ..
 cd Fusion
 call build.bat %build_type%
 pause

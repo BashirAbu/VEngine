@@ -2,7 +2,7 @@
 set build_type=%1
 mkdir bin\int 2> NUL
 set COMMON_FLAGS=/EHsc /utf-8 /std:c++20 /MP /nologo /W3 /wd4251
-set DEBUG_FLAGS=/Z7 /Od /MDd
+set DEBUG_FLAGS=/Z7 /O1 /MDd
 set RELEASE_FLAGS=/O2 /MD
 set LINKER_FLAGS=/SUBSYSTEM:CONSOLE
 set LIBS=..\VEngine\bin\VEngine.lib ..\VEngine\bin\imgui\imgui.lib

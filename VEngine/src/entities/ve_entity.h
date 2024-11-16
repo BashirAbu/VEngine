@@ -35,7 +35,7 @@ namespace VE
 		Entity* GetParent() { return parent; }
 		std::list<Entity*> GetChildren() { return children; }
 		std::string GetTag() { return tag; }
-
+		void Destroy() { this->destroy = true; }
 		void SetInternalName(std::string internalName) { this->internalName = internalName; };
 
 		TransformComponent* transformComponent;
@@ -59,6 +59,7 @@ namespace VE
 		std::list<Entity*> children;
 		bool started = false;
 		bool construct = false;
+		bool destroy = false;
 		std::filesystem::path constructPath;
 		friend class Scene;
 		friend class SceneManager;

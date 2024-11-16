@@ -10,6 +10,7 @@
 #include "entities/ve_entity.h"
 #include "ve_scene_2d.h"
 #include "entities/ve_empty_entity.h"
+#include "ve_engine.h"
 namespace VE 
 {
 	SceneManager::SceneManager() : currentScene(nullptr), mode(SceneMode::Editor), selectedEntity(nullptr)
@@ -134,7 +135,7 @@ namespace VE
 				entityJson["construct"] = entity->construct;
 				entityJson["internal_name"] = entity->internalName;
 				entityJson["name"] = entity->name;
-				entityJson["construct_path"] = entity->constructPath.string();
+				entityJson["construct_path"] =  entity->constructPath.generic_string();
 				entity->Serialize(entityJson);
 				entity->ComponentsSerialize(entityJson["components"]);
 			}
@@ -191,7 +192,9 @@ namespace VE
 		{
 			return nullptr;
 		}
-		std::fstream constructFile(constructPath);
+		std::filesystem::path relativePath = constructPath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path());
+		std::filesystem::path fullPath = Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/" + (!relativePath.empty()? relativePath.string() : constructPath.string());
+		std::fstream constructFile(fullPath);
 		nlohmann::json constructJson = nlohmann::json::parse(constructFile);
 		constructFile.close();
 		constructJson["name"];
@@ -207,7 +210,7 @@ namespace VE
 			}
 		}
 		construct->construct = true;
-		construct->constructPath = constructPath;
+		construct->constructPath = (!relativePath.empty() ? relativePath: constructPath).generic_string();
 		return construct;
 	}
 
@@ -241,6 +244,20 @@ namespace VE
 			}
 			
 			currentScene->Render();
+
+			//Destroy entites.
+			for (auto itr = currentScene->entities.begin(); itr != currentScene->entities.end();)
+			{
+				if ((*itr)->destroy)
+				{
+					delete* itr;
+					itr = currentScene->entities.erase(itr);
+				}
+				else 
+				{
+					itr++;
+				}
+			}
 		}
 	}
 }

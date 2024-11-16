@@ -2,7 +2,7 @@
 set build_type=%1
 mkdir bin\imgui\
 set COMMON_FLAGS=/EHsc /utf-8 /std:c++20 /MP /nologo /W3 /wd4251 /wd4996
-set DEBUG_FLAGS=/Z7 /Od /MDd
+set DEBUG_FLAGS=/Z7 /O1 /MDd
 set RELEASE_FLAGS=/O2 /MD
 set LIBS=Gdi32.lib
 set DEBUG_LIBS=third_party\glfw\build\src\Debug\glfw3.lib

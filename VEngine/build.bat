@@ -4,7 +4,7 @@ set build_type=%1
 mkdir bin\int > NUL
 
 set COMMON_FLAGS=/EHsc /utf-8 /std:c++20 /MP /nologo /W3 /wd4251 /wd4996
-set DEBUG_FLAGS=/Z7 /Od /MDd
+set DEBUG_FLAGS=/Z7 /O1 /MDd
 set RELEASE_FLAGS=/O2 /MD
 set LINKER_FLAGS=/SUBSYSTEM:CONSOLE
 set LIBS=Comdlg32.lib Gdi32.lib User32.lib Shell32.lib Winmm.lib bin\imgui\imgui.lib

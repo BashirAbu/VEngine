@@ -405,8 +405,9 @@ namespace VE
 		ImGui::Begin("Status");
 		float frameTime = GetFrameTime();
 		float fps = 1.0f / frameTime;
-		ImGui::Text("Frame Time: %fms", frameTime);
-		ImGui::Text("FPS       : %f", fps);
+		ImGui::Text("Frame Time  : %fms", frameTime);
+		ImGui::Text("FPS         : %f", fps);
+		ImGui::Text("Entity Count: %d", engine->sceneManager->currentScene->entities.size());
 		ImGui::End();
 	}
 
