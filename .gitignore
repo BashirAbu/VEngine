@@ -1,9 +1,9 @@
-/.vs
-/bin
-/x64
-/$
-/VEngine/x64
-/bin_int
+.vs/
+bin/
+x64/
+$/
+VEngine/x64\
+bin_int/
 *.dll
 *.exe
 *.lib
