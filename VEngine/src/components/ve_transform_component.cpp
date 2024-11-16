@@ -12,6 +12,9 @@ namespace VE
 {
 	TransformComponent::TransformComponent(Entity* entity) : Component(entity), position(0.0f), rotation(0.0f), scale(1.0f), worldPosition(0.0f), worldRotation(0.0f), worldScale(0.0f)
 	{
+		worldPosition = position;
+		worldRotation = rotation;
+		worldScale = scale;
 	}
 	TransformComponent::~TransformComponent()
 	{
@@ -21,6 +24,7 @@ namespace VE
 	}
 	void TransformComponent::Update(float deltaTime)
 	{
+
 	}
 
 	void TransformComponent::ApplyChildren(Entity* entity, glm::mat4 parentTransform)
@@ -45,13 +49,18 @@ namespace VE
 
 	void TransformComponent::Render()
 	{
-		
 		if (entity->GetChildren().size() > 0 && !entity->GetParent())
 		{
 			worldPosition = position;
 			worldRotation = rotation;
 			worldScale = scale;
 			ApplyChildren(entity, GetTransformMatrix());
+		}
+		else if (entity->GetChildren().size() == 0 && !entity->GetParent())
+		{
+			worldPosition = position;
+			worldRotation = rotation;
+			worldScale = scale;
 		}
 	}
 	void TransformComponent::Serialize(nlohmann::json& json)

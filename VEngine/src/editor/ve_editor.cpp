@@ -191,7 +191,7 @@ namespace VE
 			if (ImGui::MenuItem("Add Construct"))
 			{
 				std::filesystem::path constructPath = VE::OpenFileDialog();
-				Engine::GetSingleton()->GetSceneManager()->LoadScene(constructPath);
+				Engine::GetSingleton()->GetSceneManager()->LoadConstruct(constructPath);
 				//add construct
 			}
 			ImGui::EndPopup();
@@ -375,6 +375,16 @@ namespace VE
 		ImGui::Begin("Inspector");
 		if (engine->sceneManager->selectedEntity)
 		{
+			char buffer[255];
+			if (engine->sceneManager->selectedEntity->name.size() > 255)
+			{
+				engine->sceneManager->selectedEntity->name.resize(255);
+			}
+			strcpy(buffer, engine->sceneManager->selectedEntity->name.c_str());
+			ImGui::InputText("Name", buffer, 255);
+			engine->sceneManager->selectedEntity->name = buffer;
+
+
 			engine->sceneManager->selectedEntity->ComponentDrawEditorUI();
 			engine->sceneManager->selectedEntity->DrawEditorUI();
 		}
@@ -449,9 +459,6 @@ namespace VE
 					selectedEntity->transformComponent->position = pos;
 					selectedEntity->transformComponent->scale = scl;
 					selectedEntity->transformComponent->rotation = eulerAngles;
-
-
-					TraceLog(LOG_INFO, "x: %f y: %f", eulerAngles.z, eulerAngles.z);
 				}
 
 			}

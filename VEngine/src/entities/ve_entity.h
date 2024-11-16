@@ -56,8 +56,8 @@ namespace VE
 		Entity* parent;
 		std::list<Entity*> children;
 		bool started = false;
-
-
+		bool construct = false;
+		std::filesystem::path constructPath;
 		friend class Scene;
 		friend class SceneManager;
 		friend class Engine;

@@ -55,7 +55,17 @@ namespace VE
 		{
 			for (nlohmann::json entityJson : sceneJson["entities"])
 			{
-				DeserializeChildren(entityJson);
+				bool isConstruct = entityJson.contains("construct")? (bool)entityJson["construct"] : false;
+				if (isConstruct)
+				{
+					Entity* construct = LoadConstruct(entityJson["construct_path"]);
+					construct->Deserialize(entityJson);
+					construct->ComponentsDeserialize(entityJson["components"]);
+				}
+				else 
+				{
+					DeserializeChildren(entityJson);
+				}
 			}
 		}
 
@@ -68,6 +78,7 @@ namespace VE
 		{
 			entity = Engine::GetSingleton()->CreateBuiltinEntity(entName);
 		}
+		entity->name = entityJson.contains("name")? entityJson["name"] : "";
 		entity->Deserialize(entityJson);
 		entity->ComponentsDeserialize(entityJson["components"]);
 		for (nlohmann::json childJson : entityJson["children"])
@@ -114,7 +125,19 @@ namespace VE
 				continue;
 			}
 			nlohmann::json entityJson;
-			entityJson = SerializeChildren(entity, index);
+			if (!entity->construct)
+			{
+				entityJson = SerializeChildren(entity, index);
+			}
+			else
+			{
+				entityJson["construct"] = entity->construct;
+				entityJson["internal_name"] = entity->internalName;
+				entityJson["name"] = entity->name;
+				entityJson["construct_path"] = entity->constructPath.string();
+				entity->Serialize(entityJson);
+				entity->ComponentsSerialize(entityJson["components"]);
+			}
 			std::string genName = "entity" + std::to_string(index);
 			sceneJson["entities"][genName] = entityJson;
 			index++;
@@ -129,6 +152,8 @@ namespace VE
 
 		nlohmann::json entityJson;
 		entityJson["internal_name"] = entity->internalName;
+		entityJson["name"] = entity->name;
+		entityJson["construct"] = entity->construct;
 		entity->Serialize(entityJson);
 		entity->ComponentsSerialize(entityJson["components"]);
 		
@@ -178,21 +203,14 @@ namespace VE
 		{
 			for (nlohmann::json entityJson : constructJson["entities"])
 			{
-				std::string entName = entityJson["internal_name"];
-				Entity* entity = CreateProjectEntity(entName);
-				if (!entity)
-				{
-					entity = Engine::GetSingleton()->CreateBuiltinEntity(entName);
-				}
-				entity->Deserialize(entityJson);
-				entity->ComponentsDeserialize(entityJson["components"]);
-				//currentScene->entities.push_back(entity);
+				construct->AddChild(DeserializeChildren(entityJson));
 			}
 		}
-
+		construct->construct = true;
+		construct->constructPath = constructPath;
 		return construct;
-
 	}
+
 	void SceneManager::SaveSceneAs()
 	{
 		//show file dialog.
