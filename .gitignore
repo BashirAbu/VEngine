@@ -76,4 +76,4 @@ CMakeLists.txt.user
 *.cache
 *.bak
 *~
-!premake.exe
+!premake5.exe
