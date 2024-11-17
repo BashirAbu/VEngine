@@ -81,7 +81,7 @@ project "Fusion"
     language "c++"
 
     targetdir("bin/" .. outputDir .. "/%{prj.name}")
-    objdir("bin-int/" .. outputDir .. "/%{prj.name}")
+    objdir("bin_int/" .. outputDir .. "/%{prj.name}")
 
     files
     {
@@ -155,7 +155,7 @@ project "VEngine"
     language "c++"
 
     targetdir("bin/" .. outputDir .. "/%{prj.name}")
-    objdir("bin-int/" .. outputDir .. "/%{prj.name}")
+    objdir("bin_int/" .. outputDir .. "/%{prj.name}")
 
     files
     {
@@ -206,7 +206,7 @@ project "VEngine"
         }
 
         links
-        {
+        { 
             "ImGui.lib"
         }
 

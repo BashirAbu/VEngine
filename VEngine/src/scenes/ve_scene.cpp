@@ -10,7 +10,7 @@ namespace VE
 {
 	Scene::Scene() 
 	{
-
+		
 	}
 	void Scene::DeleteEntityChildren(Entity* entity)
 	{
@@ -35,7 +35,7 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
-		UnloadRenderTexture(editorCameraRenderTarget);
+		
 		for (Entity* entity : entities) 
 		{
 			if (entity->children.size() > 0)

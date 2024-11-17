@@ -61,6 +61,8 @@ namespace VE
 		bool construct = false;
 		bool destroy = false;
 		std::filesystem::path constructPath;
+
+		int32_t id = -1;
 		friend class Scene;
 		friend class SceneManager;
 		friend class Engine;

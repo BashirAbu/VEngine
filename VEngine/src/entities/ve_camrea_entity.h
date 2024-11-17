@@ -1,14 +1,14 @@
 #pragma once
 #include "ve_defines.h"
-#include "ve_camrea_entity.h"
+#include "ve_entity.h"
 #include <raylib.h>
 namespace VE 
 {
-	class VE_API Camera2DEntity : public CameraEntity 
+	class VE_API CameraEntity : public Entity 
 	{
 	public:
-		Camera2DEntity(std::string name = "");
-		~Camera2DEntity();
+		CameraEntity(std::string name = "");
+		virtual ~CameraEntity();
 
 		virtual void Start() override;
 		virtual void Update(float deltaTime) override;
@@ -16,11 +16,15 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) override;
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
+		const RenderTexture* GetRenderTarget() const { return &renderTarget; }
 	private:
-		Camera2D camera2D = {};
-
-		friend class Editor;
+		RenderTexture renderTarget;
+		int32_t renderTargetWidth;
+		int32_t renderTargetHeight;
+		bool mainCamera = false;
+		friend class Scene;
 		friend class Scene2D;
-
+		friend class Engine;
+		friend class Editor;
 	};
 }

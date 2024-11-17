@@ -2,6 +2,7 @@
 
 #include "ve_defines.h"
 #include <glm/glm.hpp>
+#include <raylib.h>
 namespace VE 
 {
 	class VE_API Editor 
@@ -19,7 +20,7 @@ namespace VE
 		void DrawGameViewport();
 
 		void UpdateEditor(float deltaTime);
-
+		void RenderEditorSceneView();
 		void AddEntityNode(class Entity* entity, std::list<Entity*>& deletedEntities);
 		void DrawChildren(class Entity* entity, std::list<Entity*>& deletedEntities);
 		const bool IsGameViewportFocused() const { return gameViewportFocused; }
@@ -35,7 +36,16 @@ namespace VE
 		glm::vec2 gameViewportPosition;
 		bool gameViewportFocused = false;
 		bool sceneViewportFocused = false;
+		bool usingImGuizmo = false;
 		class Engine* engine;
+
+		Camera2D editorCamera;
+		glm::vec2 oldRenderTargetSize;
+		RenderTexture editorCameraRenderTarget;
+
+		RenderTexture colorPickingBuffer;
+		Shader colorPickingShader;
+
 		friend class Engine;
 
 		static Editor* singleton;

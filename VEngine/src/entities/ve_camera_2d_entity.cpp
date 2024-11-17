@@ -4,44 +4,14 @@
 #include "scenes/ve_scene_2d.h"
 namespace VE 
 {
-	Camera2DEntity::Camera2DEntity(std::string name) : Entity(name)
+	Camera2DEntity::Camera2DEntity(std::string name) : CameraEntity(name)
 	{
-		if (Engine::GetSingleton()->GetSceneManager()->currentScene)
-		{
-			Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.push_back(this);
-			if (Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.size() == 1)
-			{
-				Engine::GetSingleton()->GetSceneManager()->currentScene->SetMainCamera(this);
-			}
-		}
-
-		renderTargetWidth = Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth;
-		renderTargetHeight = Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight;
-		renderTarget = LoadRenderTexture(renderTargetWidth, renderTargetHeight, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-		SetTextureFilter(renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-		SetTextureWrap(renderTarget.texture, TEXTURE_WRAP_CLAMP);
 		camera2D = {};
 		camera2D.zoom = 1.0f;
 	}
 	Camera2DEntity::~Camera2DEntity()
 	{
-		UnloadRenderTexture(renderTarget);
-		for (auto itr = Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.begin();
-			itr != Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.end();
-			itr++)
-		{
-			if (*itr == this)
-			{
-				if (((Scene2D*)Engine::GetSingleton()->GetSceneManager()->currentScene)->mainCamera == this)
-				{
-					
-					((Scene2D*)Engine::GetSingleton()->GetSceneManager()->currentScene)->mainCamera = nullptr;
-					
-				}
-				Engine::GetSingleton()->GetSceneManager()->currentScene->cameras.erase(itr);
-				break;
-			}
-		}
+		
 	}
 	void Camera2DEntity::Start()
 	{

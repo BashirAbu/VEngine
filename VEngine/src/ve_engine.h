@@ -36,6 +36,7 @@ namespace VE
 	inline VE_API PFN_OnSharedLibraryEntry OnSharedLibraryEntry;
 	typedef VE_API Entity* (*PFN_CreateProjectEntity) (std::string);
 	inline VE_API PFN_CreateProjectEntity CreateProjectEntity;
+
 	class VE_API Engine
 	{
 	public:

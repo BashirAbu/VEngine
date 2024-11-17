@@ -4,14 +4,17 @@
 #include "ve_engine.h"
 namespace VE 
 {
+	static int32_t idGenerator = 0;
 	Entity::Entity(std::string name) : parent(nullptr)
 	{
+		id = idGenerator++;
 		this->name = name;
 		internalName = name;
 		transformComponent = new TransformComponent(this);
 		components.push_back(transformComponent);
 
 		VE::Engine::GetSingleton()->GetSceneManager()->GetCurrentScene()->entities.push_back(this);
+		VE::Engine::GetSingleton()->GetSceneManager()->GetCurrentScene()->entityIDtable[id] = this;
 	}
 	Entity::~Entity()
 	{

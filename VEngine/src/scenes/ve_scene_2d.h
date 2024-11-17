@@ -13,10 +13,7 @@ namespace VE
 		virtual void SetMainCamera(class Entity* camera) override;
 		virtual const Entity* GetMainCamera() const override;
 	private:
-		glm::vec4 clearColor;
-		Camera2D editorCamera;
-		glm::vec2 oldRenderTargetSize;
-		class Camera2DEntity* mainCamera = nullptr;
+
 		friend class Editor;
 		friend class SceneManager;
 		friend class Camera2DEntity;

@@ -10,6 +10,19 @@
 
 namespace VE 
 {
+	void CustomLogCallback(int logLevel, const char* text, va_list args) {
+		switch (logLevel)
+		{
+		case LOG_INFO: printf("[INFO] : "); break;
+			case LOG_ERROR: printf("[ERROR]: "); break;
+			case LOG_WARNING: printf("[WARN] : "); break;
+			case LOG_DEBUG: printf("[DEBUG]: "); break;
+			default: break;
+		}
+
+		vprintf(text, args);
+		printf("\n");
+	}
 	Engine* Engine::singleton = nullptr;
 	Engine::Engine(EngineDesc engineDesc)
 	{
@@ -37,6 +50,9 @@ namespace VE
 		SetConfigFlags(configFlags);
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
 		SetWindowState(FLAG_WINDOW_RESIZABLE);
+		SetTraceLogCallback(CustomLogCallback);
+
+
 		projectSharedLibrary = new SharedLibrary();
 
 		LoadProjectSharedLibrary();
@@ -83,7 +99,6 @@ namespace VE
 		{
 			BeginDrawing();
 			ClearBackground(BLACK);
-			editor->UpdateEditor(GetFrameTime());
 			sceneManager->RunCurrentScene();
 			editor->DrawUI();
 			EndDrawing();
