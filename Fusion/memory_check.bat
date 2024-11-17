@@ -1,2 +1,2 @@
-heob64.exe ..bin/Debug-windows-x86_64/Fusion/Fusion.exe
+heob64.exe ..\bin\Debug_windows_x86_64\Fusion\Fusion.exe
 pause

@@ -28,6 +28,7 @@ namespace VE
 	}
 	Editor::~Editor() 
 	{
+		UnloadShader(colorPickingShader);
 		UnloadRenderTexture(editorCameraRenderTarget);
 		rlImGuiShutdown();
 	}

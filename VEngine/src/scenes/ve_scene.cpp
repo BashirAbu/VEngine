@@ -86,6 +86,13 @@ namespace VE
 	}
 	void Scene::Render()
 	{
+		//
+		// sort entities based on z
+		// 
+		entities.sort([](const Entity* a, const Entity* b)
+			{
+				return a->transformComponent->GetPosition().z < b->transformComponent->GetPosition().z;
+			});
 		//for each camera, render the scene once.
 		for (CameraEntity* camera : cameras)
 		{

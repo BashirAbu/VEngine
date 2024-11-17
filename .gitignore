@@ -77,3 +77,4 @@ CMakeLists.txt.user
 *.bak
 *~
 !premake5.exe
+!heob64.exe
