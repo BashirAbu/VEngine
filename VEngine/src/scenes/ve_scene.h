@@ -16,21 +16,21 @@ namespace VE
 	class VE_API Scene
 	{
 	public:
-		Scene();
+		Scene(SceneType type);
 		~Scene();
 
 		void Start();
 		void Update(float deltaTime);
-		virtual void Render() = 0;
+		void Render();
 		void DrawEditorUI();
 
 		void AddEntity(Entity* entity);
 		void RemoveEntity(Entity* entity);
-		virtual void SetMainCamera(class Entity* camera) = 0;
+		void SetMainCamera(class CameraEntity* camera);
 
 		const SceneType GetSceneType() const { return sceneType; }
 		
-		virtual const Entity* GetMainCamera() const = 0;
+		const class CameraEntity* GetMainCamera() const { return mainCamera; };
 	protected:
 
 		std::unordered_map<int32_t, Entity*> entityIDtable;
@@ -41,7 +41,7 @@ namespace VE
 		std::string name;
 		bool started = false;
 		std::filesystem::path scenePath;
-		std::list<class Entity*> cameras;
+		std::list<class CameraEntity*> cameras;
 		std::list<class Entity*> entities;
 
 		class CameraEntity* mainCamera = nullptr;

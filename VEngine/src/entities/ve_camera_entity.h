@@ -16,6 +16,7 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) override;
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
+		void SetMainCamera();
 		const RenderTexture* GetRenderTarget() const { return &renderTarget; }
 	private:
 		RenderTexture renderTarget;

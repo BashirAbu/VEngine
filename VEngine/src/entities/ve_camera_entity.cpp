@@ -1,4 +1,4 @@
-#include "ve_camrea_entity.h"
+#include "ve_camera_entity.h"
 #include "ve_engine.h"
 
 namespace VE 

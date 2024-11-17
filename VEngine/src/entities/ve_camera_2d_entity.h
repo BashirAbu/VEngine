@@ -1,6 +1,6 @@
 #pragma once
 #include "ve_defines.h"
-#include "ve_camrea_entity.h"
+#include "ve_camera_entity.h"
 #include <raylib.h>
 namespace VE 
 {
@@ -20,7 +20,7 @@ namespace VE
 		Camera2D camera2D = {};
 
 		friend class Editor;
-		friend class Scene2D;
+		friend class Scene;
 
 	};
 }

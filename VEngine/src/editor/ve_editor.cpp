@@ -12,7 +12,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <raymath.h>
 #include "entities/ve_camera_2d_entity.h"
-#include "scenes/ve_scene_2d.h"
 #include "editor/ve_editor_elements.h"
 namespace VE 
 {
@@ -250,12 +249,9 @@ namespace VE
 					if (!scenePath.empty())
 					{
 						engine->sceneManager->UnloadScene();
-						//TODO: show a dialog to choose scene type 2d or 3d.
-						engine->sceneManager->currentScene = new Scene2D();
-						engine->sceneManager->currentScene->sceneType = SceneType::Scene2D;
+						engine->sceneManager->currentScene = new Scene(SceneType::Scene2D);
 						engine->sceneManager->currentScene->scenePath = scenePath;
-						engine->sceneManager->currentScene->name = scenePath.filename().string();
-						//Add default entites like camera and basic lighting.
+						engine->sceneManager->currentScene->name = scenePath.stem().string();
 						engine->sceneManager->SaveScene();
 					}
 					
@@ -352,11 +348,8 @@ namespace VE
 		else
 		{
 			//Scene Settings
-			if (engine->sceneManager->currentScene->sceneType == SceneType::Scene2D)
-			{
-				Scene2D* s2d = (Scene2D*)engine->sceneManager->currentScene;
-				EditorElement::Color(s2d->clearColor, "Clear Color");
-			}
+			EditorElement::Color(engine->sceneManager->currentScene->clearColor, "Clear Color");
+			
 		}
 		ImGui::End();
 	}
@@ -435,20 +428,14 @@ namespace VE
 		size = ImGui::GetWindowPos();
 		gameViewportPosition = *((glm::vec2*)&size);
 		gameViewportFocused = ImGui::IsWindowFocused() ? true : false;
-		if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
+		
+		if (engine->sceneManager->currentScene->mainCamera)
 		{
-			Scene2D* s2d = (Scene2D*)engine->sceneManager->currentScene;
-			if (s2d->mainCamera)
-			{
-				const RenderTexture2D* gameViewTex = s2d->mainCamera->GetRenderTarget();
+			const RenderTexture* gameViewTex = engine->sceneManager->currentScene->mainCamera->GetRenderTarget();
 
-				rlImGuiImageRenderTextureFit(&gameViewTex->texture, true);
-			}
+			rlImGuiImageRenderTextureFit(&gameViewTex->texture, true);
 		}
-		else 
-		{
-			//handle 3d scene here
-		}
+		
 		ImGui::End();
 	}
 	void Editor::UpdateEditor(float deltaTime)
@@ -457,7 +444,6 @@ namespace VE
 		{
 			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
 			{
-				Scene2D* s2d = (Scene2D*)engine->sceneManager->currentScene;
 				
 				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y },
 					editorCamera);

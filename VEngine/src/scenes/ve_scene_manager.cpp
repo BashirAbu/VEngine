@@ -8,7 +8,6 @@
 #include <iostream>
 #include "ve_assets_manager.h"
 #include "entities/ve_entity.h"
-#include "ve_scene_2d.h"
 #include "entities/ve_empty_entity.h"
 #include "ve_engine.h"
 namespace VE 
@@ -37,7 +36,7 @@ namespace VE
 		
 		if (sceneJson["type"] == "2D")
 		{
-			currentScene = new Scene2D();
+			currentScene = new Scene(SceneType::Scene2D);
 		}
 		else 
 		{
@@ -47,11 +46,9 @@ namespace VE
 
 		currentScene->name = sceneJson["name"];
 		currentScene->scenePath = scenePath;
-		if (SceneType::Scene2D == currentScene->GetSceneType())
-		{
-			Scene2D* s2d = (Scene2D*)currentScene;
-			s2d->clearColor = Deserialze::Vec4(sceneJson["clear_color"]);
-		}
+		
+		currentScene->clearColor = Deserialze::Vec4(sceneJson["clear_color"]);
+
 		if (sceneJson.contains("entities"))
 		{
 			for (nlohmann::json entityJson : sceneJson["entities"])
@@ -110,12 +107,10 @@ namespace VE
 		nlohmann::json sceneJson;
 		currentScene->name = currentScene->scenePath.stem().string();
 		sceneJson["name"] = currentScene->name;
-		if (SceneType::Scene2D == currentScene->GetSceneType())
-		{
-			Scene2D* s2d = (Scene2D*)currentScene;
-			sceneJson["clear_color"] = Serialize::Vec4(s2d->clearColor);
-			sceneJson["type"] = "2D";
-		}
+		
+		sceneJson["clear_color"] = Serialize::Vec4(currentScene->clearColor);
+		sceneJson["type"] = "2D";
+		
 
 		//serialize entities.
 		size_t index = 0;
@@ -175,14 +170,9 @@ namespace VE
 		{
 			UnloadScene();
 		}
-		if (type == SceneType::Scene2D)
-		{
-			scene = new Scene2D();
-		}
-		else 
-		{
-			//3d scene stuff
-		}
+		
+		scene = new Scene(SceneType::Scene2D);
+
 		currentScene = scene;
 		return scene;
 	}

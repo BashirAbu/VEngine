@@ -1,7 +1,6 @@
 #include "ve_camera_2d_entity.h"
 #include "ve_engine.h"
 #include "editor/ve_editor_elements.h"
-#include "scenes/ve_scene_2d.h"
 namespace VE 
 {
 	Camera2DEntity::Camera2DEntity(std::string name) : CameraEntity(name)
