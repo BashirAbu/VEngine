@@ -132,9 +132,12 @@ namespace VE
 	{
 		if (entity->GetParent())
 		{
+			glm::mat4 invParentScaleMatrix = glm::inverse(glm::scale(glm::mat4(1.0f), entity->GetParent()->transformComponent->GetScale()));
+
+
 			glm::quat worldRotQuat = glm::quat(glm::vec3(glm::radians(vec)));
 
-			glm::quat parentWorldRotQuat = glm::normalize(glm::quat(entity->GetParent()->transformComponent->GetWorldTransformMatrix()));
+			glm::quat parentWorldRotQuat = glm::quat_cast(glm::mat3(invParentScaleMatrix * entity->GetParent()->transformComponent->GetWorldTransformMatrix()));
 
 			glm::quat localRotQuat = glm::inverse(parentWorldRotQuat) * worldRotQuat;
 
@@ -147,8 +150,6 @@ namespace VE
 			rotation = vec;
 		}
 		UpdateWolrdTransform();
-
-
 	}
 	void TransformComponent::SetScale(glm::vec3 vec)
 	{

@@ -39,7 +39,6 @@ namespace VE
 	void Editor::DrawUI()
 	{
 		
-		RenderEditorSceneView();
 		// Start the Dear ImGui frame
 		rlImGuiBegin();
 
@@ -58,16 +57,9 @@ namespace VE
 		DrawSceneViewport();
 
 		DrawGameViewport();
-
-
-		ImGui::Begin("Pick");
-
-		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
-
-		ImGui::End();
 		
 		rlImGuiEnd();
-
+		//make sure this gets called after DrawSceneViewport().
 		UpdateEditor(GetFrameTime());
 	}
 
@@ -390,6 +382,8 @@ namespace VE
 		sceneViewportPosition = *((glm::vec2*)&(size));
 
 
+		RenderEditorSceneView();
+
 		const RenderTexture* sceneViewTex = &editorCameraRenderTarget;
 		rlImGuiImageRenderTextureFit(&sceneViewTex->texture, false);
 
@@ -527,12 +521,10 @@ namespace VE
 				Image pickImage = LoadImageFromTexture(t);
 				float* pickingData = (float*)pickImage.data;
 				int pixelIndex = (int)(editorCameraRenderTarget.texture.height - mousePos.y) * pickImage.width + (int)mousePos.x;
-
 				int id = (int)pickingData[pixelIndex];
-				TraceLog(LOG_INFO, "ID: %d", id);
 				if (usingImGuizmo)
 				{
-					
+					//do nothing brother.	
 				}
 				else if(id == 0)
 				{
