@@ -13,14 +13,104 @@
 #include <raymath.h>
 #include "entities/ve_camera_2d_entity.h"
 #include "editor/ve_editor_elements.h"
+#include "GLFW/glfw3.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui_impl_raylib.h"
+
 namespace VE 
 {
+
+	void GrayTheme()
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4* colors = style.Colors;
+
+		// Background
+		colors[ImGuiCol_WindowBg] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f); // Darker soft gray
+		colors[ImGuiCol_ChildBg] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Darker child background
+		colors[ImGuiCol_PopupBg] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f); // Darker popup background
+
+		// Main Menu Bar
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Even darker menu bar
+
+		// Borders
+		colors[ImGuiCol_Border] = ImVec4(0.40f, 0.40f, 0.40f, 0.60f); // Much darker borders
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+
+		// Headers
+		colors[ImGuiCol_Header] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Darker header
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+		colors[ImGuiCol_HeaderActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f); // Darker active header
+
+		// Buttons
+		colors[ImGuiCol_Button] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f); // Darker button background
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f); // Hovered button
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Active button
+
+		// Frame BG
+		colors[ImGuiCol_FrameBg] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Darker frame background
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f); // Darker active frame
+
+		// Tabs
+		colors[ImGuiCol_Tab] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f); // Darker tab
+		colors[ImGuiCol_TabHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+		colors[ImGuiCol_TabActive] = ImVec4(0.48f, 0.48f, 0.48f, 1.00f); // Darker active tab
+		colors[ImGuiCol_TabUnfocused] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
+		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+
+		// Title
+		colors[ImGuiCol_TitleBg] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f); // Darker title bar, more visible
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.50f, 0.50f, 0.50f, 0.75f);
+
+		// Scrollbar
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f); // Darker scrollbar background
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f); // Darker grab
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+
+		// Sliders
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f); // Darker slider
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f); // Darker active slider
+
+		// Separator
+		colors[ImGuiCol_Separator] = ImVec4(0.35f, 0.35f, 0.35f, 0.60f); // Darker separator
+		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+		colors[ImGuiCol_SeparatorActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+
+		// Text
+		colors[ImGuiCol_Text] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f); // Darker text for better contrast
+		colors[ImGuiCol_TextDisabled] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+
+		// Adjust the style for a deeper, darker look
+		style.WindowRounding = 4.0f;
+		style.FrameRounding = 3.0f;
+		style.GrabRounding = 3.0f;
+		style.ScrollbarRounding = 3.0f;
+		style.ChildRounding = 3.0f;
+		style.FramePadding = ImVec2(6.0f, 4.0f); // More padding for a spacious feel
+	}
+
 	Editor* Editor::singleton = nullptr;
 	Editor::Editor(class Engine* engine) : engine(engine)
 	{
 		singleton = this;
 		rlImGuiSetup(true);
-		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+		ImGuiIO& io = (ImGui::GetIO());
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable docking
+		
+		GrayTheme();
+
+		font = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Medium.ttf", 18.0f);
+		IM_ASSERT(font != nullptr);
+
+		// required to be called to cache the font texture with raylib
+		io.Fonts->Build();
+		ImGui_ImplRaylib_BuildFontAtlas();
+
 
 		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 		editorCamera = {};
@@ -38,13 +128,12 @@ namespace VE
 	}
 	void Editor::DrawUI()
 	{
-		
 		// Start the Dear ImGui frame
 		rlImGuiBegin();
-
+		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		DrawMainMenuBar();
 
@@ -57,10 +146,11 @@ namespace VE
 		DrawSceneViewport();
 
 		DrawGameViewport();
-		
+		ImGui::PopFont();
 		rlImGuiEnd();
 		//make sure this gets called after DrawSceneViewport().
 		UpdateEditor(GetFrameTime());
+		
 	}
 
 	void Editor::DrawChildren(Entity* entity, std::list<Entity*>& deletedEntities)

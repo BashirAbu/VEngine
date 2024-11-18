@@ -24,6 +24,7 @@ project "ImGui"
         "%{prj.location}/third_party/imgui/imgui_widgets.cpp",
         "%{prj.location}/third_party/imgui/imgui_demo.cpp",
         "%{prj.location}/third_party/imgui/backends/imgui_impl_opengl3.cpp",
+        "%{prj.location}/third_party/imgui/backends/imgui_impl_glfw.cpp",
         "%{prj.location}/third_party/ImGuizmo/ImGuizmo.cpp"  
     }
 
@@ -174,16 +175,19 @@ project "VEngine"
         "%{prj.location}/third_party/raygui/src/",
         "%{prj.location}/third_party/rlImGui/",
         "%{prj.location}/third_party/glm/",
-        "%{prj.location}/third_party/ImGuizmo/"
+        "%{prj.location}/third_party/ImGuizmo/",
+        "%{prj.location}/third_party/glfw/include"
     }
     
     libdirs
     {
-        "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/"
+        "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
+        "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
     }
     links
     {
-        "raylib"
+        "raylib",
+        "glfw3"
     }
 
     filter "system:windows"

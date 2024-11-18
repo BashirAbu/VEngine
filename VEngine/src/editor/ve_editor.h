@@ -3,6 +3,7 @@
 #include "ve_defines.h"
 #include <glm/glm.hpp>
 #include <raylib.h>
+struct ImFont;
 namespace VE 
 {
 	class VE_API Editor 
@@ -46,6 +47,7 @@ namespace VE
 		RenderTexture colorPickingBuffer;
 		Shader colorPickingShader;
 
+		ImFont* font;
 		friend class Engine;
 
 		static Editor* singleton;
