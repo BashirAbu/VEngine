@@ -21,6 +21,7 @@
 namespace VE 
 {
 
+
 	void GrayTheme()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -101,6 +102,7 @@ namespace VE
 
 		ImGuiIO& io = (ImGui::GetIO());
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable docking
+		io.ConfigWindowsMoveFromTitleBarOnly = true;
 		
 		GrayTheme();
 
@@ -146,6 +148,9 @@ namespace VE
 		DrawSceneViewport();
 
 		DrawGameViewport();
+
+		consoleWindow.Draw();
+
 		ImGui::PopFont();
 		rlImGuiEnd();
 		//make sure this gets called after DrawSceneViewport().
@@ -423,16 +428,6 @@ namespace VE
 		ImGui::Begin("Inspector");
 		if (engine->sceneManager->selectedEntity)
 		{
-			char buffer[255];
-			if (engine->sceneManager->selectedEntity->name.size() > 255)
-			{
-				engine->sceneManager->selectedEntity->name.resize(255);
-			}
-			strcpy(buffer, engine->sceneManager->selectedEntity->name.c_str());
-			ImGui::InputText("Name", buffer, 255);
-			engine->sceneManager->selectedEntity->name = buffer;
-
-
 			engine->sceneManager->selectedEntity->ComponentDrawEditorUI();
 			engine->sceneManager->selectedEntity->DrawEditorUI();
 		}
@@ -459,7 +454,8 @@ namespace VE
 	void Editor::DrawSceneViewport()
 	{
 		ImGui::Begin("SceneViewport");
-		sceneViewportFocused = ImGui::IsWindowFocused() ? true : false;
+		sceneViewportFocused = ImGui::IsWindowFocused();
+		isSceneViewHovered = ImGui::IsWindowHovered();
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		sceneViewportSize = *((glm::vec2*)&size);
 		size = ImGui::GetCursorScreenPos();
@@ -499,7 +495,6 @@ namespace VE
 				glm::quat rot;
 					
 				glm::decompose(selectedEntity->GetParent()? glm::inverse(selectedEntity->GetParent()->transformComponent->GetWorldTransformMatrix()) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
-
 				glm::vec3 eulerAngles = glm::eulerAngles(rot);
 				eulerAngles = glm::degrees(eulerAngles);
 
@@ -529,6 +524,7 @@ namespace VE
 		
 		ImGui::End();
 	}
+
 	void Editor::UpdateEditor(float deltaTime)
 	{
 		if (sceneViewportFocused)
@@ -547,9 +543,11 @@ namespace VE
 					editorCamera.target.x = editorCamera.target.x + delta.x;
 					editorCamera.target.y = editorCamera.target.y + delta.y;
 				}
-
-
-				float wheel = GetMouseWheelMove();
+				float wheel = 0;
+				if (isSceneViewHovered)
+				{
+					wheel = GetMouseWheelMove();
+				}
 				if (wheel)
 				{
 
@@ -674,5 +672,75 @@ namespace VE
 		}
 		EndMode2D();
 		EndTextureMode();
+	}
+
+
+	Editor::ConsoleWindow::ConsoleWindow()
+	{
+
+	}
+	Editor::ConsoleWindow::~ConsoleWindow()
+	{
+	}
+	std::vector<std::string> logs;
+	bool scrollToBottom = false;
+	void Editor::ConsoleWindow::Draw()
+	{
+		ImGui::Begin("Console");
+
+		if (ImGui::Button("Clear"))
+		{
+			ClearLog();
+		}
+
+		ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGuiInputTextFlags inputFlags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput;
+		for (const auto& log : logs)
+		{
+			ImColor color = ImColor(0.1f, 0.1f, 0.1f, 1.0f);
+			if (log.find("[INFO]") != std::string::npos)
+			{
+				color = ImColor(0.1f, 0.1f, 0.1f, 1.0f);
+			}
+			else if (log.find("[ERROR]") != std::string::npos)
+			{
+				color = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
+			}
+			else if (log.find("[FATAL]") != std::string::npos)
+			{
+				color = ImColor(0.5f, 0.0f, 0.0f, 1.0f);
+			}
+			else if (log.find("[WARN]") != std::string::npos)
+			{
+				color = ImColor(7.0f, 7.0f, 0.0f, 1.0f);
+			}
+			else if (log.find("[DEBUG]") != std::string::npos)
+			{
+				color = ImColor(0.0f, .7f, 0.0f, 1.0f);
+			}
+			ImGui::TextColored(color, log.c_str());
+		}
+
+		if (scrollToBottom) 
+		{
+			ImGui::SetScrollHereY(1.0f);
+			scrollToBottom = false;
+		}
+
+		ImGui::EndChild();
+		ImGui::End();
+	}
+	void Editor::ConsoleWindow::ClearLog()
+	{
+		logs.clear();
+	}
+	void AddLog(const std::string& message)
+	{
+		if (logs.size() > 1024) 
+		{
+			logs.erase(logs.begin());
+		}
+		logs.push_back(message);
+		scrollToBottom = true;
 	}
 }

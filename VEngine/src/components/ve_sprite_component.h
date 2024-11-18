@@ -18,13 +18,15 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) override;
 		virtual void Deserialize(nlohmann::json& json) override;
 		virtual void DrawEditorUI() override;
+		Texture GetTexture() { return *texture; }
+		void LoadTexture(std::filesystem::path path);
 
 
-
-		Texture* texture;
 		glm::vec2 origin;
 		glm::vec4 tintColor;
 	private:
+		Texture* texture;
+		std::filesystem::path texturePath;
 		TransformComponent* transformComponent;
 	};
 }

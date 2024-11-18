@@ -1,6 +1,7 @@
 #include "ve_engine.h"
 #include "ve_entity.h"
 #include <imgui.h>
+#include "scenes/ve_scene_manager.h"
 #include "ve_engine.h"
 namespace VE 
 {
@@ -29,6 +30,10 @@ namespace VE
 			delete comp;
 		}
 		components.clear();
+	}
+	const Scene* Entity::GetCurrentScene() const
+	{
+		return VE::Engine::GetSingleton()->GetSceneManager()->GetCurrentScene();
 	}
 	void Entity::SetParent(Entity* parent)
 	{
@@ -83,6 +88,15 @@ namespace VE
 	}
 	void Entity::ComponentDrawEditorUI()
 	{
+		char buffer[255];
+		if (name.size() > 255)
+		{
+			name.resize(255);
+		}
+		strcpy(buffer, name.c_str());
+		ImGui::InputText("Name", buffer, 255);
+		name = buffer;
+
 		for (Component* comp : components)
 		{
 			comp->DrawEditorUI();

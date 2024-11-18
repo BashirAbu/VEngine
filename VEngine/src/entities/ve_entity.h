@@ -22,6 +22,9 @@ namespace VE
 		virtual void Serialize(nlohmann::json& json) {}
 		virtual void Deserialize(nlohmann::json& json) {}
 		virtual void DrawEditorUI() {}
+
+		const class Scene* GetCurrentScene() const;
+
 		template <typename T>
 		T* AddComponent();
 		template <typename T>

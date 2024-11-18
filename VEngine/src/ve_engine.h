@@ -60,7 +60,7 @@ namespace VE
 		SceneManager* GetSceneManager() { return sceneManager; };
 		const EngineDesc* GetDesc() const { return &desc; }
 
-
+		Editor* GetEditor() { return editor; }
 
 	private:
 		Editor* editor;

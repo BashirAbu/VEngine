@@ -1,6 +1,4 @@
-- Destroy enitties.
-
-- see if you can use IDS insted of strings. 
+-
 
 -UI render target (res same to the main render target).
 

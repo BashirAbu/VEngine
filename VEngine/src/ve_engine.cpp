@@ -11,17 +11,34 @@
 namespace VE 
 {
 	void CustomLogCallback(int logLevel, const char* text, va_list args) {
-		switch (logLevel)
+
+		std::string msg;
+		
+		va_list argsCopy;
+		va_copy(argsCopy, args);
+		int size = vsnprintf(nullptr, 0, text, argsCopy);
+		va_end(argsCopy);
+
+		if (size <= 0) 
 		{
-		case LOG_INFO: printf("[INFO] : "); break;
-			case LOG_ERROR: printf("[ERROR]: "); break;
-			case LOG_WARNING: printf("[WARN] : "); break;
-			case LOG_DEBUG: printf("[DEBUG]: "); break;
-			default: break;
+			msg = "";
 		}
 
-		vprintf(text, args);
-		printf("\n");
+		std::vector<char> buffer(size + 1);
+		vsnprintf(buffer.data(), buffer.size(), text, args);
+		msg = buffer.data();
+		msg = msg + '\n';
+		switch (logLevel)
+		{
+		case LOG_INFO: msg = "[INFO]: " + msg; break;
+		case LOG_ERROR:  msg = "[ERROR]: " + msg; break;
+		case LOG_WARNING:  msg = "[WARN]: " + msg; break;
+		case LOG_DEBUG:  msg = "[DEBUG]: " + msg; break;
+		case LOG_FATAL:  msg = "[FATAL]: " + msg; break;
+		default: break;
+		}
+		AddLog(msg);
+		printf(msg.c_str());
 	}
 	Engine* Engine::singleton = nullptr;
 	Engine::Engine(EngineDesc engineDesc)
@@ -46,11 +63,15 @@ namespace VE
 		{
 			configFlags |= FLAG_VSYNC_HINT;
 		}
+		
+		SetTraceLogCallback(CustomLogCallback);
 		InitAudioDevice();
 		SetConfigFlags(configFlags);
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
-		SetWindowState(FLAG_WINDOW_RESIZABLE);
-		SetTraceLogCallback(CustomLogCallback);
+		SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
+		
+		
+		editor = new Editor(this);
 
 
 		projectSharedLibrary = new SharedLibrary();
@@ -70,7 +91,6 @@ namespace VE
 		}
 
 		
-		editor = new Editor(this);
 		
 		//Register builtin entities.
 		RegisterEntity(VE_STRINGIFY(EmptyEntity));

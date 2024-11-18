@@ -17,14 +17,14 @@ namespace VE
 	}
 	Texture* AssetsManager::LoadTexture(std::filesystem::path filepath)
 	{
-		std::filesystem::path fullpath = assetsFolderPath.string() + filepath.string();
+		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 		if (textures.find(filepath.string()) != textures.end())
 		{
 			return &textures[filepath.string()];
 		}
 		else 
 		{
-			textures[filepath.string()] = ::LoadTexture((assetsFolderPath.string() + filepath.string()).c_str());
+			textures[filepath.string()] = ::LoadTexture((assetsFolderPath.string() + filepath.generic_string()).c_str());
 			//This to avoid distortion while rotating or scaling.
 			SetTextureFilter(textures[filepath.string()], TEXTURE_FILTER_BILINEAR);
 			//This to avoid bleeding at the edges.
@@ -40,7 +40,7 @@ namespace VE
 		}
 		else
 		{
-			images[filepath.string()] = ::LoadImage((assetsFolderPath.string() + filepath.string()).c_str());
+			images[filepath.string()] = ::LoadImage((assetsFolderPath.string() + filepath.generic_string()).c_str());
 			return &images[filepath.string()];
 		}
 	}
@@ -52,7 +52,7 @@ namespace VE
 		}
 		else
 		{
-			sounds[filepath.string()] = ::LoadSound((assetsFolderPath.string() + filepath.string()).c_str());
+			sounds[filepath.string()] = ::LoadSound((assetsFolderPath.string() + filepath.generic_string()).c_str());
 			return &sounds[filepath.string()];
 		}
 	}

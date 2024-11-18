@@ -3,9 +3,13 @@
 #include "ve_defines.h"
 #include <glm/glm.hpp>
 #include <raylib.h>
+#include <string>
+#include <vector>
+#include "imgui.h"
 struct ImFont;
 namespace VE 
 {
+	void AddLog(const std::string& message);
 	class VE_API Editor 
 	{
 	public:
@@ -19,6 +23,18 @@ namespace VE
 		void DrawStatus();
 		void DrawSceneViewport();
 		void DrawGameViewport();
+
+		class ConsoleWindow 
+		{
+		public:
+			ConsoleWindow();
+			~ConsoleWindow();
+
+			void Draw();
+			void ClearLog();
+		};
+
+		ConsoleWindow consoleWindow;
 
 		void UpdateEditor(float deltaTime);
 		void RenderEditorSceneView();
@@ -37,6 +53,7 @@ namespace VE
 		glm::vec2 gameViewportPosition;
 		bool gameViewportFocused = false;
 		bool sceneViewportFocused = false;
+		bool isSceneViewHovered = false;
 		bool usingImGuizmo = false;
 		class Engine* engine;
 
