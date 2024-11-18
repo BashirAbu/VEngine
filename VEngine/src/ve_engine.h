@@ -8,6 +8,7 @@
 #include "editor/ve_editor.h"
 namespace VE 
 {
+	extern std::vector<std::string>* logs;
 	enum class VE_API RuntimeType
 	{
 		Editor,

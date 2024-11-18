@@ -108,7 +108,7 @@ namespace VE
 
 	void TransformComponent::Translate(glm::vec3 vec)
 	{
-		position += vec;
+		SetPosition(GetPosition() + vec);
 	}
 
 	void TransformComponent::SetPosition(glm::vec3 vec)

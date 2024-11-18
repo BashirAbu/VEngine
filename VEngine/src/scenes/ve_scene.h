@@ -25,6 +25,7 @@ namespace VE
 		void DrawEditorUI();
 
 		void AddEntity(Entity* entity);
+		Entity* GetEntityByName(std::string name);
 		void RemoveEntity(Entity* entity);
 		void SetMainCamera(class CameraEntity* camera);
 

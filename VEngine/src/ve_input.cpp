@@ -35,6 +35,7 @@ namespace VE
             {
                 return ::IsKeyReleased(key);
             }
+
             return false;
         }
         bool IsKeyUp(int key) 

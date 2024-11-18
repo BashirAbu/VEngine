@@ -4,7 +4,8 @@ workspace "VEngine"
     configurations
     {
         "Debug",
-        "Release"
+        "Release",
+        "Development"
     }
 
 outputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
@@ -35,10 +36,6 @@ project "ImGui"
         "%{prj.location}/third_party/ImGuizmo/"
     }
     
-    libdirs
-    {
-        "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
-    }
     links
     {
         "glfw3"
@@ -55,25 +52,66 @@ project "ImGui"
             "IMGUI_EXPORT"
         }
         
+       
+
+    filter "configurations:Debug"
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/Debug/"
+        }
+        symbols "On"
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/glfw/",
             "{MKDIR} build",
             "{CHDIR} build",
             "cmake ..",
-            "cmake --build . --config %{cfg.buildcfg}"
+            "cmake --build . --config Debug"
         }
-
         postbuildcommands
         {
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
         }
 
-    filter "configurations:Debug"
-        symbols "On"
-
     filter "configurations:Release"
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/Release/"
+        }
         optimize "On"
+        symbols "On"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config Debug"
+        }
+        postbuildcommands
+        {
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
+        }
+     filter "configurations:Development"
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/Release/"
+        }
+        symbols "On"
+        optimize "On"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config Release"
+        }
+        outputDirImGui = "Development_%{cfg.system}_%{cfg.architecture}"
+        postbuildcommands
+        {
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDirImGui .. "/Fusion")
+        }
 
 project "Fusion"
     location "Fusion"
@@ -102,10 +140,7 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/rlImGui/",
     }
     
-    libdirs
-    {
-        "%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/"
-    }
+   
     links
     {
         "raylib"
@@ -136,12 +171,28 @@ project "Fusion"
         }
     
     filter "configurations:Debug"
+        libdirs
+        {
+            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/"
+        }
         defines "VE_DEBUG"
         symbols "On"
 
     filter "configurations:Release"
+        libdirs
+        {
+            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
+        }
         defines "VE_RELEASE"
         optimize "On"
+    filter "configurations:Development"
+        libdirs
+        {
+            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
+        }
+        defines "VE_DEBUG"
+        symbols "On"
+        optimize "On" 
 
 
 
@@ -178,10 +229,7 @@ project "VEngine"
         "%{prj.location}/third_party/glfw/include"
     }
     
-    libdirs
-    {
-        "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
-    }
+   
     links
     {
         "raylib",
@@ -210,25 +258,69 @@ project "VEngine"
         { 
             "ImGui.lib"
         }
-
+    
+    filter "configurations:Debug"
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/Debug/",
+        }
+        defines "VE_DEBUG"
+        symbols "On"
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/raylib/",
             "{MKDIR} build",
             "{CHDIR} build",
             "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config %{cfg.buildcfg}"
+            "cmake --build . --config Debug"
         }
         postbuildcommands
         {
             "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
-            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
         }
-    
-    filter "configurations:Debug"
-        defines "VE_DEBUG"
-        symbols "On"
 
     filter "configurations:Release"
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/Release/",
+        }
         defines "VE_RELEASE"
         optimize "On"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/raylib/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
+            "cmake --build . --config Release"
+        }
+        postbuildcommands
+        {
+            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
+        }
+
+
+    filter "configurations:Development"
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/Release/",
+        }
+        defines "VE_DEBUG"
+        symbols "On"
+        optimize "On" 
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/raylib/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
+            "cmake --build . --config Release"
+        }
+        outputDirVEngine = "Development_%{cfg.system}_%{cfg.architecture}"
+        postbuildcommands
+        {
+            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDirVEngine .. "/Fusion",
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/raylib.dll\" ../bin/" .. outputDirVEngine .. "/Fusion"
+        }

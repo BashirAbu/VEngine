@@ -21,7 +21,8 @@
 namespace VE 
 {
 
-
+	std::vector<std::string>* logs = new std::vector<std::string>();
+	bool scrollToBottom = false;
 	void GrayTheme()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -107,7 +108,7 @@ namespace VE
 		GrayTheme();
 
 		font = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Medium.ttf", 18.0f);
-		IM_ASSERT(font != nullptr);
+		consoleFont = io.Fonts->AddFontFromFileTTF("resources/fonts/SourceCodePro-Medium.ttf", 16.0f);
 
 		// required to be called to cache the font texture with raylib
 		io.Fonts->Build();
@@ -682,8 +683,7 @@ namespace VE
 	Editor::ConsoleWindow::~ConsoleWindow()
 	{
 	}
-	std::vector<std::string> logs;
-	bool scrollToBottom = false;
+
 	void Editor::ConsoleWindow::Draw()
 	{
 		ImGui::Begin("Console");
@@ -695,7 +695,8 @@ namespace VE
 
 		ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
 		ImGuiInputTextFlags inputFlags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AllowTabInput;
-		for (const auto& log : logs)
+		ImGui::PushFont(VE::Engine::GetSingleton()->editor->consoleFont);
+		for (const auto log : *logs)
 		{
 			ImColor color = ImColor(0.1f, 0.1f, 0.1f, 1.0f);
 			if (log.find("[INFO]") != std::string::npos)
@@ -720,7 +721,7 @@ namespace VE
 			}
 			ImGui::TextColored(color, log.c_str());
 		}
-
+		ImGui::PopFont();
 		if (scrollToBottom) 
 		{
 			ImGui::SetScrollHereY(1.0f);
@@ -732,15 +733,15 @@ namespace VE
 	}
 	void Editor::ConsoleWindow::ClearLog()
 	{
-		logs.clear();
+		logs->clear();
 	}
-	void AddLog(const std::string& message)
+	void AddLog(const std::string message)
 	{
-		if (logs.size() > 1024) 
-		{
-			logs.erase(logs.begin());
-		}
-		logs.push_back(message);
+		//if (logs.size() > 1024) 
+		//{
+		//	logs.erase(logs.begin());
+		//}
+		logs->push_back(message);
 		scrollToBottom = true;
 	}
 }

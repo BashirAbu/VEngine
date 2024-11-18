@@ -31,7 +31,7 @@ namespace VE
 		}
 		components.clear();
 	}
-	const Scene* Entity::GetCurrentScene() const
+	Scene* Entity::GetCurrentScene()
 	{
 		return VE::Engine::GetSingleton()->GetSceneManager()->GetCurrentScene();
 	}

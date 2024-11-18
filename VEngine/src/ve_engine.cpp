@@ -39,6 +39,7 @@ namespace VE
 		}
 		AddLog(msg);
 		printf(msg.c_str());
+		buffer.clear();
 	}
 	Engine* Engine::singleton = nullptr;
 	Engine::Engine(EngineDesc engineDesc)
@@ -63,7 +64,7 @@ namespace VE
 		{
 			configFlags |= FLAG_VSYNC_HINT;
 		}
-		
+		SetTraceLogLevel(LOG_DEBUG);
 		SetTraceLogCallback(CustomLogCallback);
 		InitAudioDevice();
 		SetConfigFlags(configFlags);
@@ -106,6 +107,8 @@ namespace VE
 		delete AssetsManager::GetSingleton();
 		CloseAudioDevice();
 		CloseWindow();
+		logs->clear();
+		delete logs;
 	}
 	Engine* Engine::GetSingleton()
 	{

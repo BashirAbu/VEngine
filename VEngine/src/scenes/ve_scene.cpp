@@ -133,6 +133,18 @@ namespace VE
 			entity->ComponentDrawEditorUI();
 		}
 	}
+	Entity* Scene::GetEntityByName(std::string name)
+	{
+		for (Entity* ent : entities)
+		{
+			if (ent->name == name)
+			{
+				return ent;
+			}
+		}
+
+		return nullptr;
+	}
 	void Scene::AddEntity(Entity* entity)
 	{
 		entities.push_back(entity);

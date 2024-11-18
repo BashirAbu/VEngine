@@ -182,10 +182,10 @@ namespace VE
 		{
 			return nullptr;
 		}
-		std::filesystem::path relativePath = constructPath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path());
-		std::filesystem::path fullPath = Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/" + (!relativePath.empty()? relativePath.string() : constructPath.string());
+		std::filesystem::path relativePath = constructPath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
+		std::filesystem::path fullPath = Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/" + (!relativePath.empty()? relativePath.string() : "assets/" + constructPath.string());
 		std::fstream constructFile(fullPath);
-		nlohmann::json constructJson = nlohmann::json::parse(constructFile);
+		nlohmann::json constructJson = nlohmann::json::parse(constructFile); 
 		constructFile.close();
 		constructJson["name"];
 		Entity* construct = new EmptyEntity(constructJson["name"]);

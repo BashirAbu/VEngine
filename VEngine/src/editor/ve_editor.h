@@ -9,7 +9,7 @@
 struct ImFont;
 namespace VE 
 {
-	void AddLog(const std::string& message);
+	void AddLog(const std::string message);
 	class VE_API Editor 
 	{
 	public:
@@ -65,6 +65,7 @@ namespace VE
 		Shader colorPickingShader;
 
 		ImFont* font;
+		ImFont* consoleFont;
 		friend class Engine;
 
 		static Editor* singleton;
