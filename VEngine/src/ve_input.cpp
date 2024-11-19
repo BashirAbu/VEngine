@@ -62,5 +62,16 @@ namespace VE
             }
             return KEY_NULL;
         }
+        VE_API glm::vec2 GetMousePosistion()
+        {
+            glm::vec2 pos = {};
+            if (Editor::GetSingleton()->IsGameViewportFocused())
+            {
+                glm::vec2 gameViewportPos = Editor::GetSingleton()->GetGameViewportPosition();
+                pos.x = ::GetMousePosition().x - gameViewportPos.x;
+                pos.y = ::GetMousePosition().y - gameViewportPos.y;
+            }
+            return pos;
+        }
     }
 }

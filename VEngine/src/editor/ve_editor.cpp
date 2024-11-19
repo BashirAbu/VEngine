@@ -436,7 +436,6 @@ namespace VE
 		{
 			//Scene Settings
 			EditorElement::Color(engine->sceneManager->currentScene->clearColor, "Clear Color");
-			
 		}
 		ImGui::End();
 	}
@@ -509,13 +508,33 @@ namespace VE
 
 	void Editor::DrawGameViewport()
 	{
+		ImVec2 oldPadding = ImGui::GetStyle().WindowPadding;
+		ImGui::GetStyle().WindowPadding = ImVec2(0.0f, 0.0f);
 		ImGui::Begin("GameViewport");
-		ImVec2 size = ImGui::GetWindowSize();
-		gameViewportSize = *((glm::vec2*)&size);
-		size = ImGui::GetWindowPos();
-		gameViewportPosition = *((glm::vec2*)&size);
+		ImVec2 size = ImGui::GetContentRegionAvail();
+		sceneViewportSize = *((glm::vec2*)&size);
+		
 		gameViewportFocused = ImGui::IsWindowFocused() ? true : false;
 		
+
+		ImVec2 area = ImGui::GetContentRegionAvail();
+
+		float scale = area.x / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.width;
+
+		float y = engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale;
+		if (y > area.y)
+		{
+			scale = area.y / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height;
+		}
+
+		int sizeY = int(engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale);
+	
+
+		size = ImGui::GetCursorScreenPos();
+		size.y = (area.y / 2 - sizeY / 2) + (size.y -.5f);
+		gameViewportPosition = *((glm::vec2*)&size);
+
+
 		if (engine->sceneManager->currentScene->mainCamera)
 		{
 			const RenderTexture* gameViewTex = engine->sceneManager->currentScene->mainCamera->GetRenderTarget();
@@ -524,6 +543,7 @@ namespace VE
 		}
 		
 		ImGui::End();
+		ImGui::GetStyle().WindowPadding = oldPadding;
 	}
 
 	void Editor::UpdateEditor(float deltaTime)
