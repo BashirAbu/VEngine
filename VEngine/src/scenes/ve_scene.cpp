@@ -33,12 +33,6 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
-
-		if (updateThread.joinable())
-		{
-			updateThread.join();
-		}
-
 		mainCamera = nullptr;
 
 		for (auto itr = entities.begin(); itr != entities.end();)
@@ -59,7 +53,6 @@ namespace VE
 			entity->started = true;
 		}
 
-		//updateThread = std::thread(&Scene::Update, this);
 	}
 	void Scene::Update()
 	{
@@ -97,8 +90,6 @@ namespace VE
 		//
 		// sort entities based on z
 		// 
-		
-		std::lock_guard<std::mutex> lock(entitiesMutex);
 		entities.sort([](const Entity* a, const Entity* b)
 			{
 				return a->transformComponent->GetPosition().z < b->transformComponent->GetPosition().z;
