@@ -15,35 +15,31 @@ namespace VE
 	}
 	void Scene::DeleteEntityChildren(Entity* entity)
 	{
-		for (auto itr = entity->children.begin(); itr != entity->children.end();)
+		for (auto itr = entity->children.begin(); itr != entity->children.end(); itr++)
 		{
 			if ((*itr)->children.size() > 0)
 			{
 				DeleteEntityChildren(*itr);
 				
-				entities.remove(*itr);
-				delete* itr;
-				itr = entity->children.erase(itr);
+				(*itr)->destroy = true;
 				
 			}
 			else 
 			{
-				entities.remove(*itr);
-				delete* itr;
-				itr = entity->children.erase(itr);
+				(*itr)->destroy = true;
 			}
 		}
 	}
 	Scene::~Scene()
 	{
 		mainCamera = nullptr;
-		for (Entity* entity : entities) 
+
+		for (auto itr = entities.begin(); itr != entities.end();)
 		{
-			if (entity->children.size() > 0)
-			{
-				DeleteEntityChildren(entity);
-			}
-			delete entity;
+		
+			delete *itr;
+			itr = entities.erase(itr);
+			
 		}
 		entities.clear();
 	}

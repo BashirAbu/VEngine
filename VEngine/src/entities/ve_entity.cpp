@@ -19,10 +19,9 @@ namespace VE
 	}
 	Entity::~Entity()
 	{
-		for (auto itr = children.begin(); itr != children.end();)
+		for (auto itr = children.begin(); itr != children.end(); itr++)
 		{
-			Engine::GetSingleton()->GetSceneManager()->GetCurrentScene()->entities.remove(*itr);
-			delete (*itr);
+			(*itr)->destroy = true;
 		}
 		children.clear();
 		for (Component* comp : components)

@@ -314,12 +314,11 @@ namespace VE
 		for (auto ent : deletedEntities)
 		{
 			engine->sceneManager->currentScene->DeleteEntityChildren(ent);
-			engine->sceneManager->currentScene->entities.remove(ent);
+			ent->destroy = true;
 			if (ent->parent)
 			{
 				ent->parent->children.remove(ent);
 			}
-			delete ent;
 		}
 
 		ImGui::End();
@@ -757,10 +756,10 @@ namespace VE
 	}
 	void AddLog(const std::string message)
 	{
-		//if (logs.size() > 1024) 
-		//{
-		//	logs.erase(logs.begin());
-		//}
+		if (logs->size() > 512) 
+		{
+			logs->erase(logs->begin());
+		}
 		logs->push_back(message);
 		scrollToBottom = true;
 	}
