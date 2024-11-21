@@ -516,26 +516,27 @@ namespace VE
 		gameViewportFocused = ImGui::IsWindowFocused() ? true : false;
 		
 
-		ImVec2 area = ImGui::GetContentRegionAvail();
-
-		float scale = area.x / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.width;
-
-		float y = engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale;
-		if (y > area.y)
-		{
-			scale = area.y / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height;
-		}
-
-		int sizeY = int(engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale);
-	
-
-		size = ImGui::GetCursorScreenPos();
-		size.y = (area.y / 2 - sizeY / 2) + (size.y -.5f);
-		gameViewportPosition = *((glm::vec2*)&size);
+		
 
 
 		if (engine->sceneManager->currentScene->mainCamera)
 		{
+			ImVec2 area = ImGui::GetContentRegionAvail();
+
+			float scale = area.x / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.width;
+
+			float y = engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale;
+			if (y > area.y)
+			{
+				scale = area.y / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height;
+			}
+
+			int sizeY = int(engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale);
+
+
+			size = ImGui::GetCursorScreenPos();
+			size.y = (area.y / 2 - sizeY / 2) + (size.y - .5f);
+			gameViewportPosition = *((glm::vec2*)&size);
 			const RenderTexture* gameViewTex = engine->sceneManager->currentScene->mainCamera->GetRenderTarget();
 
 			rlImGuiImageRenderTextureFit(&gameViewTex->texture, true);

@@ -24,3 +24,6 @@
 [submodule "VEngine/third_party/ImGuizmo"]
 	path = VEngine/third_party/ImGuizmo
 	url = https://github.com/BashirAbu/VE_ImGuizmo.git
+[submodule "VEngine/third_party/flecs"]
+	path = VEngine/third_party/flecs
+	url = https://github.com/BashirAbu/VE_flecs.git
