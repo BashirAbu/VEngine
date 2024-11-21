@@ -35,6 +35,7 @@ namespace VE
 
 		SceneMode GetSceneMode() { return mode; }
 	private:
+
 		Scene* currentScene;
 		SceneMode mode;
 		Entity* selectedEntity;

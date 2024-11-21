@@ -5,6 +5,8 @@
 #include <raylib.h>
 #include <filesystem>
 #include <unordered_map>
+#include <thread>
+#include <mutex>
 namespace VE 
 {
 	class Entity;
@@ -20,7 +22,7 @@ namespace VE
 		~Scene();
 
 		void Start();
-		void Update(float deltaTime);
+		void Update();
 		void Render();
 		void DrawEditorUI();
 
@@ -48,6 +50,9 @@ namespace VE
 		class CameraEntity* mainCamera = nullptr;
 
 		SceneType sceneType;
+
+		std::mutex entitiesMutex;
+		std::thread updateThread;
 
 		friend class Scene2D;
 		friend class Editor;

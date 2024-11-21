@@ -12,6 +12,7 @@ namespace VE
 	Scene::Scene(SceneType type)
 	{
 		sceneType = type;
+		
 	}
 	void Scene::DeleteEntityChildren(Entity* entity)
 	{
@@ -32,6 +33,12 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
+
+		if (updateThread.joinable())
+		{
+			updateThread.join();
+		}
+
 		mainCamera = nullptr;
 
 		for (auto itr = entities.begin(); itr != entities.end();)
@@ -51,9 +58,13 @@ namespace VE
 			entity->ComponentsStart();
 			entity->started = true;
 		}
+
+		//updateThread = std::thread(&Scene::Update, this);
 	}
-	void Scene::Update(float deltaTime)
+	void Scene::Update()
 	{
+		
+		float deltaTime = GetFrameTime();
 		for (Entity* entity : entities)
 		{
 			if (!entity->started)
@@ -79,16 +90,20 @@ namespace VE
 				entity->ComponentsUpdate(deltaTime);
 			}
 		}
+		
 	}
 	void Scene::Render()
 	{
 		//
 		// sort entities based on z
 		// 
+		
+		std::lock_guard<std::mutex> lock(entitiesMutex);
 		entities.sort([](const Entity* a, const Entity* b)
 			{
 				return a->transformComponent->GetPosition().z < b->transformComponent->GetPosition().z;
 			});
+
 		//for each camera, render the scene once.
 		for (CameraEntity* camera : cameras)
 		{
@@ -98,7 +113,7 @@ namespace VE
 				Camera2DEntity* c2d = (Camera2DEntity*)camera;
 				BeginMode2D(c2d->camera2D);
 			}
-			else 
+			else
 			{
 				//handle 3d.
 			}
@@ -114,12 +129,13 @@ namespace VE
 			{
 				EndMode2D();
 			}
-			else 
+			else
 			{
 				//handle 3d.
 			}
 			EndTextureMode();
 		}
+		
 	}
 	void Scene::DrawEditorUI()
 	{

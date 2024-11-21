@@ -230,7 +230,7 @@ namespace VE
 					currentScene->Start();
 					currentScene->started = true;
 				}
-				currentScene->Update(GetFrameTime());
+				currentScene->Update();
 			}
 			
 			currentScene->Render();
