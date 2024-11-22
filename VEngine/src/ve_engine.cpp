@@ -5,8 +5,6 @@
 #include "ve_assets_manager.h"
 #include <fstream>
 #include <iostream>
-#include "entities/ve_camera_2d_entity.h"
-#include "entities/ve_empty_entity.h"
 
 namespace VE 
 {
@@ -80,22 +78,18 @@ namespace VE
 		LoadProjectSharedLibrary();
 
 		sceneManager = new SceneManager();
+		
 		if (engineDesc.projectDetails.mainScenePath.empty())
 		{
-			sceneManager->CreateEmptyScene(SceneType::Scene2D);
+			//Create emtpy scene;
+			sceneManager->currentScene = new Scene(SceneType::Scene2D);
+
 		}
 		else 
 		{
-			std::string scenePath = engineDesc.projectDetails.path.parent_path().string();
-			scenePath += "/" + engineDesc.projectDetails.mainScenePath.string();
-			sceneManager->LoadScene(scenePath);
+			//load saved scene.
 		}
 
-		
-		
-		//Register builtin entities.
-		RegisterEntity(VE_STRINGIFY(EmptyEntity));
-		RegisterEntity(VE_STRINGIFY(Camera2DEntity));
 	}
 	typedef VE_PROJECT_API int* (*get_ptr)();
 	get_ptr ptr;
@@ -127,33 +121,7 @@ namespace VE
 			EndDrawing();
 		}
 	}
-	void Engine::RegisterEntity(std::string entity)
-	{
-		for (std::string name : entitiesRegistry) 
-		{
-			if (name == entity)
-			{
-				return;
-			}
-		}
-		entitiesRegistry.push_back(entity);
-	}
-	Entity* Engine::CreateBuiltinEntity(std::string entity)
-	{
-
-		Entity* ent = nullptr;
-		if (entity == "Camera2DEntity")
-		{
-			ent = new Camera2DEntity(entity);
-			ent->internalName = entity;
-		}
-		else if (entity == "EmptyEntity")
-		{
-			ent = new EmptyEntity(entity);
-			ent->internalName = entity;
-		}
-		return ent;
-	}
+	
 	void Engine::LoadProjectSharedLibrary()
 	{
 		std::ifstream srcSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + ".dll", std::ios::binary);
@@ -165,12 +133,8 @@ namespace VE
 		destSharedLib.close();
 		projectSharedLibrary->Load(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + "_temp");
 
-		CreateProjectEntity = (PFN_CreateProjectEntity)projectSharedLibrary->GetProcAddress("CreateProjectEntity");
-		VE_ASSERT(CreateProjectEntity);
 		OnSharedLibraryEntry = (PFN_OnSharedLibraryEntry)projectSharedLibrary->GetProcAddress("OnSharedLibraryEntry");
 		VE_ASSERT(OnSharedLibraryEntry);
-		ptr = (get_ptr)projectSharedLibrary->GetProcAddress("get_ptr");
-		OnSharedLibraryEntry();
 	}
 	void Engine::ReloadProjectSharedLibrary()
 	{
@@ -180,7 +144,6 @@ namespace VE
 	void Engine::UnloadProjectSharedLibrary()
 	{
 		projectSharedLibrary->Unload();
-		CreateProjectEntity = nullptr;
 		OnSharedLibraryEntry = nullptr;
 	}
 

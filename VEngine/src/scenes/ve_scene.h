@@ -1,14 +1,11 @@
 #pragma once
 #include "ve_defines.h"
 #include <glm/glm.hpp>
-#include <list>
 #include <raylib.h>
 #include <filesystem>
-#include <unordered_map>
-
+#include <flecs.h>
 namespace VE 
 {
-	class Entity;
 	enum class SceneType 
 	{
 		Scene2D,
@@ -23,37 +20,28 @@ namespace VE
 		void Start();
 		void Update();
 		void Render();
-		void DrawEditorUI();
 
-		void AddEntity(Entity* entity);
-		Entity* GetEntityByName(std::string name);
-		void RemoveEntity(Entity* entity);
-		void SetMainCamera(class CameraEntity* camera);
-
+		void AddSystem(std::string name);
+		flecs::entity AddEntity(std::string name);
 		const SceneType GetSceneType() const { return sceneType; }
-		
-		const class CameraEntity* GetMainCamera() const { return mainCamera; };
-	protected:
 
-		std::unordered_map<int32_t, Entity*> entityIDtable;
-
+	private:
+		flecs::world world;
 		glm::vec4 clearColor;
 
-		void DeleteEntityChildren(Entity* entity);
-		std::string name;
-		bool started = false;
-		std::filesystem::path scenePath;
-		std::list<class CameraEntity*> cameras;
-		std::list<class Entity*> entities;
 
-		class CameraEntity* mainCamera = nullptr;
+		std::unordered_map<std::string, flecs::entity> sceneSystems;
 
+		std::unordered_map<std::string, flecs::entity> componentsTable;
+		std::unordered_map<std::string, flecs::entity> systemsTable;
+		
 		SceneType sceneType;
+		bool started = false;
+		size_t entityIndexGen = 0;
 
-		friend class Scene2D;
+		std::filesystem::path scenePath = "";
+
 		friend class Editor;
-		friend class Entity;
-		friend class CameraEntity;
 		friend class SceneManager;
 	};
 }

@@ -138,6 +138,7 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/glm/",
         "%{wks.location}/VEngine/third_party/imgui/",
         "%{wks.location}/VEngine/third_party/rlImGui/",
+        "%{wks.location}/VEngine/third_party/flecs/include/"
     }
     
    
@@ -213,7 +214,8 @@ project "VEngine"
         "%{prj.location}/src/**.h",     
         "%{prj.location}/src/**.hpp",      
         "%{prj.location}/src/**.cpp",      
-        "%{prj.location}/src/**.c"    
+        "%{prj.location}/src/**.c",
+        "%{prj.location}/third_party/flecs/distr/flecs.c"
     }
 
     includedirs
@@ -226,7 +228,8 @@ project "VEngine"
         "%{prj.location}/third_party/rlImGui/",
         "%{prj.location}/third_party/glm/",
         "%{prj.location}/third_party/ImGuizmo/",
-        "%{prj.location}/third_party/glfw/include"
+        "%{prj.location}/third_party/glfw/include",
+        "%{prj.location}/third_party/flecs/include/"
     }
     
    
@@ -234,6 +237,7 @@ project "VEngine"
     {
         "raylib",
     }
+
 
     filter "system:windows"
         cppdialect "C++20"
@@ -245,7 +249,8 @@ project "VEngine"
             "VE_WINDOWS",
             "VE_EXPORT",
             "USE_LIBTYPE_SHARED",
-            "BUILD_LIBTYPE_SHARED"
+            "BUILD_LIBTYPE_SHARED",
+            "flecs_EXPORTS"
         }
 
         libdirs 

@@ -1,6 +1,6 @@
 #pragma once
 #include "ve_defines.h"
-#include "glm/glm.hpp"
+
 namespace VE
 {
     namespace EditorInput

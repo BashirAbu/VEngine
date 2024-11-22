@@ -1,7 +1,5 @@
 #pragma once
 #include "ve_defines.h"
-#include <filesystem>
-#include <string>
 namespace VE
 {
 	class VE_API SharedLibrary 

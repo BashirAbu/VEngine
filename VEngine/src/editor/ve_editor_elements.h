@@ -1,8 +1,6 @@
 #pragma once
 #include "ve_defines.h"
-#include <glm/glm.hpp>
 #include <imgui.h>
-#include <string>
 namespace VE 
 {
 

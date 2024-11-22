@@ -1,9 +1,7 @@
 #pragma once
 #include "ve_defines.h"
-#include <unordered_map>
-#include <string>
 #include <raylib.h>
-#include <filesystem>
+
 namespace VE 
 {
 	class VE_API AssetsManager 

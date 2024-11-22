@@ -1,5 +1,4 @@
 #include <ve_engine.h>
-#include <string.h>
 #include "project_dialog.h"
 
 int main(int argc, char* argv[])

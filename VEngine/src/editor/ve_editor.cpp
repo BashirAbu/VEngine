@@ -4,20 +4,11 @@
 #include <rlImGui.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
-#include "entities/ve_entity.h"
 #include "platform/ve_platform.h"
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtc/matrix_transform.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <raymath.h>
-#include "entities/ve_camera_2d_entity.h"
 #include "editor/ve_editor_elements.h"
-#include "GLFW/glfw3.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
 #include "imgui_impl_raylib.h"
-
+#include "components/ve_components.h"
+#include "systems/ve_systems.h"
 namespace VE 
 {
 
@@ -158,168 +149,108 @@ namespace VE
 		UpdateEditor(GetFrameTime());
 		
 	}
-
-	void Editor::DrawChildren(Entity* entity, std::list<Entity*>& deletedEntities)
+	
+	void Editor::AddChildrenNode(flecs::entity child) 
 	{
-		for (auto* child : entity->children) 
-		{
-			ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == (child)) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child->name.c_str());
-			
-			if (ImGui::IsItemClicked())
-			{
-				engine->sceneManager->selectedEntity = child;
-			}
+		ImGuiTreeNodeFlags flags = selectedEntity == (child) ? ImGuiTreeNodeFlags_Selected : 0 | ImGuiTreeNodeFlags_OpenOnArrow;
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child.name().c_str());
 
-			if (ImGui::BeginPopupContextItem(0, 1))
-			{
-				engine->sceneManager->selectedEntity = child;
-				if (ImGui::BeginMenu("Add Child"))
-				{
-					for (std::string entityName : engine->entitiesRegistry)
-					{
-						if (ImGui::MenuItem(entityName.c_str()))
-						{
-							Entity* childEntity = CreateProjectEntity(entityName);
-							if (!childEntity)
-							{
-								childEntity = engine->CreateBuiltinEntity(entityName);
-							}
-							engine->sceneManager->selectedEntity->AddChild(childEntity);
-						}
-					}
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::MenuItem("Remove"))
-				{
-					if (child == engine->sceneManager->selectedEntity)
-					{
-						engine->sceneManager->selectedEntity = nullptr;
-					}
-					deletedEntities.push_back(child);
-				}
-				ImGui::EndPopup();
-			}
-			if (open)
-			{
-				if (child->children.size() > 0)
-				{
-					DrawChildren(child, deletedEntities);
-				}
-				ImGui::TreePop();
-			}
-		}
-	}
-
-	void Editor::AddEntityNode(Entity* entity, std::list<Entity*>& deletedEntities)
-	{
-		if (entity->parent)
-		{
-			return;
-		}
-		ImGuiTreeNodeFlags flags = ((engine->sceneManager->selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)entity), flags, entity->name.c_str());
 		if (ImGui::IsItemClicked())
 		{
-			engine->sceneManager->selectedEntity = entity;
+			selectedEntity = child;
 		}
 
 		if (ImGui::BeginPopupContextItem(0, 1))
 		{
-			engine->sceneManager->selectedEntity = entity;
-			if (ImGui::BeginMenu("Add Child"))
+			selectedEntity = child;
+			if (ImGui::MenuItem("Add Child"))
 			{
-				for (std::string entityName : engine->entitiesRegistry)
-				{
-					if (ImGui::MenuItem(entityName.c_str()))
-					{
-						Entity* childEntity = CreateProjectEntity(entityName);
-						if (!childEntity)
-						{
-							childEntity = engine->CreateBuiltinEntity(entityName);
-						}
-						engine->sceneManager->selectedEntity->AddChild(childEntity);
-					}
-				}
-				ImGui::EndMenu();
+				flecs::entity _child = engine->sceneManager->currentScene->AddEntity("EmptyEntity");
+				_child.child_of(child);
 			}
 			if (ImGui::MenuItem("Remove"))
 			{
-				if (entity == engine->sceneManager->selectedEntity)
+				child.destruct();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			child.children([&](flecs::entity e)
 				{
-					engine->sceneManager->selectedEntity = nullptr;
-				}
-				deletedEntities.push_back(entity);
+					AddChildrenNode(e);
+				});
+			ImGui::TreePop();
+		}
+	}
+	void Editor::AddEntityNode(flecs::entity e)
+	{
+		if (e.parent())
+		{
+			return;
+		}
+		ImGuiTreeNodeFlags flags = ((selectedEntity == e) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)e), flags, e.name().c_str());
+		if (ImGui::IsItemClicked())
+		{
+			selectedEntity = e;
+		}
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			selectedEntity = e;
+			if (ImGui::MenuItem("Add Child"))
+			{
+				flecs::entity child = engine->sceneManager->currentScene->AddEntity("EmptyEntity");
+				child.child_of(e);
+			}
+			if (ImGui::MenuItem("Remove"))
+			{
+				e.destruct();
 			}
 			ImGui::EndPopup();
 		}
 		if (opened)
 		{
-			if (entity->children.size() > 0)
-			{
-				//if node is expaneded, draw children.
-				DrawChildren(entity, deletedEntities);
-			}
+
+			e.children([&](flecs::entity e)
+				{
+					AddChildrenNode(e);
+				});
+
 			ImGui::TreePop();
 		}
-
 	}
 	void Editor::DrawHierarchy()
 	{
 		ImGui::Begin("Hierarchy");
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered(ImGuiHoveredFlags_None))
-		{
-			engine->sceneManager->selectedEntity = nullptr;
-		}
+
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
 			if (ImGui::BeginMenu("Add Entity"))
 			{
-				for (std::string entityName : engine->entitiesRegistry)
+				if (ImGui::MenuItem("Empty Entity"))
 				{
-					if (ImGui::MenuItem(entityName.c_str()))
-					{
-						Entity* createdEntity = engine->CreateBuiltinEntity(entityName);
-						if (createdEntity == nullptr)
-							createdEntity = CreateProjectEntity(entityName);
-						if (createdEntity == nullptr)
-						{
-							TraceLog(LOG_ERROR, "Failed to create entity (%s)!", entityName.c_str());
-							continue;
-						}
-					}
+					engine->sceneManager->currentScene->AddEntity("EmptyEntity");
 				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Add Construct"))
 			{
-				std::filesystem::path constructPath = VE::OpenFileDialog();
-				Engine::GetSingleton()->GetSceneManager()->LoadConstruct(constructPath);
-				//add construct
+
 			}
 			ImGui::EndPopup();
 		}
-		size_t index = 0;
-		std::list<Entity*> deletedEntities;
-		for (auto itr = engine->sceneManager->currentScene->entities.begin(); itr != engine->sceneManager->currentScene->entities.end(); itr++)
-		{
-			AddEntityNode(*itr, deletedEntities);
-			if (itr == engine->sceneManager->currentScene->entities.end() || engine->sceneManager->currentScene->entities.size() == 0)
-			{
-				break;
-			}
-		}
 
-		for (auto ent : deletedEntities)
-		{
-			engine->sceneManager->currentScene->DeleteEntityChildren(ent);
-			ent->destroy = true;
-			if (ent->parent)
+		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneTag>().build();
+
+		engine->sceneManager->currentScene->world.defer_begin();
+		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
-				ent->parent->children.remove(ent);
-			}
-		}
+				
+				AddEntityNode(e);
+			});
+		engine->sceneManager->currentScene->world.defer_end();
+
 
 		ImGui::End();
 	}
@@ -327,6 +258,7 @@ namespace VE
 	void Editor::DrawMainMenuBar()
 	{
 		ImGui::BeginMainMenuBar();
+
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("Open Scene"))
@@ -344,20 +276,16 @@ namespace VE
 					std::filesystem::path scenePath = VE::SaveFileDialog();
 					if (!scenePath.empty())
 					{
-						engine->sceneManager->UnloadScene();
-						engine->sceneManager->currentScene = new Scene(SceneType::Scene2D);
-						engine->sceneManager->currentScene->scenePath = scenePath;
-						engine->sceneManager->currentScene->name = scenePath.stem().string();
-						engine->sceneManager->SaveScene();
+						
 					}
-					
+
 				}
 				if (ImGui::MenuItem("3D scene"))
 				{
 					//handle 3d scene creation.
 				}
 				ImGui::EndMenu();
-				
+
 			}
 			if (ImGui::MenuItem("Save Scene"))
 			{
@@ -384,14 +312,14 @@ namespace VE
 				{
 					engine->sceneManager->mode = SceneMode::Game;
 					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-					
+
 					engine->sceneManager->UnloadScene();
 					engine->ReloadProjectSharedLibrary();
 					engine->sceneManager->LoadScene(reloadScenePath);
-					
+
 					ImGui::SetWindowFocus("GameViewport");
 				}
-				
+
 			}
 
 			ImGui::SameLine();
@@ -400,11 +328,11 @@ namespace VE
 			{
 				engine->sceneManager->SaveScene();
 				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-				
+
 				engine->sceneManager->UnloadScene();
 				engine->ReloadProjectSharedLibrary();
 				engine->sceneManager->LoadScene(reloadScenePath);
-				
+
 			}
 		}
 		else
@@ -414,28 +342,57 @@ namespace VE
 				engine->sceneManager->mode = SceneMode::Editor;
 				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
 				SceneType sceneType = engine->sceneManager->currentScene->GetSceneType();
-				
+
 				engine->sceneManager->UnloadScene();
 				engine->sceneManager->LoadScene(reloadScenePath);
-				
+
 				ImGui::SetWindowFocus("SceneViewport");
 			}
 		}
+		
 		ImGui::EndMainMenuBar();
 	}
 	void Editor::DrawInspector()
 	{
 		ImGui::Begin("Inspector");
-		if (engine->sceneManager->selectedEntity)
+		
+		if (selectedEntity)
 		{
-			engine->sceneManager->selectedEntity->ComponentDrawEditorUI();
-			engine->sceneManager->selectedEntity->DrawEditorUI();
+
+			//TraceLog(LOG_INFO, "%s", selectedEntity.type().str().c_str());
+			selectedEntity.each([&](flecs::id compId) 
+				{
+					if (compId.is_entity())
+					{
+						if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
+						{
+							DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
+						}
+					}
+				});
+
+
+			if (ImGui::Button("Add Component")) 
+			{
+				ImGui::OpenPopup("Add Component");
+			}
+
+			if (ImGui::BeginPopup("Add Component"))
+			{
+				for (auto comp : engine->sceneManager->currentScene->componentsTable) 
+				{
+					if (ImGui::MenuItem(comp.first.c_str()))
+					{
+						selectedEntity.add(comp.second);
+					}
+					ImGui::Separator();
+				}
+				ImGui::EndPopup();
+			}
 		}
-		else
-		{
-			//Scene Settings
-			EditorElement::Color(engine->sceneManager->currentScene->clearColor, "Clear Color");
-		}
+		
+
+
 		ImGui::End();
 	}
 
@@ -446,62 +403,14 @@ namespace VE
 		float fps = 1.0f / frameTime;
 		ImGui::Text("Frame Time  : %fms", frameTime);
 		ImGui::Text("FPS         : %f", fps);
-		ImGui::Text("Entity Count: %d", engine->sceneManager->currentScene->entities.size());
+		
 		ImGui::End();
 	}
 
 	void Editor::DrawSceneViewport()
 	{
 		ImGui::Begin("SceneViewport");
-		sceneViewportFocused = ImGui::IsWindowFocused();
-		isSceneViewHovered = ImGui::IsWindowHovered();
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		sceneViewportSize = *((glm::vec2*)&size);
-		size = ImGui::GetCursorScreenPos();
-		sceneViewportPosition = *((glm::vec2*)&(size));
-
-
-		RenderEditorSceneView();
-
-		const RenderTexture* sceneViewTex = &editorCameraRenderTarget;
-		rlImGuiImageRenderTextureFit(&sceneViewTex->texture, false);
-
-		//Draw ImGuizmo stuff here.
 		
-		ImGuizmo::BeginFrame();
-		Entity* selectedEntity = engine->sceneManager->selectedEntity;
-		usingImGuizmo = false;
-		if (selectedEntity)
-		{
-			ImGuizmo::SetOrthographic(true);
-			ImGuizmo::SetDrawlist();
-
-			ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
-			glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
-
-			glm::mat4 transformMatrix = selectedEntity->transformComponent->GetWorldTransformMatrix();
-			Matrix cameraViewMatrix;
-			cameraViewMatrix = GetCameraMatrix2D(editorCamera);
-			ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
-
-			if (ImGuizmo::IsUsing())
-			{
-				usingImGuizmo = true;
-				glm::vec3 skew;
-				glm::vec3 pos;
-				glm::vec3 scl;
-				glm::vec4 pres;
-				glm::quat rot;
-					
-				glm::decompose(selectedEntity->GetParent()? glm::inverse(selectedEntity->GetParent()->transformComponent->GetWorldTransformMatrix()) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
-				glm::vec3 eulerAngles = glm::eulerAngles(rot);
-				eulerAngles = glm::degrees(eulerAngles);
-
-				selectedEntity->transformComponent->position = pos;
-				selectedEntity->transformComponent->scale = scl;
-				selectedEntity->transformComponent->rotation = eulerAngles;
-			}	
-		}
 		ImGui::End();
 	}
 
@@ -510,37 +419,6 @@ namespace VE
 		ImVec2 oldPadding = ImGui::GetStyle().WindowPadding;
 		ImGui::GetStyle().WindowPadding = ImVec2(0.0f, 0.0f);
 		ImGui::Begin("GameViewport");
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		sceneViewportSize = *((glm::vec2*)&size);
-		
-		gameViewportFocused = ImGui::IsWindowFocused() ? true : false;
-		
-
-		
-
-
-		if (engine->sceneManager->currentScene->mainCamera)
-		{
-			ImVec2 area = ImGui::GetContentRegionAvail();
-
-			float scale = area.x / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.width;
-
-			float y = engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale;
-			if (y > area.y)
-			{
-				scale = area.y / engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height;
-			}
-
-			int sizeY = int(engine->sceneManager->currentScene->mainCamera->GetRenderTarget()->texture.height * scale);
-
-
-			size = ImGui::GetCursorScreenPos();
-			size.y = (area.y / 2 - sizeY / 2) + (size.y - .5f);
-			gameViewportPosition = *((glm::vec2*)&size);
-			const RenderTexture* gameViewTex = engine->sceneManager->currentScene->mainCamera->GetRenderTarget();
-
-			rlImGuiImageRenderTextureFit(&gameViewTex->texture, true);
-		}
 		
 		ImGui::End();
 		ImGui::GetStyle().WindowPadding = oldPadding;
@@ -548,151 +426,12 @@ namespace VE
 
 	void Editor::UpdateEditor(float deltaTime)
 	{
-		if (sceneViewportFocused)
-		{
-			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
-			{
-				
-				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y },
-					editorCamera);
-
-				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
-				{
-					Vector2 delta = GetMouseDelta();
-					delta.x *= -1.0f / editorCamera.zoom;
-					delta.y *= -1.0f / editorCamera.zoom;
-					editorCamera.target.x = editorCamera.target.x + delta.x;
-					editorCamera.target.y = editorCamera.target.y + delta.y;
-				}
-				float wheel = 0;
-				if (isSceneViewHovered)
-				{
-					wheel = GetMouseWheelMove();
-				}
-				if (wheel)
-				{
-
-					editorCamera.offset = Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y };
-					editorCamera.target = mouseWorldPos;
-					float scaleFactor = 1.0f + (0.25f * fabsf(wheel));
-					if (wheel < 0) scaleFactor = 1.0f / scaleFactor;
-					editorCamera.zoom = glm::clamp(editorCamera.zoom * scaleFactor, 0.005f, 64.0f);
-				}
-			}
-			
-		}
 		
-		
-		
-			
-		glm::vec2 mousePos = EditorInput::GetMousePostion();
-		if (mousePos.x < editorCameraRenderTarget.texture.width &&
-			mousePos.x > 0 &&
-			mousePos.y < editorCameraRenderTarget.texture.height &&
-			mousePos.y > 0)
-		{
-			if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT)) 
-			{
-
-				BeginTextureMode(colorPickingBuffer);
-				BeginMode2D(editorCamera);
-				ClearBackground(BLANK);
-				BeginShaderMode(colorPickingShader);
-				int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
-				EndShaderMode();
-				for (Entity* entity : engine->sceneManager->currentScene->entities)
-				{
-					BeginShaderMode(colorPickingShader);
-					float id = (float)entity->id;
-					SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-					entity->Render();
-					entity->ComponentsRender();
-					EndShaderMode();
-				}
-				EndMode2D();
-				EndTextureMode();
-
-				Texture t = colorPickingBuffer.texture;
-				glm::vec2 mousePos = EditorInput::GetMousePostion();
-				Image pickImage = LoadImageFromTexture(t);
-				float* pickingData = (float*)pickImage.data;
-				int pixelIndex = (int)(editorCameraRenderTarget.texture.height - mousePos.y) * pickImage.width + (int)mousePos.x;
-				int id = (int)pickingData[pixelIndex];
-				if (usingImGuizmo)
-				{
-					//do nothing brother.	
-				}
-				else if(id == 0)
-				{
-					engine->sceneManager->selectedEntity = nullptr;
-				}
-				else 
-				{
-					engine->sceneManager->selectedEntity = engine->sceneManager->currentScene->entityIDtable[id];
-				}
-				UnloadImage(pickImage);
-			}
-		}
 	}
 
 	void Editor::RenderEditorSceneView()
 	{
-		//EditorCamera
-		if (oldRenderTargetSize != Editor::GetSingleton()->GetSceneViewportSize())
-		{
-			oldRenderTargetSize = Editor::GetSingleton()->GetSceneViewportSize();
-			UnloadRenderTexture(editorCameraRenderTarget);
-			UnloadRenderTexture(colorPickingBuffer);
-			editorCameraRenderTarget = LoadRenderTexture((int)oldRenderTargetSize.x, (int)oldRenderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-			SetTextureFilter(editorCameraRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
-			colorPickingBuffer = LoadRenderTexture((int)oldRenderTargetSize.x, (int)oldRenderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R32);
-			SetTextureFilter(colorPickingBuffer.texture, TEXTURE_FILTER_POINT);
-		}
-
-		BeginTextureMode(editorCameraRenderTarget);
-		BeginMode2D(editorCamera);
-		glm::vec4 clearColor = engine->sceneManager->currentScene->clearColor;
-		Color cc = { (uint8_t)(clearColor.r * 255), (uint8_t)(clearColor.g * 255) , (uint8_t)(clearColor.b * 255) , (uint8_t)(clearColor.a * 255) };
-		ClearBackground(cc);
-
-		for (Entity* entity : engine->sceneManager->currentScene->entities)
-		{
-			entity->Render();
-			entity->ComponentsRender();
-		}
-		//2d scene
-		Camera2DEntity* mainCamera = (Camera2DEntity*)engine->sceneManager->currentScene->mainCamera;
-		if (mainCamera)
-		{
-
-			std::vector<glm::vec2> vertices = {
-												{0.0f                                        , mainCamera->GetRenderTarget()->texture.height}, // Bottom-left
-												{mainCamera->GetRenderTarget()->texture.width, mainCamera->GetRenderTarget()->texture.height}, // Bottom-right
-												{mainCamera->GetRenderTarget()->texture.width, 0.0f}, // Top-right
-												{0.0f,                                         0.0f}  // Top-left
-			};
-
-			glm::mat4 transform =
-				glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + +mainCamera->camera2D.offset.y, 0.0f))
-				* glm::rotate(glm::mat4(1.0f), -glm::radians(mainCamera->camera2D.rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-				* glm::scale(glm::mat4(1.0f), glm::vec3((1.0f / mainCamera->camera2D.zoom), (1.0f / mainCamera->camera2D.zoom), 1.0f))
-				* glm::translate(glm::mat4(1.0f), -glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + mainCamera->camera2D.offset.y, 0.0f))
-				* glm::translate(glm::mat4(1.0f), glm::vec3(mainCamera->camera2D.target.x + mainCamera->camera2D.offset.x, mainCamera->camera2D.target.y + mainCamera->camera2D.offset.y, 0.0f));
-
-			std::vector<glm::vec2> transformedVertices;
-			for (const auto& vertex : vertices) {
-				glm::vec4 transformedVertex = transform * glm::vec4(vertex, 0.0f, 1.0f);
-				transformedVertices.push_back(glm::vec2(transformedVertex));
-			}
-
-
-			DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, GRAY);
-			DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, GRAY);
-			DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, GRAY);
-			DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, GRAY);
-		}
-		EndMode2D();
-		EndTextureMode();
+		
 	}
 
 

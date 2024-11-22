@@ -1,10 +1,6 @@
 #pragma once
-
 #include "ve_defines.h"
-#include <glm/glm.hpp>
 #include <raylib.h>
-#include <string>
-#include <vector>
 #include "imgui.h"
 struct ImFont;
 namespace VE 
@@ -38,15 +34,21 @@ namespace VE
 
 		void UpdateEditor(float deltaTime);
 		void RenderEditorSceneView();
-		void AddEntityNode(class Entity* entity, std::list<Entity*>& deletedEntities);
-		void DrawChildren(class Entity* entity, std::list<Entity*>& deletedEntities);
+		void AddEntityNode(flecs::entity entity);
+		void AddChildrenNode(flecs::entity e);
 		const bool IsGameViewportFocused() const { return gameViewportFocused; }
 		const bool IsSceneViewportFocused() const { return sceneViewportFocused; }
 		const glm::vec2 GetSceneViewportSize() const { return sceneViewportSize; }
 		const glm::vec2 GetGameViewportSize() const { return gameViewportSize; }
 		const glm::vec2 GetSceneViewportPosition() const { return sceneViewportPosition; }
 		const glm::vec2 GetGameViewportPosition() const { return gameViewportPosition; }
+
+		void DrawComponentElements(std::string name, flecs::entity entity);
+
 	private:
+
+		flecs::entity selectedEntity;
+
 		glm::vec2 sceneViewportSize;
 		glm::vec2 gameViewportSize;
 		glm::vec2 sceneViewportPosition;

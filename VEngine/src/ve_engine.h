@@ -1,10 +1,7 @@
 #pragma once
-#include <filesystem>
 #include "ve_defines.h"
-#include <string>
 #include "scenes/ve_scene_manager.h"
 #include "platform/ve_shared_library.h"
-#include <memory>
 #include "editor/ve_editor.h"
 namespace VE 
 {
@@ -33,10 +30,8 @@ namespace VE
 		RuntimeType runtimeType;
 	};
 
-	typedef VE_API void (*PFN_OnSharedLibraryEntry)();
+	typedef VE_API void (*PFN_OnSharedLibraryEntry)(flecs::world& world);
 	inline VE_API PFN_OnSharedLibraryEntry OnSharedLibraryEntry;
-	typedef VE_API Entity* (*PFN_CreateProjectEntity) (std::string);
-	inline VE_API PFN_CreateProjectEntity CreateProjectEntity;
 
 	class VE_API Engine
 	{
@@ -47,10 +42,6 @@ namespace VE
 		static Engine* GetSingleton();
 
 		void Run();
-		//use this for both builtin entities and project entities.
-		void RegisterEntity(std::string entityName);
-		// use this for adding builtin entity such as camera entity.
-		class Entity* CreateBuiltinEntity(std::string entityName);
 
 		void LoadProjectSharedLibrary();
 		void ReloadProjectSharedLibrary();
@@ -69,7 +60,7 @@ namespace VE
 		EngineDesc desc;
 		SceneManager* sceneManager;
 		VE::SharedLibrary* projectSharedLibrary;
-		std::list<std::string> entitiesRegistry;
+
 		static Engine* singleton;
 		friend class Editor;
 	};

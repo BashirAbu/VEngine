@@ -1,185 +1,135 @@
 #include "ve_scene.h"
-#include "entities/ve_entity.h"
-#include "entities/ve_camera_2d_entity.h"
-#include "entities/ve_camera_entity.h"
 #include "ve_engine.h"
 #include "editor/ve_editor_input.h"
+#include "components/ve_components.h"
+#include "systems/ve_systems.h"
 #include <imgui.h>
-
+#include <flecs/addons/meta.h>
 
 namespace VE 
 {
 	Scene::Scene(SceneType type)
 	{
 		sceneType = type;
+
+		//register builtin components.
+		world.component<Components::TransformComponent>();
+		world.component<Components::SpriteComponent>();
+		//system phases
 		
-	}
-	void Scene::DeleteEntityChildren(Entity* entity)
-	{
-		for (auto itr = entity->children.begin(); itr != entity->children.end(); itr++)
-		{
-			if ((*itr)->children.size() > 0)
+		world.component<_Components::StartPhase>();
+		world.component<_Components::PreUpdatePhase>();
+		world.component<_Components::UpdatePhase>();
+		world.component<_Components::PostUpdatePhase>();
+		world.component<_Components::RenderPhase>();
+
+		//register builtin systems.
+		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").with<_Components::PreUpdatePhase>().each(Systems::TransformSystem);
+		sceneSystems["Renderer2DSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Renderer2DSystem").with<_Components::StartPhase>().run(Systems::Sprite2DRenderSystem);
+		//register project components & systems.
+		OnSharedLibraryEntry(world);
+
+
+		flecs::query regComponents = world.query<flecs::Component>();
+
+		regComponents.each([&](flecs::entity e, flecs::Component& comp)
 			{
-				DeleteEntityChildren(*itr);
-				
-				(*itr)->destroy = true;
-				
-			}
-			else 
+				std::string path = e.path().c_str();
+				if (path.find("::flecs::") != 0)
+				{
+					if(path.find("::VE::_Components::") != 0)
+						componentsTable[e.name().c_str()] = e;
+				}
+			});
+
+		flecs::query regSystems = world.query_builder().with(flecs::System).build();
+
+		regSystems.each([&](flecs::entity e)
 			{
-				(*itr)->destroy = true;
-			}
-		}
+				std::string path = e.path().c_str();
+				if (path.find("::flecs::") != 0)
+				{
+					systemsTable[e.name().c_str()] = e;
+				}
+			});
 	}
 	Scene::~Scene()
 	{
-		mainCamera = nullptr;
-
-		for (auto itr = entities.begin(); itr != entities.end();)
-		{
 		
-			delete *itr;
-			itr = entities.erase(itr);
-			
-		}
-		entities.clear();
 	}
 	void Scene::Start()
 	{
-		for (Entity* entity : entities) 
+		world.defer_begin();
+		for (auto system : sceneSystems) 
 		{
-			entity->Start();
-			entity->ComponentsStart();
-			entity->started = true;
+			if (system.second.has<_Components::StartPhase>())
+			{
+				flecs::system* s = (flecs::system*) & system.second;
+				s->run();
+			}
 		}
-
+		world.defer_end();
 	}
 	void Scene::Update()
 	{
-		
-		float deltaTime = GetFrameTime();
-		for (Entity* entity : entities)
-		{
-			if (!entity->started)
-			{
-				entity->started = true;
-				entity->Start();
-			}
-		}
-		for (Entity* entity : entities)
-		{
-			if (entity->started)
-			{
-				entity->PreUpdate(deltaTime);
-				entity->ComponentsPreUpdate(deltaTime);
-			}
-		}
+		world.defer_begin();
 
-		for (Entity* entity : entities)
+		for (auto system : sceneSystems)
 		{
-			if (entity->started)
+			if (system.second.has<_Components::PreUpdatePhase>())
 			{
-				entity->Update(deltaTime);
-				entity->ComponentsUpdate(deltaTime);
+				flecs::system* s = (flecs::system*)&system.second;
+				s->run();
 			}
 		}
-		
+		world.defer_end();
+
+		world.defer_begin();
+
+		for (auto system : sceneSystems)
+		{
+			if (system.second.has<_Components::UpdatePhase>())
+			{
+				flecs::system* s = (flecs::system*)&system.second;
+				s->run();
+			}
+		}
+		world.defer_end();
+
+		world.defer_begin();
+
+		for (auto system : sceneSystems)
+		{
+			if (system.second.has<_Components::PostUpdatePhase>())
+			{
+				flecs::system* s = (flecs::system*)&system.second;
+				s->run();
+			}
+		}
+		world.defer_end();
+
 	}
 	void Scene::Render()
 	{
-		//
-		// sort entities based on z
-		// 
-		entities.sort([](const Entity* a, const Entity* b)
-			{
-				return a->transformComponent->GetPosition().z < b->transformComponent->GetPosition().z;
-			});
-
-		//for each camera, render the scene once.
-		for (CameraEntity* camera : cameras)
+		for (auto system : sceneSystems)
 		{
-			BeginTextureMode(*camera->GetRenderTarget());
-			if (sceneType == SceneType::Scene2D)
+			if (system.second.has<_Components::RenderPhase>())
 			{
-				Camera2DEntity* c2d = (Camera2DEntity*)camera;
-				BeginMode2D(c2d->camera2D);
+				flecs::system* s = (flecs::system*)&system.second;
+				s->run();
 			}
-			else
-			{
-				//handle 3d.
-			}
-
-			Color cc = { (uint8_t)(clearColor.r * 255), (uint8_t)(clearColor.g * 255) , (uint8_t)(clearColor.b * 255) , (uint8_t)(clearColor.a * 255) };
-			ClearBackground(cc);
-			for (Entity* entity : entities)
-			{
-				entity->Render();
-				entity->ComponentsRender();
-			}
-			if (sceneType == SceneType::Scene2D)
-			{
-				EndMode2D();
-			}
-			else
-			{
-				//handle 3d.
-			}
-			EndTextureMode();
 		}
-		
 	}
-	void Scene::DrawEditorUI()
+	void Scene::AddSystem(std::string name)
 	{
-		for (Entity* entity : entities)
-		{
-			entity->DrawEditorUI();
-			entity->ComponentDrawEditorUI();
-		}
+		flecs::entity system = world.lookup(name.c_str());
+		VE_ASSERT(system.id());
+		sceneSystems[name.c_str()] = system;
 	}
-	Entity* Scene::GetEntityByName(std::string name)
+	flecs::entity Scene::AddEntity(std::string name)
 	{
-		for (Entity* ent : entities)
-		{
-			if (ent->name == name)
-			{
-				return ent;
-			}
-		}
-
-		return nullptr;
+		std::string nameIndex = name + std::to_string(entityIndexGen);
+		entityIndexGen++;
+		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneTag>();
 	}
-	void Scene::AddEntity(Entity* entity)
-	{
-		entities.push_back(entity);
-	}
-	void Scene::RemoveEntity(Entity* entity)
-	{
-		for (auto itr = entities.begin(); itr != entities.end(); itr++) 
-		{
-			if (*itr == entity) 
-			{
-				delete *itr;
-				itr = entities.erase(itr);
-				break;
-			}
-		}
-	}
-
-	void Scene::SetMainCamera(CameraEntity* camera)
-	{
-		for (auto itr = cameras.begin(); itr != cameras.end(); itr++)
-		{
-			(*itr)->mainCamera = false;
-		}
-		for (auto itr = cameras.begin(); itr != cameras.end(); itr++)
-		{
-			if (*itr == camera)
-			{
-				camera->mainCamera = true;
-				mainCamera = (Camera2DEntity*)*itr;
-				return;
-			}
-		}
-	}
-
 }

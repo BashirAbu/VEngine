@@ -1,4 +1,19 @@
 #pragma once
+#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+#include <filesystem>
+#include <flecs.h>
+#include <unordered_map>
+#include <flecs/addons/meta.h>
+#include <flecs/addons/json.h>
+#include <nlohmann/json.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <assert.h>
 #include <stdint.h>
 #ifdef _WIN32
@@ -41,36 +56,12 @@
 #define VE_API __declspec(dllimport)
 #endif
 
-#ifdef VE_PROJECT_EXPORT
+#ifdef VE_PROJECT_EXPORT 
 #define VE_PROJECT_API __declspec(dllexport)
 #else
 #define VE_PROJECT_API __declspec(dllimport)
 #endif
 
-
-#define VE_REGISTER_ENTITY_BEGIN()\
-extern "C" VE_PROJECT_API VE::Entity* CreateProjectEntity(std::string entityName)\
-{\
-    if (0)\
-    {}
-
-#define VE_REGISTER_ENTITY(entity)\
-    else if(#entity == entityName)\
-    {\
-        VE::Entity* ent = new entity(#entity);\
-        ent->SetInternalName(entityName);\
-        return ent;\
-    }
-
-
-#define VE_REGISTER_ENTITY_END() return nullptr;}
-
-
-#ifdef VE_WIN32
-#define CHANGE_CURRENT_WORKING_DIRECTORY _chdir
-#else
-#define CHANGE_CURRENT_WORKING_DIRECTORY chdir
-#endif
 
 #define VE_PROJECT_FILE_EXTENSION "VEProject"
 #define VE_SCENE_FILE_EXTENSION "VEScene"
