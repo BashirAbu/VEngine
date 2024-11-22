@@ -47,6 +47,8 @@ namespace VE
 
 	private:
 
+		std::vector<char> entityName;
+		bool saveName = false;
 		flecs::entity selectedEntity;
 
 		glm::vec2 sceneViewportSize;

@@ -9,18 +9,18 @@ namespace VE
 		
 		if (name == "TransformComponent")
 		{
-			Components::TransformComponent* tc = entity.get_mut<Components::TransformComponent>();
-			glm::vec3 p = tc->localPosition;
-			EditorElement::Vec3(p, "Position");
-			tc->localPosition = p;
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+			if (open)
+			{
+				Components::TransformComponent* tc = entity.get_mut<Components::TransformComponent>();
+				EditorElement::Vec3(tc->localPosition, "Position");
 
-			glm::vec3 r = tc->localRotation;
-			EditorElement::Vec3(r, "Rotation");
-			tc->localRotation = r;
+				EditorElement::Vec3(tc->localRotation, "Rotation");
 
-			glm::vec3 s = tc->localScale;
-			EditorElement::Vec3(s, "Scale");
-			tc->localScale = s;
+				EditorElement::Vec3(tc->localScale, "Scale");
+				ImGui::TreePop();
+			}
 			
 		}
 	}

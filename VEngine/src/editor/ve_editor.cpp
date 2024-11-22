@@ -109,6 +109,10 @@ namespace VE
 		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 		editorCamera = {};
 		editorCamera.zoom = 1.0f;
+
+
+		entityName.resize(255);
+		memset(entityName.data(), 0, entityName.size());
 	}
 	Editor::~Editor() 
 	{
@@ -352,29 +356,60 @@ namespace VE
 		
 		ImGui::EndMainMenuBar();
 	}
+
 	void Editor::DrawInspector()
 	{
 		ImGui::Begin("Inspector");
 		
 		if (selectedEntity)
 		{
-
-			//TraceLog(LOG_INFO, "%s", selectedEntity.type().str().c_str());
-			selectedEntity.each([&](flecs::id compId) 
+			ImGui::Text("Name");
+			ImGui::SameLine();
+			ImGui::InputText("##Name", entityName.data(), entityName.size());
+			if (ImGui::IsItemActivated())
+			{
+				saveName = true;
+			}
+			else if (ImGui::IsItemDeactivated())
+			{
+				if (!engine->sceneManager->currentScene->world.lookup(entityName.data()) && saveName)
 				{
-					if (compId.is_entity())
+					selectedEntity.set_name(entityName.data());
+					saveName = false;
+				}
+			}
+			else 
+			{
+				strcpy(entityName.data(), selectedEntity.name().c_str());
+			}
+			
+			ImGui::Separator();
+
+			selectedEntity.each([&](flecs::id compId) 
+			{
+				if (compId.is_entity())
+				{
+					if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
 					{
-						if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
-						{
-							DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
-						}
+						DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
+						ImGui::Separator();
 					}
-				});
+				}
+			});
 
+			ImGuiStyle& style = ImGui::GetStyle();
 
-			if (ImGui::Button("Add Component")) 
+			float size = ImGui::CalcTextSize("Add Component").x + style.FramePadding.x * 2.0f;
+			float avail = ImGui::GetContentRegionAvail().x;
+
+			float off = (avail - size) * .5f;
+			if (off > 0.0f)
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+			if (ImGui::Button("Add Component"))
 			{
 				ImGui::OpenPopup("Add Component");
+
 			}
 
 			if (ImGui::BeginPopup("Add Component"))
