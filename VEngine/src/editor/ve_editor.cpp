@@ -270,7 +270,9 @@ namespace VE
 				std::filesystem::path scenePath = OpenFileDialog();
 				if (!scenePath.empty())
 				{
-					engine->sceneManager->LoadScene(scenePath);
+					std::filesystem::path relativePath = scenePath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
+					engine->sceneManager->LoadScene(relativePath);
+					selectedEntity = flecs::entity();
 				}
 			}
 			if (ImGui::BeginMenu("New Scene"))
@@ -280,13 +282,16 @@ namespace VE
 					std::filesystem::path scenePath = VE::SaveFileDialog();
 					if (!scenePath.empty())
 					{
-						
+						std::filesystem::path relativePath = scenePath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
+						engine->sceneManager->LoadScene(relativePath);
+						selectedEntity = flecs::entity();
 					}
 
 				}
 				if (ImGui::MenuItem("3D scene"))
 				{
 					//handle 3d scene creation.
+					selectedEntity = flecs::entity();
 				}
 				ImGui::EndMenu();
 
@@ -312,17 +317,15 @@ namespace VE
 			if (ImGui::Button("Start"))
 			{
 				engine->sceneManager->SaveScene();
-				if (!engine->sceneManager->currentScene->scenePath.empty())
-				{
+				//if (!engine->sceneManager->currentScene->scenePath.empty())
+				//{
 					engine->sceneManager->mode = SceneMode::Game;
 					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-
-					engine->sceneManager->UnloadScene();
 					engine->ReloadProjectSharedLibrary();
 					engine->sceneManager->LoadScene(reloadScenePath);
-
 					ImGui::SetWindowFocus("GameViewport");
-				}
+					selectedEntity = flecs::entity();
+				//}
 
 			}
 
@@ -332,11 +335,9 @@ namespace VE
 			{
 				engine->sceneManager->SaveScene();
 				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-
-				engine->sceneManager->UnloadScene();
 				engine->ReloadProjectSharedLibrary();
 				engine->sceneManager->LoadScene(reloadScenePath);
-
+				selectedEntity = flecs::entity();
 			}
 		}
 		else
@@ -345,12 +346,9 @@ namespace VE
 			{
 				engine->sceneManager->mode = SceneMode::Editor;
 				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-				SceneType sceneType = engine->sceneManager->currentScene->GetSceneType();
-
-				engine->sceneManager->UnloadScene();
 				engine->sceneManager->LoadScene(reloadScenePath);
-
 				ImGui::SetWindowFocus("SceneViewport");
+				selectedEntity = flecs::entity();
 			}
 		}
 		
@@ -425,9 +423,6 @@ namespace VE
 				ImGui::EndPopup();
 			}
 		}
-		
-
-
 		ImGui::End();
 	}
 
@@ -455,6 +450,28 @@ namespace VE
 		ImGui::GetStyle().WindowPadding = ImVec2(0.0f, 0.0f);
 		ImGui::Begin("GameViewport");
 		
+		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
+		
+		Components::Camera2DComponent* c2dc = nullptr;
+
+		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc) 
+			{
+				if (cc.isMain) 
+				{
+					c2dc = &cc;
+				}
+			});
+
+		if (c2dc)
+		{
+
+			const Texture* rt = &c2dc->renderTarget.texture;
+
+			rlImGuiImageRenderTextureFit(rt, true);
+
+		}
+
+
 		ImGui::End();
 		ImGui::GetStyle().WindowPadding = oldPadding;
 	}

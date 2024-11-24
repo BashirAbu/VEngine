@@ -21,10 +21,12 @@ namespace VE
 		void Update();
 		void Render();
 
+		void SetMainCamera(flecs::entity entity);
+
 		void AddSystem(std::string name);
 		flecs::entity AddEntity(std::string name);
 		const SceneType GetSceneType() const { return sceneType; }
-
+		void AddMetaData(flecs::entity comp);
 	private:
 		flecs::world world;
 		glm::vec4 clearColor;

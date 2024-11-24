@@ -1,6 +1,8 @@
 #pragma once
 #include "ve_defines.h"
 #include <raylib.h>
+#include "ve_engine.h"
+#include "ve_assets_manager.h"
 namespace VE 
 {
 
@@ -17,6 +19,9 @@ namespace VE
 
 	namespace Components
 	{
+
+
+
 		struct TransformComponent
 		{
 			glm::vec3 worldPosition = {};
@@ -28,29 +33,36 @@ namespace VE
 			glm::vec3 localScale = {};
 		};
 
-		struct Color
-		{
-			union
-			{
-				glm::vec4 elements;
-				struct
-				{
-					float r, g, b, a;
-				};
-			};
-		};
 		struct SpriteComponent
 		{
-			Texture* texture = nullptr;
+
+			SpriteComponent() 
+			{
+				if (!texturePath.empty())
+				{
+					texture = VE::AssetsManager::GetSingleton()->LoadTexture(texturePath);
+				}
+			}
 			std::filesystem::path texturePath = "";
 			glm::vec2 origin = {};
-			Color tintColor = {};
+			glm::vec4 tintColor = {};
+			Texture* texture = nullptr;
 		};
 
 		struct Camera2DComponent
 		{
-			Camera2D camera;
-			RenderTexture renderTarget;
+			Camera2DComponent() 
+			{
+				renderTarget = LoadRenderTexture(VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+					VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight,
+					PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+			}
+			~Camera2DComponent() 
+			{
+				UnloadRenderTexture(renderTarget);
+			}
+			Camera2D camera = {};
+			RenderTexture renderTarget = {};
 			bool isMain = false;
 		};
 	}

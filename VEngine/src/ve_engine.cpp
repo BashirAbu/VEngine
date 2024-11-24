@@ -115,7 +115,7 @@ namespace VE
 		while (!WindowShouldClose())
 		{
 			BeginDrawing();
-			ClearBackground(BLACK);
+			ClearBackground(BLANK);
 			sceneManager->RunCurrentScene();
 			editor->DrawUI();
 			EndDrawing();

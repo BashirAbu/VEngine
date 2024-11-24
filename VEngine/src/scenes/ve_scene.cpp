@@ -4,41 +4,74 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include <imgui.h>
-#include <flecs/addons/meta.h>
-
 namespace VE 
 {
 	Scene::Scene(SceneType type)
 	{
 		sceneType = type;
-
 		//register builtin components.
-		world.component<Components::TransformComponent>();
-		world.component<Components::SpriteComponent>();
-		//system phases
+		world.component<std::string>()
+			.opaque(flecs::String)
+			.serialize([](const flecs::serializer* s, const std::string* data) 
+			{
+				const char* str = data->c_str();
+				return s->value(flecs::String, &str);
+			})
+			.assign_string([](std::string* data, const char* value) 
+			{
+				*data = value;
+			});
+		world.component<std::filesystem::path>()
+			.opaque(flecs::String)
+			.serialize([](const flecs::serializer* s, const std::filesystem::path* data)
+				{
+					std::string temp = data->string();
+					const char* str = temp.c_str();
+					return s->value(flecs::String, &str);
+				})
+			.assign_string([](std::filesystem::path* data, const char* value)
+				{
+					*data = (std::string)value;
+				});
+		AddMetaData(world.component<glm::vec2>());
+		AddMetaData(world.component<glm::vec3>());
+		AddMetaData(world.component<glm::vec4>());
+		AddMetaData(world.component<Components::TransformComponent>());
+		AddMetaData(world.component<Components::SpriteComponent>());
+		AddMetaData(world.component<Components::Camera2DComponent>());
+		world.observer<Components::Camera2DComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::Camera2DComponent& c2dc) 
+			{
+				e.add<Components::TransformComponent>();
+			
+			});
 		
 		world.component<_Components::StartPhase>();
 		world.component<_Components::PreUpdatePhase>();
 		world.component<_Components::UpdatePhase>();
 		world.component<_Components::PostUpdatePhase>();
 		world.component<_Components::RenderPhase>();
+		world.component<_Components::SceneTag>();
 
 		//register builtin systems.
-		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").with<_Components::PreUpdatePhase>().each(Systems::TransformSystem);
-		sceneSystems["Renderer2DSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Renderer2DSystem").with<_Components::StartPhase>().run(Systems::Sprite2DRenderSystem);
+		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").each(Systems::TransformSystem);
+		sceneSystems["TransformSystem"].add<_Components::PreUpdatePhase>();
+		sceneSystems["Renderer2DSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Renderer2DSystem").run(Systems::Sprite2DRenderSystem);
+		sceneSystems["Renderer2DSystem"].add<_Components::RenderPhase>();
 		//register project components & systems.
 		OnSharedLibraryEntry(world);
 
+
+
+	
 
 		flecs::query regComponents = world.query<flecs::Component>();
 
 		regComponents.each([&](flecs::entity e, flecs::Component& comp)
 			{
 				std::string path = e.path().c_str();
-				if (path.find("::flecs::") != 0)
+				if (path.find("::Components::") != std::string::npos)
 				{
-					if(path.find("::VE::_Components::") != 0)
-						componentsTable[e.name().c_str()] = e;
+					componentsTable[e.name().c_str()] = e;
 				}
 			});
 
@@ -119,6 +152,22 @@ namespace VE
 				s->run();
 			}
 		}
+	}
+	void Scene::SetMainCamera(flecs::entity entity)
+	{
+		flecs::query cameras = world.query<Components::Camera2DComponent>();
+
+		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc)
+			{
+				if (e == entity)
+				{
+					cc.isMain = true;
+				}
+				else 
+				{
+					cc.isMain = false;
+				}
+			});
 	}
 	void Scene::AddSystem(std::string name)
 	{
