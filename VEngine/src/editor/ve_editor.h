@@ -51,10 +51,10 @@ namespace VE
 		bool saveName = false;
 		flecs::entity selectedEntity;
 
-		glm::vec2 sceneViewportSize;
-		glm::vec2 gameViewportSize;
-		glm::vec2 sceneViewportPosition;
-		glm::vec2 gameViewportPosition;
+		glm::vec2 sceneViewportSize = {};
+		glm::vec2 gameViewportSize = {};
+		glm::vec2 sceneViewportPosition = {};
+		glm::vec2 gameViewportPosition = {};
 		bool gameViewportFocused = false;
 		bool sceneViewportFocused = false;
 		bool isSceneViewHovered = false;

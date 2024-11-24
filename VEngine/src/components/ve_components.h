@@ -19,51 +19,33 @@ namespace VE
 
 	namespace Components
 	{
-
-
-
 		struct TransformComponent
 		{
 			glm::vec3 worldPosition = {};
 			glm::vec3 worldRotation = {};
-			glm::vec3 worldScale = {};
+			glm::vec3 worldScale = { 1.0f,1.0f,1.0f };
 
 			glm::vec3 localPosition = {};
 			glm::vec3 localRotation = {};
-			glm::vec3 localScale = {};
+			glm::vec3 localScale = {1.0f,1.0f,1.0f};
 		};
 
 		struct SpriteComponent
 		{
-
-			SpriteComponent() 
-			{
-				if (!texturePath.empty())
-				{
-					texture = VE::AssetsManager::GetSingleton()->LoadTexture(texturePath);
-				}
-			}
 			std::filesystem::path texturePath = "";
 			glm::vec2 origin = {};
-			glm::vec4 tintColor = {};
+			glm::vec4 tintColor = {1.0f, 1.0f, 1.0f, 1.0f};
 			Texture* texture = nullptr;
 		};
 
 		struct Camera2DComponent
 		{
-			Camera2DComponent() 
-			{
-				renderTarget = LoadRenderTexture(VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
-					VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight,
-					PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-			}
-			~Camera2DComponent() 
-			{
-				UnloadRenderTexture(renderTarget);
-			}
+			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
+			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+			float zoom = 1.0f;
+			bool isMain = false;
 			Camera2D camera = {};
 			RenderTexture renderTarget = {};
-			bool isMain = false;
 		};
 	}
 }

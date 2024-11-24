@@ -87,7 +87,7 @@ namespace VE
 		}
 		else 
 		{
-			//load saved scene.
+			sceneManager->LoadScene(engineDesc.projectDetails.mainScenePath);
 		}
 
 	}

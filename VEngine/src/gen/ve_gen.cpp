@@ -38,7 +38,12 @@ namespace VE
 		}
 		else if (compName.find("Camera2DComponent") != std::string::npos)
 		{
-			
+			/*glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+			glm::vec4 backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+			float zoom = 1.0f;
+			bool isMain = false;*/
+			flecs::component<Components::Camera2DComponent>* cc = (flecs::component<Components::Camera2DComponent>*) & comp;
+			cc->member<glm::vec2>("renderTargetSize").member<glm::vec4>("backgroundColor").member<float>("zoom").member<bool>("isMain");
 		}
 	}
 	
@@ -84,7 +89,11 @@ namespace VE
 				{
 					UnloadRenderTexture(cc->renderTarget);
 					cc->renderTarget = LoadRenderTexture((int)renderTargetSize.x, (int)renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+					SetTextureFilter(cc->renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 				}
+
+				EditorElement::Color(cc->backgroundColor, "Backgournd Color");
+
 				ImGui::TreePop();
 			}
 		}
@@ -110,6 +119,9 @@ namespace VE
 						sp->texture = AssetsManager::GetSingleton()->LoadTexture(relativePath);
 					}
 				}
+
+				EditorElement::Vec2(sp->origin, "Origin");
+				EditorElement::Color(sp->tintColor, "Tint Color");
 				ImGui::TreePop();
 			}
 		}

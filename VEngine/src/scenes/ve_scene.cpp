@@ -3,6 +3,7 @@
 #include "editor/ve_editor_input.h"
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
+#include "utils/ve_utils.h"
 #include <imgui.h>
 namespace VE 
 {
@@ -42,7 +43,19 @@ namespace VE
 		world.observer<Components::Camera2DComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::Camera2DComponent& c2dc) 
 			{
 				e.add<Components::TransformComponent>();
+				c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+				SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+				c2dc.camera.zoom = c2dc.zoom;
 			
+			});
+		world.observer<Components::Camera2DComponent>().event(flecs::OnRemove).each([](flecs::entity e, Components::Camera2DComponent& c2dc)
+			{
+				UnloadRenderTexture(c2dc.renderTarget);
+			});
+
+		world.observer<Components::SpriteComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::SpriteComponent& sp)
+			{
+				e.add<Components::TransformComponent>();
 			});
 		
 		world.component<_Components::StartPhase>();
@@ -55,8 +68,8 @@ namespace VE
 		//register builtin systems.
 		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").each(Systems::TransformSystem);
 		sceneSystems["TransformSystem"].add<_Components::PreUpdatePhase>();
-		sceneSystems["Renderer2DSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Renderer2DSystem").run(Systems::Sprite2DRenderSystem);
-		sceneSystems["Renderer2DSystem"].add<_Components::RenderPhase>();
+		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").each(Systems::Sprite2DRenderSystem);
+		sceneSystems["Sprite2DRenderSystem"].add<_Components::RenderPhase>();
 		//register project components & systems.
 		OnSharedLibraryEntry(world);
 
@@ -144,14 +157,27 @@ namespace VE
 	}
 	void Scene::Render()
 	{
-		for (auto system : sceneSystems)
-		{
-			if (system.second.has<_Components::RenderPhase>())
+		flecs::query cameras2D = world.query<Components::Camera2DComponent>();
+
+		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
 			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->run();
-			}
-		}
+
+				BeginTextureMode(cc.renderTarget);
+				BeginMode2D(cc.camera);
+				Color c;
+				ClearBackground(c = GLMVec4ToRayColor(cc.backgroundColor));
+				for (auto system : sceneSystems)
+				{
+					if (system.second.has<_Components::RenderPhase>())
+					{
+						flecs::system* s = (flecs::system*)&system.second;
+						s->run();
+					}
+				}
+
+				EndMode2D();
+				EndTextureMode();
+			});
 	}
 	void Scene::SetMainCamera(flecs::entity entity)
 	{

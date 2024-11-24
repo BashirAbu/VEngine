@@ -15,6 +15,7 @@ namespace VE
 		};
 
 		void TransformSystem(flecs::entity e, Components::TransformComponent& transform);
-		void Sprite2DRenderSystem(flecs::iter& it);
+		void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc);
+
 	}
 }
