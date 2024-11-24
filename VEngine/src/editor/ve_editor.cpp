@@ -10,6 +10,7 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
+#include <raymath.h>
 namespace VE 
 {
 
@@ -116,6 +117,10 @@ namespace VE
 		memset(entityName.data(), 0, entityName.size());
 
 		editorCameraRenderTarget = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+		colorPickingBuffer = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R32);
+		SetTextureFilter(colorPickingBuffer.texture, TEXTURE_FILTER_POINT);
+
+		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 	}
 	Editor::~Editor() 
 	{
@@ -147,6 +152,12 @@ namespace VE
 		DrawSceneViewport();
 
 		DrawGameViewport();
+
+		ImGui::Begin("Pick");
+
+		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, false);
+
+		ImGui::End();
 
 		consoleWindow.Draw();
 
@@ -520,11 +531,48 @@ namespace VE
 
 		EndMode2D();
 		EndTextureMode();
-		rlImGuiImageRenderTextureFit(&editorCameraRenderTarget.texture, true);
+		rlImGuiImageRenderTextureFit(&editorCameraRenderTarget.texture, false);
 
-		//do imguizmo
+		//Draw ImGuizmo stuff here.
 
+		ImGuizmo::BeginFrame();
+		usingImGuizmo = false;
+		if (selectedEntity)
+		{
+			Components::TransformComponent* tc = selectedEntity.get_mut<Components::TransformComponent>();
+			if (tc) 
+			{
+				ImGuizmo::SetOrthographic(true);
+				ImGuizmo::SetDrawlist();
 
+				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
+				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
+
+				glm::mat4 transformMatrix = GetWorldTransformMatrix(*tc);
+				Matrix cameraViewMatrix;
+				cameraViewMatrix = GetCameraMatrix2D(editorCamera);
+				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
+
+				if (ImGuizmo::IsUsing())
+				{
+					usingImGuizmo = true;
+					glm::vec3 skew;
+					glm::vec3 pos;
+					glm::vec3 scl;
+					glm::vec4 pres;
+					glm::quat rot;
+
+					glm::decompose(selectedEntity.parent()? glm::inverse(GetWorldTransformMatrix(*selectedEntity.parent().get<Components::TransformComponent>())) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
+					glm::vec3 eulerAngles = glm::eulerAngles(rot);
+					eulerAngles = glm::degrees(eulerAngles);
+
+					tc->localPosition = pos;
+					tc->localScale = scl;
+					tc->localRotation = eulerAngles;
+				}
+			}
+			
+		}
 		ImGui::End();
 	}
 
@@ -535,7 +583,7 @@ namespace VE
 		ImGui::Begin("GameViewport");
 
 		ImVec2 vec2 = ImGui::GetContentRegionAvail();
-		sceneViewportSize = *((glm::vec2*)&vec2);
+		gameViewportSize = *((glm::vec2*)&vec2);
 
 		gameViewportFocused = ImGui::IsWindowFocused();
 
@@ -592,7 +640,7 @@ namespace VE
 			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
 			{
 
-				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y },
+				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y},
 					editorCamera);
 
 				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
@@ -620,11 +668,69 @@ namespace VE
 			}
 
 		}
-	}
 
-	void Editor::RenderEditorSceneView()
-	{
-		
+		glm::vec2 mousePos = EditorInput::GetMousePostion();
+		TraceLog(LOG_DEBUG, "x: %f, y: %f", mousePos.x, mousePos.y);
+		if (IsSceneViewportFocused() && isSceneViewHovered)
+		{
+			if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT))
+			{
+
+				if (glm::vec2(colorPickingBuffer.texture.width, colorPickingBuffer.texture.height) != sceneViewportSize)
+				{
+					UnloadRenderTexture(colorPickingBuffer);
+					colorPickingBuffer = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R32);
+					SetTextureFilter(colorPickingBuffer.texture, TEXTURE_FILTER_POINT);
+				}
+
+
+				BeginTextureMode(colorPickingBuffer);
+				BeginMode2D(editorCamera);
+				ClearBackground(BLANK);
+				BeginShaderMode(colorPickingShader);
+				int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
+				EndShaderMode();
+				flecs::query entities = engine->sceneManager->currentScene->world.query<Components::TransformComponent, Components::SpriteComponent>();
+
+				entities.each([&](flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
+					{
+						BeginShaderMode(colorPickingShader);
+						float id = (float)e;
+						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
+						Systems::Sprite2DRenderSystem(e, tc, sc);
+						EndShaderMode();
+					});
+
+
+				EndMode2D();
+				EndTextureMode();
+
+				Texture t = colorPickingBuffer.texture;
+
+
+				Image pickImage = LoadImageFromTexture(t);
+				float* pickingData = (float*)pickImage.data;
+				
+				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
+				int id = (int)pickingData[pixelIndex];
+				if (usingImGuizmo)
+				{
+					//do nothing brother.	
+				}
+				else if (engine->sceneManager->currentScene->world.is_valid(id))
+				{
+					selectedEntity = engine->sceneManager->currentScene->world.entity(id);
+				}
+				else 
+				{
+					selectedEntity = flecs::entity();
+				}
+				UnloadImage(pickImage);
+			}
+		}
+
+
+
 	}
 
 

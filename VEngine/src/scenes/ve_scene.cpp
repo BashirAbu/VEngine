@@ -70,6 +70,8 @@ namespace VE
 		sceneSystems["TransformSystem"].add<_Components::PreUpdatePhase>();
 		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").each(Systems::Sprite2DRenderSystem);
 		sceneSystems["Sprite2DRenderSystem"].add<_Components::RenderPhase>();
+		sceneSystems["Camera2DTransformSystem"] = world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").each(Systems::Camera2DTransformSystem);
+		sceneSystems["Camera2DTransformSystem"].add<_Components::PostUpdatePhase>();
 		//register project components & systems.
 		OnSharedLibraryEntry(world);
 
@@ -157,6 +159,18 @@ namespace VE
 	}
 	void Scene::Render()
 	{
+		if (Engine::GetSingleton()->GetSceneManager()->mode == SceneMode::Editor)
+		{
+			flecs::entity ts = sceneSystems["TransformSystem"];
+			flecs::system* tss = (flecs::system*) & ts;
+			tss->run();
+
+			ts = sceneSystems["Camera2DTransformSystem"];
+			tss = (flecs::system*)&ts;
+
+			tss->run();
+		}
+
 		flecs::query cameras2D = world.query<Components::Camera2DComponent>();
 
 		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
