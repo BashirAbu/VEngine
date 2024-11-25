@@ -5,9 +5,11 @@
 #include <nlohmann/json.hpp>
 #include "platform/ve_platform.h"
 #include "utils/ve_serialization.h"
+#include "utils/ve_utils.h"
 #include <iostream>
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
+
 namespace VE
 {
 	SceneManager::SceneManager() : currentScene(nullptr), mode(SceneMode::Editor)
@@ -24,16 +26,39 @@ namespace VE
 		{
 			UnloadScene();
 		}
-		std::filesystem::path fullpath = Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/assets/" + scenePath.string();
 		currentScene = new Scene(SceneType::Scene2D);
 		currentScene->scenePath = scenePath;
-		std::fstream sceneFile(fullpath);
-		std::string sceneJson;
-		std::stringstream ss;
-		ss << sceneFile.rdbuf();
-		sceneJson = ss.str();
+		std::fstream sceneFile(GetFullPath(scenePath));
 
-		currentScene->world.from_json(sceneJson.c_str());
+		nlohmann::ordered_json sceneJson;
+		sceneFile >> sceneJson;
+		nlohmann::ordered_json sceneSystemsJson = sceneJson["scene_systems"];
+		
+		std::vector<std::string> systems;
+
+		for (auto systemSceneJson : sceneSystemsJson)
+		{
+			std::string systemName = (std::string)systemSceneJson;
+			systems.push_back(systemName);
+		}
+
+
+		flecs::query querySystem = currentScene->world.query_builder().with(flecs::System).build();
+
+
+		querySystem.each([&](flecs::entity e) 
+			{
+				std::string name = e.name().c_str();
+				if (std::find(systems.begin(), systems.end(), name) != systems.end())
+				{
+					(*currentScene->GetSceneSystems())[name] = e;
+				}
+			});
+
+		std::stringstream ss;
+		ss << sceneJson["flecs_world"];
+		std::string flecsWorld = ss.str();
+		currentScene->world.from_json(flecsWorld.c_str());
 	}
 
 	void SceneManager::UnloadScene()
@@ -53,8 +78,21 @@ namespace VE
 			return;
 		}
 
-		std::string sceneJson =  currentScene->world.to_json().c_str();
-		std::ofstream sceneFile(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/assets/" + currentScene->scenePath.string());
+		nlohmann::ordered_json sceneJson;
+
+		nlohmann::ordered_json flecsWorldJson = nlohmann::ordered_json::parse(currentScene->world.to_json().c_str());
+		sceneJson["flecs_world"] = flecsWorldJson;
+		size_t index = 0;
+		for (auto system : currentScene->sceneSystems)
+		{
+			std::string systemName = "system" + std::to_string(index);
+			sceneJson["scene_systems"][systemName] = system.first;
+			index++;
+		}
+
+		std::stringstream ss;
+		ss << sceneJson;
+		std::ofstream sceneFile(GetFullPath(currentScene->scenePath));
 		sceneFile << sceneJson;
 		sceneFile.close();
 	}
@@ -70,8 +108,7 @@ namespace VE
 			TraceLog(LOG_ERROR, "Scene files must have %s extension!", VE_SCENE_FILE_EXTENSION);
 			return;
 		}
-		std::filesystem::path relativePath = currentScene->scenePath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
-		currentScene->scenePath = relativePath;
+		currentScene->scenePath = GetRelativePath(currentScene->scenePath);
 		SaveScene();
 	}
 	void SceneManager::RunCurrentScene()

@@ -8,4 +8,7 @@ namespace VE
 
 	glm::mat4 GetLocalTransformMatrix(const Components::TransformComponent& tc);
 	glm::mat4 GetWorldTransformMatrix(const Components::TransformComponent& tc);
+
+	std::filesystem::path GetRelativePath(std::filesystem::path path);
+	std::filesystem::path GetFullPath(std::filesystem::path path);
 }

@@ -13,7 +13,6 @@
 #include <raymath.h>
 namespace VE 
 {
-
 	std::vector<std::string>* logs = new std::vector<std::string>();
 	bool scrollToBottom = false;
 	void GrayTheme()
@@ -107,11 +106,9 @@ namespace VE
 		io.Fonts->Build();
 		ImGui_ImplRaylib_BuildFontAtlas();
 
-
 		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 		editorCamera = {};
 		editorCamera.zoom = 1.0f;
-
 
 		entityName.resize(255);
 		memset(entityName.data(), 0, entityName.size());
@@ -153,19 +150,12 @@ namespace VE
 
 		DrawGameViewport();
 
-		ImGui::Begin("Pick");
-
-		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, false);
-
-		ImGui::End();
-
 		consoleWindow.Draw();
 
 		ImGui::PopFont();
 		rlImGuiEnd();
 		//make sure this gets called after DrawSceneViewport().
 		UpdateEditor(GetFrameTime());
-		
 	}
 	
 	void Editor::AddChildrenNode(flecs::entity child) 
@@ -258,9 +248,7 @@ namespace VE
 			}
 			ImGui::EndPopup();
 		}
-
-		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneTag>().build();
-
+		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
 		engine->sceneManager->currentScene->world.defer_begin();
 		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
@@ -268,7 +256,6 @@ namespace VE
 				AddEntityNode(e);
 			});
 		engine->sceneManager->currentScene->world.defer_end();
-
 
 		ImGui::End();
 	}
@@ -284,8 +271,7 @@ namespace VE
 				std::filesystem::path scenePath = OpenFileDialog();
 				if (!scenePath.empty())
 				{
-					std::filesystem::path relativePath = scenePath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
-					engine->sceneManager->LoadScene(relativePath);
+					engine->sceneManager->LoadScene(GetRelativePath(scenePath));
 					selectedEntity = flecs::entity();
 				}
 			}
@@ -293,14 +279,13 @@ namespace VE
 			{
 				if (ImGui::MenuItem("2D scene"))
 				{
-					std::filesystem::path scenePath = VE::SaveFileDialog();
-					if (!scenePath.empty())
-					{
-						std::filesystem::path relativePath = scenePath.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
-						engine->sceneManager->LoadScene(relativePath);
-						selectedEntity = flecs::entity();
-					}
-
+					//std::filesystem::path scenePath = VE::SaveFileDialog();
+					
+					//engine->sceneManager->LoadScene(GetRelativePath(scenePath));
+					engine->sceneManager->UnloadScene();
+					engine->sceneManager->currentScene = new Scene(SceneType::Scene2D);
+					selectedEntity = flecs::entity();
+					
 				}
 				if (ImGui::MenuItem("3D scene"))
 				{
@@ -308,7 +293,6 @@ namespace VE
 					selectedEntity = flecs::entity();
 				}
 				ImGui::EndMenu();
-
 			}
 			if (ImGui::MenuItem("Save Scene"))
 			{
@@ -318,10 +302,8 @@ namespace VE
 			{
 				engine->sceneManager->SaveSceneAs();
 			}
-
 			ImGui::EndMenu();
 		}
-
 		float menuBarWidth = ImGui::GetWindowWidth();
 		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload Project").x + ImGui::GetStyle().ItemSpacing.x * 4;
 		float spacing = (menuBarWidth - buttonWidth) / 2.0f;
@@ -331,15 +313,15 @@ namespace VE
 			if (ImGui::Button("Start"))
 			{
 				engine->sceneManager->SaveScene();
-				//if (!engine->sceneManager->currentScene->scenePath.empty())
-				//{
+				if (!engine->sceneManager->currentScene->scenePath.empty())
+				{
 					engine->sceneManager->mode = SceneMode::Game;
 					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
 					engine->ReloadProjectSharedLibrary();
 					engine->sceneManager->LoadScene(reloadScenePath);
 					ImGui::SetWindowFocus("GameViewport");
 					selectedEntity = flecs::entity();
-				//}
+				}
 
 			}
 
@@ -423,7 +405,6 @@ namespace VE
 				ImGui::OpenPopup("Add Component");
 
 			}
-
 			if (ImGui::BeginPopup("Add Component"))
 			{
 				for (auto comp : engine->sceneManager->currentScene->componentsTable) 
@@ -431,6 +412,44 @@ namespace VE
 					if (ImGui::MenuItem(comp.first.c_str()))
 					{
 						selectedEntity.add(comp.second);
+					}
+					ImGui::Separator();
+				}
+				ImGui::EndPopup();
+			}
+		}
+		else 
+		{
+			//stuff in scenes.
+			ImGui::Text("Scene Systems:");
+			for (auto systemScene : engine->sceneManager->currentScene->sceneSystems)
+			{
+				ImGui::Text("%s", systemScene.first.c_str());
+			}
+
+			ImGuiStyle& style = ImGui::GetStyle();
+
+			float size = ImGui::CalcTextSize("Add System").x + style.FramePadding.x * 2.0f;
+			float avail = ImGui::GetContentRegionAvail().x;
+
+			float off = (avail - size) * .5f;
+			if (off > 0.0f)
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+			if (ImGui::Button("Add System"))
+			{
+				ImGui::OpenPopup("Add System");
+			}
+			if (ImGui::BeginPopup("Add System"))
+			{
+				for (auto system : engine->sceneManager->currentScene->systemsTable)
+				{
+					if (ImGui::MenuItem(system.first.c_str()))
+					{
+						
+						engine->sceneManager->currentScene->sceneSystems[system.first.c_str()] = system.second;
+						engine->sceneManager->currentScene->sceneSystems[system.first.c_str()].add<_Components::UpdatePhase>();
+						
 					}
 					ImGui::Separator();
 				}
@@ -447,7 +466,6 @@ namespace VE
 		float fps = 1.0f / frameTime;
 		ImGui::Text("Frame Time  : %fms", frameTime);
 		ImGui::Text("FPS         : %f", fps);
-		
 		ImGui::End();
 	}
 
@@ -470,7 +488,6 @@ namespace VE
 
 		BeginTextureMode(editorCameraRenderTarget);
 		BeginMode2D(editorCamera);
-		
 
 		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
 		Components::Camera2DComponent* c2dc = nullptr;
@@ -532,9 +549,7 @@ namespace VE
 		EndMode2D();
 		EndTextureMode();
 		rlImGuiImageRenderTextureFit(&editorCameraRenderTarget.texture, false);
-
 		//Draw ImGuizmo stuff here.
-
 		ImGuizmo::BeginFrame();
 		usingImGuizmo = false;
 		if (selectedEntity)
@@ -571,7 +586,6 @@ namespace VE
 					tc->localRotation = eulerAngles;
 				}
 			}
-			
 		}
 		ImGui::End();
 	}
@@ -587,7 +601,6 @@ namespace VE
 
 		gameViewportFocused = ImGui::IsWindowFocused();
 
-
 		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
 		
 		Components::Camera2DComponent* c2dc = nullptr;
@@ -602,7 +615,6 @@ namespace VE
 
 		if (c2dc)
 		{
-
 			ImVec2 area = ImGui::GetContentRegionAvail();
 
 			float scale = area.x / c2dc->renderTarget.texture.width;
@@ -615,20 +627,15 @@ namespace VE
 
 			int sizeY = int(c2dc->renderTarget.texture.height * scale);
 
-
 			vec2 = ImGui::GetCursorScreenPos();
 			vec2.y = (area.y / 2 - sizeY / 2) + (vec2.y - .5f);
 			gameViewportPosition = *((glm::vec2*)&vec2);
-
-
 
 			const Texture* rt = &c2dc->renderTarget.texture;
 
 			rlImGuiImageRenderTextureFit(rt, true);
 
 		}
-
-
 		ImGui::End();
 		ImGui::GetStyle().WindowPadding = oldPadding;
 	}
@@ -639,10 +646,7 @@ namespace VE
 		{
 			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
 			{
-
-				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y},
-					editorCamera);
-
+				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y}, editorCamera);
 				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
 				{
 					Vector2 delta = GetMouseDelta();
@@ -658,7 +662,6 @@ namespace VE
 				}
 				if (wheel)
 				{
-
 					editorCamera.offset = Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y };
 					editorCamera.target = mouseWorldPos;
 					float scaleFactor = 1.0f + (0.25f * fabsf(wheel));
@@ -669,8 +672,6 @@ namespace VE
 
 		}
 
-		glm::vec2 mousePos = EditorInput::GetMousePostion();
-		TraceLog(LOG_DEBUG, "x: %f, y: %f", mousePos.x, mousePos.y);
 		if (IsSceneViewportFocused() && isSceneViewHovered)
 		{
 			if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT))
@@ -700,19 +701,17 @@ namespace VE
 						Systems::Sprite2DRenderSystem(e, tc, sc);
 						EndShaderMode();
 					});
-
-
 				EndMode2D();
 				EndTextureMode();
 
 				Texture t = colorPickingBuffer.texture;
 
-
 				Image pickImage = LoadImageFromTexture(t);
 				float* pickingData = (float*)pickImage.data;
-				
+				glm::vec2 mousePos = EditorInput::GetMousePostion();
 				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
-				int id = (int)pickingData[pixelIndex];
+				
+				int id = (int)pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
 				if (usingImGuizmo)
 				{
 					//do nothing brother.	
@@ -728,11 +727,7 @@ namespace VE
 				UnloadImage(pickImage);
 			}
 		}
-
-
-
 	}
-
 
 	Editor::ConsoleWindow::ConsoleWindow()
 	{
@@ -795,7 +790,7 @@ namespace VE
 	}
 	void AddLog(const std::string message)
 	{
-		if (logs->size() > 512) 
+		if (logs->size() > 48) 
 		{
 			logs->erase(logs->begin());
 		}

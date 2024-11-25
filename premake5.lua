@@ -60,6 +60,7 @@ project "ImGui"
             "%{prj.location}/third_party/glfw/build/src/Debug/"
         }
         symbols "On"
+        optimize "On"
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/glfw/",

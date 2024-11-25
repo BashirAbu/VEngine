@@ -14,7 +14,7 @@ namespace VE
 		struct UpdatePhase {};
 		struct PostUpdatePhase {};
 		struct RenderPhase {};
-		struct SceneTag {};
+		struct SceneEntityTag {};
 	}
 
 	namespace Components

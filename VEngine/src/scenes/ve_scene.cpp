@@ -63,8 +63,9 @@ namespace VE
 		world.component<_Components::UpdatePhase>();
 		world.component<_Components::PostUpdatePhase>();
 		world.component<_Components::RenderPhase>();
-		world.component<_Components::SceneTag>();
+		world.component<_Components::SceneEntityTag>();
 
+		OnSharedLibraryEntry(world);
 		//register builtin systems.
 		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").each(Systems::TransformSystem);
 		sceneSystems["TransformSystem"].add<_Components::PreUpdatePhase>();
@@ -73,18 +74,17 @@ namespace VE
 		sceneSystems["Camera2DTransformSystem"] = world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").each(Systems::Camera2DTransformSystem);
 		sceneSystems["Camera2DTransformSystem"].add<_Components::PostUpdatePhase>();
 		//register project components & systems.
-		OnSharedLibraryEntry(world);
-
-
-
-	
 
 		flecs::query regComponents = world.query<flecs::Component>();
 
 		regComponents.each([&](flecs::entity e, flecs::Component& comp)
 			{
 				std::string path = e.path().c_str();
-				if (path.find("::Components::") != std::string::npos)
+				if (!strstr(path.c_str(), "::flecs::") &&
+					!strstr(path.c_str(), "::_Components::") &&
+					!strstr(path.c_str(), "::std::") &&
+					!strstr(path.c_str(), "::glm::") &&
+					!strstr(path.c_str(), "::Systems::"))
 				{
 					componentsTable[e.name().c_str()] = e;
 				}
@@ -92,10 +92,10 @@ namespace VE
 
 		flecs::query regSystems = world.query_builder().with(flecs::System).build();
 
-		regSystems.each([&](flecs::entity e)
+		regSystems.each([&](flecs::entity e) 
 			{
 				std::string path = e.path().c_str();
-				if (path.find("::flecs::") != 0)
+				if (!strstr(path.c_str(), "::flecs::"))
 				{
 					systemsTable[e.name().c_str()] = e;
 				}
@@ -159,6 +159,8 @@ namespace VE
 	}
 	void Scene::Render()
 	{
+		
+
 		if (Engine::GetSingleton()->GetSceneManager()->mode == SceneMode::Editor)
 		{
 			flecs::entity ts = sceneSystems["TransformSystem"];
@@ -219,6 +221,6 @@ namespace VE
 	{
 		std::string nameIndex = name + std::to_string(entityIndexGen);
 		entityIndexGen++;
-		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneTag>();
+		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneEntityTag>();
 	}
 }

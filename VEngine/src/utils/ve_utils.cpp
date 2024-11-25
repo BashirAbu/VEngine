@@ -26,4 +26,12 @@ namespace VE
             * glm::scale(glm::mat4(1.0f), tc.worldScale);
         return transformMatrix;
     }
+    std::filesystem::path GetRelativePath(std::filesystem::path path)
+    {
+        return path.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
+    }
+    std::filesystem::path GetFullPath(std::filesystem::path path)
+    {
+        return Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/assets/" + path.string();
+    }
 }

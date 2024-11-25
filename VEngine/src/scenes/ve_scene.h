@@ -27,6 +27,12 @@ namespace VE
 		flecs::entity AddEntity(std::string name);
 		const SceneType GetSceneType() const { return sceneType; }
 		void AddMetaData(flecs::entity comp);
+
+		std::unordered_map<std::string, flecs::entity>* GetSceneSystems() 
+		{
+			return &sceneSystems;
+		}
+
 	private:
 		flecs::world world;
 		glm::vec4 clearColor;
