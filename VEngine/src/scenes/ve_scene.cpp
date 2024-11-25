@@ -210,16 +210,35 @@ namespace VE
 				}
 			});
 	}
-	void Scene::AddSystem(std::string name)
-	{
-		flecs::entity system = world.lookup(name.c_str());
-		VE_ASSERT(system.id());
-		sceneSystems[name.c_str()] = system;
-	}
 	flecs::entity Scene::AddEntity(std::string name)
 	{
 		std::string nameIndex = name + std::to_string(entityIndexGen);
 		entityIndexGen++;
 		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneEntityTag>();
+	}
+	void Scene::AddConstruct(std::filesystem::path constructFilePath)
+	{
+		std::fstream constructFile(GetFullPath(constructFilePath));
+		std::stringstream ss;
+		ss << constructFile.rdbuf();
+		std::string constructJson = ss.str();
+		world.from_json(constructJson.c_str());
+
+		nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
+		std::string rootName;
+		for (auto ent : constJson["results"])
+		{
+			if (!ent.contains("parent"))
+			{
+				rootName = ent["name"];
+				break;
+			}
+		}
+
+		flecs::entity root = world.lookup(rootName.c_str());
+		Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();
+		rootTC->SetWorldPosition(glm::vec3(0.0f));
+		rootTC->SetWorldRotation(glm::vec3(0.0f));
+		rootTC->SetWorldScale(glm::vec3(0.0f));
 	}
 }

@@ -157,7 +157,7 @@ namespace VE
 		//make sure this gets called after DrawSceneViewport().
 		UpdateEditor(GetFrameTime());
 	}
-	
+
 	void Editor::AddChildrenNode(flecs::entity child) 
 	{
 		ImGuiTreeNodeFlags flags = selectedEntity == (child) ? ImGuiTreeNodeFlags_Selected : 0 | ImGuiTreeNodeFlags_OpenOnArrow;
@@ -191,6 +191,75 @@ namespace VE
 			ImGui::TreePop();
 		}
 	}
+
+	void SerializeConstructChildChildren(flecs::entity child, std::string& constructJson)
+	{
+		child.children([&](flecs::entity child)
+			{
+				bool hasChildChildren = false;
+
+				child.children([&](flecs::entity c)
+					{
+						hasChildChildren = true;
+						return;
+					});
+
+				if (hasChildChildren)
+				{
+					SerializeConstructChildChildren(child, constructJson);
+				}
+				constructJson += (std::string)child.to_json().c_str() + (std::string)",";
+			});
+	}
+
+	std::string SerializeConstruct(flecs::entity e)
+	{
+		std::string constructJson = {};
+
+		bool hasChildren = false;
+
+		e.children([&](flecs::entity c)
+			{
+				hasChildren = true;
+				return;
+			});
+
+		if (hasChildren)
+		{
+			std::string parentJson = e.to_json().c_str();
+			std::string childrenJson = {};
+			e.children([&](flecs::entity child)
+				{
+					bool hasChildChildren = false;
+
+					child.children([&](flecs::entity c)
+						{
+							hasChildChildren = true;
+							return;
+						});
+
+					if (hasChildChildren)
+					{
+						SerializeConstructChildChildren(child, childrenJson);
+					}
+					childrenJson += (std::string)child.to_json().c_str() + (std::string)",";
+				});
+
+			if (!childrenJson.empty())
+			{
+				childrenJson.pop_back();
+			}
+
+			constructJson = "{ \"results\":[" + parentJson + ", " + childrenJson + "]}";
+		}
+		else
+		{
+			constructJson = e.to_json().c_str();
+		}
+
+		return constructJson;
+	}
+
 	void Editor::AddEntityNode(flecs::entity e)
 	{
 		if (e.parent())
@@ -214,6 +283,19 @@ namespace VE
 			if (ImGui::MenuItem("Remove"))
 			{
 				e.destruct();
+			}
+			if (ImGui::MenuItem("Make Construct"))
+			{
+				std::string constructJson = SerializeConstruct(e);
+
+				std::filesystem::path constructPath = SaveFileDialog(VE_CONSTRUCT_FILE_EXTENSION);
+
+				std::ofstream constructFile(constructPath);
+
+				constructFile << constructJson;
+
+				constructFile.close();
+				
 			}
 			ImGui::EndPopup();
 		}
@@ -244,7 +326,8 @@ namespace VE
 			}
 			if (ImGui::MenuItem("Add Construct"))
 			{
-
+				std::filesystem::path relativePath = GetRelativePath(OpenFileDialog());
+				engine->sceneManager->currentScene->AddConstruct(relativePath);
 			}
 			ImGui::EndPopup();
 		}
@@ -252,7 +335,6 @@ namespace VE
 		engine->sceneManager->currentScene->world.defer_begin();
 		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
-				
 				AddEntityNode(e);
 			});
 		engine->sceneManager->currentScene->world.defer_end();

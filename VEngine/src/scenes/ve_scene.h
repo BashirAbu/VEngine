@@ -23,8 +23,8 @@ namespace VE
 
 		void SetMainCamera(flecs::entity entity);
 
-		void AddSystem(std::string name);
 		flecs::entity AddEntity(std::string name);
+		void AddConstruct(std::filesystem::path constructFilePath);
 		const SceneType GetSceneType() const { return sceneType; }
 		void AddMetaData(flecs::entity comp);
 

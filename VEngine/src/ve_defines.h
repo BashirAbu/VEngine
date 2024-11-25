@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <filesystem>
+#include <fstream>
 #include <flecs.h>
 #include <unordered_map>
 #include <flecs/addons/meta.h>
@@ -65,3 +66,4 @@
 
 #define VE_PROJECT_FILE_EXTENSION "VEProject"
 #define VE_SCENE_FILE_EXTENSION "VEScene"
+#define VE_CONSTRUCT_FILE_EXTENSION "VEConstruct"
