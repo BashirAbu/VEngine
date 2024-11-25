@@ -57,6 +57,11 @@ namespace VE
 			{
 				e.add<Components::TransformComponent>();
 			});
+
+		world.observer<Components::TransformComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::TransformComponent& tc)
+			{
+				tc.e = e;
+			});
 		
 		world.component<_Components::StartPhase>();
 		world.component<_Components::PreUpdatePhase>();
@@ -67,8 +72,6 @@ namespace VE
 
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
-		sceneSystems["TransformSystem"] = world.system<Components::TransformComponent>("TransformSystem").each(Systems::TransformSystem);
-		sceneSystems["TransformSystem"].add<_Components::PreUpdatePhase>();
 		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").each(Systems::Sprite2DRenderSystem);
 		sceneSystems["Sprite2DRenderSystem"].add<_Components::RenderPhase>();
 		sceneSystems["Camera2DTransformSystem"] = world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").each(Systems::Camera2DTransformSystem);
@@ -163,12 +166,8 @@ namespace VE
 
 		if (Engine::GetSingleton()->GetSceneManager()->mode == SceneMode::Editor)
 		{
-			flecs::entity ts = sceneSystems["TransformSystem"];
-			flecs::system* tss = (flecs::system*) & ts;
-			tss->run();
-
-			ts = sceneSystems["Camera2DTransformSystem"];
-			tss = (flecs::system*)&ts;
+			flecs::entity ts = sceneSystems["Camera2DTransformSystem"];
+			flecs::system* tss = (flecs::system*)&ts;
 
 			tss->run();
 		}

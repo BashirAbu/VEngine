@@ -14,7 +14,6 @@ namespace VE
 			RenderPhase
 		};
 
-		void TransformSystem(flecs::entity e, Components::TransformComponent& transform);
 		void Camera2DTransformSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc);
 		void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc);
 
