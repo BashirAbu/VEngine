@@ -645,7 +645,7 @@ namespace VE
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
 				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
 
-				glm::mat4 transformMatrix = tc->GetLocalTransformMatrix();
+				glm::mat4 transformMatrix = tc->GetWorldTransformMatrix();
 				Matrix cameraViewMatrix;
 				cameraViewMatrix = GetCameraMatrix2D(editorCamera);
 				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
@@ -659,7 +659,9 @@ namespace VE
 					glm::vec4 pres;
 					glm::quat rot;
 
-					glm::decompose(selectedEntity.parent()? glm::inverse(selectedEntity.parent().get_mut<Components::TransformComponent>()->GetLocalTransformMatrix()) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
+					std::string parentName = selectedEntity.parent() ? selectedEntity.parent().name().c_str() : "no";
+
+					glm::decompose(selectedEntity.parent()? glm::inverse(selectedEntity.parent().get_mut<Components::TransformComponent>()->GetWorldTransformMatrix()) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
 					glm::vec3 eulerAngles = glm::eulerAngles(rot);
 					eulerAngles = glm::degrees(eulerAngles);
 

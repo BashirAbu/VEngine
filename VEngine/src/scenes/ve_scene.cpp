@@ -216,7 +216,7 @@ namespace VE
 		entityIndexGen++;
 		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneEntityTag>();
 	}
-	void Scene::AddConstruct(std::filesystem::path constructFilePath)
+	flecs::entity Scene::AddConstruct(std::filesystem::path constructFilePath)
 	{
 		std::fstream constructFile(GetFullPath(constructFilePath));
 		std::stringstream ss;
@@ -240,5 +240,7 @@ namespace VE
 		rootTC->SetWorldPosition(glm::vec3(0.0f));
 		rootTC->SetWorldRotation(glm::vec3(0.0f));
 		rootTC->SetWorldScale(glm::vec3(0.0f));
+
+		return root;
 	}
 }
