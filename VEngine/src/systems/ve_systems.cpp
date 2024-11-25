@@ -11,14 +11,14 @@ namespace VE::Systems
 				Components::TransformComponent* childTransform = child.get_mut<Components::TransformComponent>();
 				if (childTransform)
 				{
-					glm::mat4 childTransformMatrix = GetLocalTransformMatrix(*childTransform);
+					glm::mat4 childTransformMatrix = GetLocalTransformMatrix(child);
 					glm::mat4 worldTransformMatrix = parentTransformMatrix * childTransformMatrix;
 					glm::quat rot;
 					glm::vec3 skew;
 					glm::vec4 pres;
-					glm::decompose(worldTransformMatrix, childTransform->worldScale, rot, childTransform->worldPosition, skew, pres);
+					glm::decompose(worldTransformMatrix, childTransform->localScale, rot, childTransform->localPosition, skew, pres);
 
-					childTransform->worldRotation = glm::degrees(glm::eulerAngles(rot));
+					childTransform->localRotation = glm::degrees(glm::eulerAngles(rot));
 					bool hasChildren = false;
 					child.children([&](flecs::entity e)
 						{
@@ -27,7 +27,7 @@ namespace VE::Systems
 						});
 					if (hasChildren)
 					{
-						ApplyParentTransform(child, GetWorldTransformMatrix(*childTransform));
+						ApplyParentTransform(child, GetWorldTransformMatrix(child));
 					}
 				}
 				
@@ -35,35 +35,25 @@ namespace VE::Systems
 	}
 	void TransformSystem(flecs::entity e, Components::TransformComponent& transform)
 	{
-		//update parent child stuff
-		bool hasChildren = false;
-		e.children([&](flecs::entity e)
-			{
-				hasChildren = true;
-				return;
-			});
-		//Get root entity
-		if (!e.parent() && hasChildren)
-		{
-			transform.worldPosition = transform.localPosition;
-			transform.worldRotation = transform.localRotation;
-			transform.worldScale = transform.localScale;
-			ApplyParentTransform(e, GetLocalTransformMatrix(transform));
-		}
-		else if(!e.parent() && !hasChildren)
-		{
-			transform.worldPosition = transform.localPosition;
-			transform.worldRotation = transform.localRotation;
-			transform.worldScale = transform.localScale;
-		}
-
+		////update parent child stuff
+		//bool hasChildren = false;
+		//e.children([&](flecs::entity e)
+		//	{
+		//		hasChildren = true;
+		//		return;
+		//	});
+		////Get root entity
+		//if (!e.parent() && hasChildren)
+		//{
+		//	ApplyParentTransform(e, GetLocalTransformMatrix(e));
+		//}
 	}
 	void Camera2DTransformSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc)
 	{
-		c2dc.camera.target.x = transform.worldPosition.x;
-		c2dc.camera.target.y = transform.worldPosition.y;
+		c2dc.camera.target.x = transform.GetWorldPosition(e).x;
+		c2dc.camera.target.y = transform.GetWorldPosition(e).y;
 
-		c2dc.camera.rotation = transform.worldRotation.z;
+		c2dc.camera.rotation = transform.GetWorldRotation(e).z;
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{
@@ -78,23 +68,23 @@ namespace VE::Systems
 			src.width = (float)sc.texture->width;
 			src.y = 0.0f;
 			src.height = (float)sc.texture->height;
-			if (tc.worldScale.x < 0.0f)
+			if (tc.GetWorldScale(e).x < 0.0f)
 			{
 				src.width *= -1.0f;
 			}
-			if (tc.worldScale.y < 0.0f)
+			if (tc.GetWorldScale(e).y < 0.0f)
 			{
 				src.height *= -1.0f;
 			}
 
-			dest.x = tc.worldPosition.x;
-			dest.y = tc.worldPosition.y;
-			dest.width = glm::abs(sc.texture->width * tc.worldScale.x);
-			dest.height = glm::abs(sc.texture->height * tc.worldScale.y);
+			dest.x = tc.GetWorldPosition(e).x;
+			dest.y = tc.GetWorldPosition(e).y;
+			dest.width = glm::abs(sc.texture->width * tc.GetWorldScale(e).x);
+			dest.height = glm::abs(sc.texture->height * tc.GetWorldScale(e).y);
 
 			Vector2 org = { dest.width * sc.origin.x, dest.height * sc.origin.y };
 			
-			DrawTexturePro(*sc.texture, src, dest, org, tc.worldRotation.z, GLMVec4ToRayColor(sc.tintColor));
+			DrawTexturePro(*sc.texture, src, dest, org, tc.GetWorldRotation(e).z, GLMVec4ToRayColor(sc.tintColor));
 		}
 	}
 

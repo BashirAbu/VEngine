@@ -28,8 +28,7 @@ namespace VE
 		else if (compName.find("TransformComponent") != std::string::npos)
 		{
 			flecs::component<Components::TransformComponent>* tc = (flecs::component<Components::TransformComponent>*)&comp;
-			tc->member<glm::vec3>("worldPosition").member<glm::vec3>("worldRotation").member<glm::vec3>("worldScale").
-				member<glm::vec3>("localPosition").member<glm::vec3>("localRotation").member<glm::vec3>("localScale");
+			tc->member<glm::vec3>("localPosition").member<glm::vec3>("localRotation").member<glm::vec3>("localScale");
 		}
 		else if (compName.find("SpriteComponent") != std::string::npos)
 		{
