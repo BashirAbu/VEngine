@@ -2,6 +2,7 @@
 #include "ve_defines.h"
 #include <raylib.h>
 #include "imgui.h"
+#include <queue>
 struct ImFont;
 namespace VE 
 {
@@ -59,6 +60,11 @@ namespace VE
 		bool isSceneViewHovered = false;
 		bool usingImGuizmo = false;
 		class Engine* engine;
+
+		std::queue<std::string> addEntities;
+		std::queue<flecs::entity> cloneEntities;
+		std::queue<flecs::entity> removeEntities;
+		std::queue<flecs::entity> addChildQueue;
 
 		Camera2D editorCamera;
 		glm::vec2 oldRenderTargetSize;

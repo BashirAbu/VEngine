@@ -233,8 +233,7 @@ namespace VE
 		entity.children([&](flecs::entity child)
 			{
 				flecs::entity cloneChild = child.clone(true);
-				std::string cloneName = std::string(child.name().c_str()) + "Clone";
-				cloneChild.set_name(GenUniqueName(cloneName).c_str());
+				cloneChild.set_name(child.name());
 				cloneChild.remove(flecs::ChildOf, entity);
 				cloneChild.child_of(cloneParent);
 				CloneChildren(child, cloneChild);
@@ -247,18 +246,34 @@ namespace VE
 	{
 		flecs::entity clone = entity.clone(true);
 		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
+		const flecs::entity_t* p = (flecs::entity_t*) & entity;
 		clone.set_name(GenUniqueName(cloneName).c_str());
 		if (entity.parent())
-		{
-			clone.remove(flecs::ChildOf, entity);
+		{	
+			//use this line of you want duplicated entity to remove its parent.
+			//clone.remove(flecs::ChildOf, entity.parent());
 		}
 		CloneChildren(entity, clone);
 		return clone;
 	}
+	flecs::entity Scene::LookupEntity(std::string name)
+	{
+		auto q = world.query_builder().with(flecs::Wildcard).build();
+		flecs::entity ent = flecs::entity();
+		q.each([&](flecs::entity e)
+			{
+				if (name == e.name().c_str())
+				{
+					ent = e;
+					return;
+				}
+			});
 
+		return ent;
+	}
 	std::string Scene::GenUniqueName(std::string name)
 	{
-		if (!world.lookup(name.c_str()))
+		if (!LookupEntity(name))
 		{
 			return name;
 		}
@@ -267,7 +282,7 @@ namespace VE
 			std::string uniqueName = name;
 			std::string temp = name;
 			size_t entityIDGen = 0;
-			while (world.lookup(temp.c_str()))
+			while (LookupEntity(temp))
 			{
 				temp = uniqueName + std::to_string(entityIDGen++);
 			}
@@ -316,15 +331,15 @@ namespace VE
 					break;
 				}
 			}
-			flecs::entity root = world.lookup(rootName.c_str());
-			if (world.is_valid(root))
+			flecs::entity root = LookupEntity(rootName);
+			if (root)
 			{
 				root = CloneEntity(root);
 			}
 			else
 			{
 				world.from_json(constructJson.c_str());
-				root = world.lookup(rootName.c_str());
+				root = LookupEntity(rootName);
 			}
 
 			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();

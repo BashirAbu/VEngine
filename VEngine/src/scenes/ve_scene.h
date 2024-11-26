@@ -38,6 +38,9 @@ namespace VE
 
 		flecs::entity CloneEntity(flecs::entity entity);
 
+		flecs::entity LookupEntity(std::string name);
+
+
 	private:
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);
@@ -56,7 +59,12 @@ namespace VE
 		std::filesystem::path scenePath = "";
 
 		std::queue<std::filesystem::path> deferredConstructs;
-
+		struct NewEntityName 
+		{
+			std::string newName;
+			flecs::entity entity;
+		};
+		std::queue<NewEntityName> deferredEntityRename;
 		friend class Editor;
 		friend class SceneManager;
 

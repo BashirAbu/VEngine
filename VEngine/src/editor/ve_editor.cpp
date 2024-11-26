@@ -173,16 +173,16 @@ namespace VE
 			selectedEntity = child;
 			if (ImGui::MenuItem("Add Child"))
 			{
-				flecs::entity _child = engine->sceneManager->currentScene->AddEntity("EmptyEntity");
-				_child.child_of(child);
+				addChildQueue.push(child);
 			}
 			if (ImGui::MenuItem("Remove"))
 			{
-				child.destruct();
+				removeEntities.push(child);
 			}
 			if (ImGui::MenuItem("Duplicate"))
 			{
-				engine->sceneManager->currentScene->CloneEntity(selectedEntity);
+				//engine->sceneManager->currentScene->CloneEntity(selectedEntity);
+				cloneEntities.push(child);
 			}
 			ImGui::EndPopup();
 		}
@@ -281,12 +281,11 @@ namespace VE
 			selectedEntity = e;
 			if (ImGui::MenuItem("Add Child"))
 			{
-				flecs::entity child = engine->sceneManager->currentScene->AddEntity("EmptyEntity");
-				child.child_of(e);
+				addChildQueue.push(e);
 			}
 			if (ImGui::MenuItem("Remove"))
 			{
-				e.destruct();
+				removeEntities.push(e);
 			}
 			if (ImGui::MenuItem("Make Construct"))
 			{
@@ -303,7 +302,7 @@ namespace VE
 			}
 			if (ImGui::MenuItem("Duplicate"))
 			{
-				engine->sceneManager->currentScene->CloneEntity(selectedEntity);
+				cloneEntities.push(e);
 			}
 
 			ImGui::EndPopup();
@@ -329,7 +328,7 @@ namespace VE
 			{
 				if (ImGui::MenuItem("Empty Entity"))
 				{
-					engine->sceneManager->currentScene->AddEntity("EmptyEntity");
+					addEntities.push("EmptyEntity");
 				}
 				ImGui::EndMenu();
 			}
@@ -341,14 +340,32 @@ namespace VE
 			ImGui::EndPopup();
 		}
 		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
-		engine->sceneManager->currentScene->world.defer_begin();
 		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
 				std::string name = e.name().c_str();
 				AddEntityNode(e);
 			});
-		engine->sceneManager->currentScene->world.defer_end();
 
+		while (!addEntities.empty()) 
+		{
+			engine->sceneManager->currentScene->AddEntity(addEntities.front());
+			addEntities.pop();
+		}
+		while (!cloneEntities.empty()) 
+		{
+			engine->sceneManager->currentScene->CloneEntity(cloneEntities.front());
+			cloneEntities.pop();
+		}
+		while (!removeEntities.empty())
+		{
+			removeEntities.front().destruct();
+			removeEntities.pop();
+		}
+		while (!addChildQueue.empty())
+		{
+			engine->sceneManager->currentScene->AddEntity("EmptyEntity").child_of(addChildQueue.front());
+			addChildQueue.pop();
+		}
 		ImGui::End();
 	}
 
@@ -458,7 +475,7 @@ namespace VE
 			}
 			else if (ImGui::IsItemDeactivated())
 			{
-				if (!engine->sceneManager->currentScene->world.lookup(entityName.data()) && saveName)
+				if (!engine->sceneManager->currentScene->LookupEntity(entityName.data()) && saveName)
 				{
 					selectedEntity.set_name(entityName.data());
 					saveName = false;
