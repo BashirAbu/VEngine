@@ -180,6 +180,10 @@ namespace VE
 			{
 				child.destruct();
 			}
+			if (ImGui::MenuItem("Duplicate"))
+			{
+				engine->sceneManager->currentScene->CloneEntity(selectedEntity);
+			}
 			ImGui::EndPopup();
 		}
 		if (open)
@@ -297,6 +301,11 @@ namespace VE
 				constructFile.close();
 				
 			}
+			if (ImGui::MenuItem("Duplicate"))
+			{
+				engine->sceneManager->currentScene->CloneEntity(selectedEntity);
+			}
+
 			ImGui::EndPopup();
 		}
 		if (opened)
@@ -335,6 +344,7 @@ namespace VE
 		engine->sceneManager->currentScene->world.defer_begin();
 		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
+				std::string name = e.name().c_str();
 				AddEntityNode(e);
 			});
 		engine->sceneManager->currentScene->world.defer_end();
@@ -548,6 +558,12 @@ namespace VE
 		float fps = 1.0f / frameTime;
 		ImGui::Text("Frame Time  : %fms", frameTime);
 		ImGui::Text("FPS         : %f", fps);
+
+		if (selectedEntity)
+		{
+			ImGui::Text("Selected Entity Name: %s. ID: %d", selectedEntity.name().c_str(), (int)selectedEntity.id());
+		}
+
 		ImGui::End();
 	}
 

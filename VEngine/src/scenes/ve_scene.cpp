@@ -7,8 +7,10 @@
 #include <imgui.h>
 namespace VE 
 {
+	Scene* Scene::singleton = nullptr;
 	Scene::Scene(SceneType type)
 	{
+		singleton = this;
 		sceneType = type;
 		//register builtin components.
 		world.component<std::string>()
@@ -37,7 +39,15 @@ namespace VE
 		AddMetaData(world.component<glm::vec2>());
 		AddMetaData(world.component<glm::vec3>());
 		AddMetaData(world.component<glm::vec4>());
-		AddMetaData(world.component<Components::TransformComponent>());
+		AddMetaData(world.component<Components::TransformComponent>()
+			.on_set([](flecs::entity e, Components::TransformComponent & tc)
+			{
+				tc.e = e;
+			})
+			.on_add([](flecs::entity e, Components::TransformComponent& tc)
+				{
+					tc.e = e;
+				}));
 		AddMetaData(world.component<Components::SpriteComponent>());
 		AddMetaData(world.component<Components::Camera2DComponent>());
 		world.observer<Components::Camera2DComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::Camera2DComponent& c2dc) 
@@ -56,11 +66,6 @@ namespace VE
 		world.observer<Components::SpriteComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::SpriteComponent& sp)
 			{
 				e.add<Components::TransformComponent>();
-			});
-
-		world.observer<Components::TransformComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::TransformComponent& tc)
-			{
-				tc.e = e;
 			});
 		
 		world.component<_Components::StartPhase>();
@@ -106,7 +111,7 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
-		
+		singleton = nullptr;
 	}
 	void Scene::Start()
 	{
@@ -158,6 +163,13 @@ namespace VE
 			}
 		}
 		world.defer_end();
+
+		while (!deferredConstructs.empty())
+		{
+			std::filesystem::path constructFilepath = deferredConstructs.front();
+			deferredConstructs.pop();
+			AddConstruct(constructFilepath);
+		}
 
 	}
 	void Scene::Render()
@@ -212,35 +224,115 @@ namespace VE
 	}
 	flecs::entity Scene::AddEntity(std::string name)
 	{
-		std::string nameIndex = name + std::to_string(entityIndexGen);
-		entityIndexGen++;
-		return world.entity().set_name(nameIndex.c_str()).add<_Components::SceneEntityTag>();
+		return world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>();
 	}
-	flecs::entity Scene::AddConstruct(std::filesystem::path constructFilePath)
+
+	void Scene::CloneChildren(flecs::entity entity, flecs::entity cloneParent)
 	{
-		std::fstream constructFile(GetFullPath(constructFilePath));
-		std::stringstream ss;
-		ss << constructFile.rdbuf();
-		std::string constructJson = ss.str();
-		world.from_json(constructJson.c_str());
-
-		nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
-		std::string rootName;
-		for (auto ent : constJson["results"])
-		{
-			if (!ent.contains("parent"))
+		world.defer_begin();
+		entity.children([&](flecs::entity child)
 			{
-				rootName = ent["name"];
-				break;
-			}
+				flecs::entity cloneChild = child.clone(true);
+				std::string cloneName = std::string(child.name().c_str()) + "Clone";
+				cloneChild.set_name(GenUniqueName(cloneName).c_str());
+				cloneChild.remove(flecs::ChildOf, entity);
+				cloneChild.child_of(cloneParent);
+				CloneChildren(child, cloneChild);
+			});
+		world.defer_end();
+
+	}
+
+	flecs::entity Scene::CloneEntity(flecs::entity entity)
+	{
+		flecs::entity clone = entity.clone(true);
+		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
+		clone.set_name(GenUniqueName(cloneName).c_str());
+		if (entity.parent())
+		{
+			clone.remove(flecs::ChildOf, entity);
 		}
+		CloneChildren(entity, clone);
+		return clone;
+	}
 
-		flecs::entity root = world.lookup(rootName.c_str());
-		Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();
-		rootTC->SetWorldPosition(glm::vec3(0.0f));
-		rootTC->SetWorldRotation(glm::vec3(0.0f));
-		rootTC->SetWorldScale(glm::vec3(0.0f));
+	std::string Scene::GenUniqueName(std::string name)
+	{
+		if (!world.lookup(name.c_str()))
+		{
+			return name;
+		}
+		else 
+		{
+			std::string uniqueName = name;
+			std::string temp = name;
+			size_t entityIDGen = 0;
+			while (world.lookup(temp.c_str()))
+			{
+				temp = uniqueName + std::to_string(entityIDGen++);
+			}
+			uniqueName = temp;
+			return uniqueName;
+		}
+	}
 
-		return root;
+	std::string Scene::AddConstruct(std::filesystem::path constructFilePath)
+	{
+		if (world.is_deferred())
+		{
+			std::fstream constructFile(GetFullPath(constructFilePath));
+			std::stringstream ss;
+			ss << constructFile.rdbuf();
+			std::string constructJson = ss.str();
+
+			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
+			std::string rootName;
+			for (auto ent : constJson["results"])
+			{
+				if (!ent.contains("parent"))
+				{
+					rootName = ent["name"];
+					break;
+				}
+			}
+
+			deferredConstructs.push(constructFilePath);
+			return rootName;
+		}
+		else 
+		{
+			std::fstream constructFile(GetFullPath(constructFilePath));
+			std::stringstream ss;
+			ss << constructFile.rdbuf();
+			std::string constructJson = ss.str();
+
+			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
+			std::string rootName;
+			for (auto ent : constJson["results"])
+			{
+				if (!ent.contains("parent"))
+				{
+					rootName = ent["name"];
+					break;
+				}
+			}
+			flecs::entity root = world.lookup(rootName.c_str());
+			if (world.is_valid(root))
+			{
+				root = CloneEntity(root);
+			}
+			else
+			{
+				world.from_json(constructJson.c_str());
+				root = world.lookup(rootName.c_str());
+			}
+
+			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();
+			rootTC->SetWorldPosition(glm::vec3(0.0f));
+			rootTC->SetWorldRotation(glm::vec3(0.0f));
+			rootTC->SetWorldScale(glm::vec3(0.0f));
+
+			return rootName;
+		}
 	}
 }

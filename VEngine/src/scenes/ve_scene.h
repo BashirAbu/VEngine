@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <filesystem>
 #include <flecs.h>
+#include <queue>
 namespace VE 
 {
 	enum class SceneType 
@@ -17,6 +18,8 @@ namespace VE
 		Scene(SceneType type);
 		~Scene();
 
+		static Scene* GetSingleton() { return singleton; }
+
 		void Start();
 		void Update();
 		void Render();
@@ -24,7 +27,7 @@ namespace VE
 		void SetMainCamera(flecs::entity entity);
 
 		flecs::entity AddEntity(std::string name);
-		flecs::entity AddConstruct(std::filesystem::path constructFilePath);
+		std::string AddConstruct(std::filesystem::path constructFilePath);
 		const SceneType GetSceneType() const { return sceneType; }
 		void AddMetaData(flecs::entity comp);
 
@@ -33,7 +36,11 @@ namespace VE
 			return &sceneSystems;
 		}
 
+		flecs::entity CloneEntity(flecs::entity entity);
+
 	private:
+		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
+		std::string GenUniqueName(std::string name);
 		flecs::world world;
 		glm::vec4 clearColor;
 
@@ -45,11 +52,14 @@ namespace VE
 		
 		SceneType sceneType;
 		bool started = false;
-		size_t entityIndexGen = 0;
 
 		std::filesystem::path scenePath = "";
 
+		std::queue<std::filesystem::path> deferredConstructs;
+
 		friend class Editor;
 		friend class SceneManager;
+
+		static Scene* singleton;
 	};
 }

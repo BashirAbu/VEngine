@@ -33,7 +33,6 @@ namespace VE
 		ConsoleWindow consoleWindow;
 
 		void UpdateEditor(float deltaTime);
-		void RenderEditorSceneView();
 		void AddEntityNode(flecs::entity entity);
 		void AddChildrenNode(flecs::entity e);
 		const bool IsGameViewportFocused() const { return gameViewportFocused; }

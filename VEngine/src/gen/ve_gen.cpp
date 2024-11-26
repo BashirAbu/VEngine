@@ -45,6 +45,8 @@ namespace VE
 			cc->member<glm::vec2>("renderTargetSize").member<glm::vec4>("backgroundColor").member<float>("zoom").member<bool>("isMain");
 		}
 	}
+
+
 	
 	//Edtior stuff.
 	void Editor::DrawComponentElements(std::string name, flecs::entity entity) 
