@@ -52,13 +52,14 @@ namespace VE
 
 		std::unordered_map<std::string, flecs::entity> componentsTable;
 		std::unordered_map<std::string, flecs::entity> systemsTable;
+		std::unordered_map<std::string, flecs::entity> cachedEntitiesTable;
 		
 		SceneType sceneType;
 		bool started = false;
 
 		std::filesystem::path scenePath = "";
 
-		std::queue<std::filesystem::path> deferredConstructs;
+		std::vector<std::filesystem::path> deferredConstructs;
 		struct NewEntityName 
 		{
 			std::string newName;

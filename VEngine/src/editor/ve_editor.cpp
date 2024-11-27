@@ -106,7 +106,6 @@ namespace VE
 		io.Fonts->Build();
 		ImGui_ImplRaylib_BuildFontAtlas();
 
-		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 		editorCamera = {};
 		editorCamera.zoom = 1.0f;
 
@@ -123,6 +122,7 @@ namespace VE
 	{
 		UnloadShader(colorPickingShader);
 		UnloadRenderTexture(editorCameraRenderTarget);
+		UnloadRenderTexture(colorPickingBuffer);
 		rlImGuiShutdown();
 	}
 	Editor* Editor::GetSingleton()
@@ -258,7 +258,7 @@ namespace VE
 		}
 		else
 		{
-			constructJson = e.to_json().c_str();
+			constructJson = "{ \"results\":[ " + (std::string)e.to_json().c_str() + "]}";
 		}
 
 		return constructJson;
@@ -426,7 +426,6 @@ namespace VE
 				{
 					engine->sceneManager->mode = SceneMode::Game;
 					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-					engine->ReloadProjectSharedLibrary();
 					engine->sceneManager->LoadScene(reloadScenePath);
 					ImGui::SetWindowFocus("GameViewport");
 					selectedEntity = flecs::entity();
@@ -440,7 +439,7 @@ namespace VE
 			{
 				engine->sceneManager->SaveScene();
 				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-				engine->ReloadProjectSharedLibrary();
+
 				engine->sceneManager->LoadScene(reloadScenePath);
 				selectedEntity = flecs::entity();
 			}
@@ -575,7 +574,7 @@ namespace VE
 		float fps = 1.0f / frameTime;
 		ImGui::Text("Frame Time  : %fms", frameTime);
 		ImGui::Text("FPS         : %f", fps);
-
+		ImGui::Text("Entity Count: %d", (int)engine->sceneManager->currentScene->world.count<_Components::SceneEntityTag>());
 		if (selectedEntity)
 		{
 			ImGui::Text("Selected Entity Name: %s. ID: %d", selectedEntity.name().c_str(), (int)selectedEntity.id());

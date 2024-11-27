@@ -12,6 +12,9 @@ namespace VE
 	{
 		singleton = this;
 		sceneType = type;
+
+		VE::Engine::GetSingleton()->LoadProjectSharedLibrary();
+
 		//register builtin components.
 		world.component<std::string>()
 			.opaque(flecs::String)
@@ -111,6 +114,8 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
+		world.reset();
+		VE::Engine::GetSingleton()->UnloadProjectSharedLibrary();
 		singleton = nullptr;
 	}
 	void Scene::Start()
@@ -124,6 +129,9 @@ namespace VE
 				s->run();
 			}
 		}
+		flecs::entity e = world.lookup("StartPlayerSystem");
+		flecs::system* s = (flecs::system*)&e;
+		s->run();
 		world.defer_end();
 	}
 	void Scene::Update()
@@ -164,18 +172,14 @@ namespace VE
 		}
 		world.defer_end();
 
-		while (!deferredConstructs.empty())
+		for (auto it = deferredConstructs.begin(); it != deferredConstructs.end();)
 		{
-			std::filesystem::path constructFilepath = deferredConstructs.front();
-			deferredConstructs.pop();
-			AddConstruct(constructFilepath);
+			AddConstruct(*it);
+			it = deferredConstructs.erase(it);
 		}
-
 	}
 	void Scene::Render()
 	{
-		
-
 		if (Engine::GetSingleton()->GetSceneManager()->mode == SceneMode::Editor)
 		{
 			flecs::entity ts = sceneSystems["Camera2DTransformSystem"];
@@ -224,7 +228,9 @@ namespace VE
 	}
 	flecs::entity Scene::AddEntity(std::string name)
 	{
-		return world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>();
+		flecs::entity e = world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>();
+		cachedEntitiesTable[e.name().c_str()] = e;
+		return e;
 	}
 
 	void Scene::CloneChildren(flecs::entity entity, flecs::entity cloneParent)
@@ -234,6 +240,7 @@ namespace VE
 			{
 				flecs::entity cloneChild = child.clone(true);
 				cloneChild.set_name(child.name());
+				cachedEntitiesTable[cloneChild.name().c_str()] = cloneChild;
 				cloneChild.remove(flecs::ChildOf, entity);
 				cloneChild.child_of(cloneParent);
 				CloneChildren(child, cloneChild);
@@ -248,6 +255,7 @@ namespace VE
 		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
 		const flecs::entity_t* p = (flecs::entity_t*) & entity;
 		clone.set_name(GenUniqueName(cloneName).c_str());
+		cachedEntitiesTable[clone.name().c_str()] = clone;
 		if (entity.parent())
 		{	
 			//use this line of you want duplicated entity to remove its parent.
@@ -258,17 +266,24 @@ namespace VE
 	}
 	flecs::entity Scene::LookupEntity(std::string name)
 	{
-		auto q = world.query_builder().with(flecs::Wildcard).build();
 		flecs::entity ent = flecs::entity();
-		q.each([&](flecs::entity e)
-			{
-				if (name == e.name().c_str())
+		
+		if (cachedEntitiesTable.find(name) != cachedEntitiesTable.end())
+		{
+			ent = cachedEntitiesTable[name];
+		}
+		else 
+		{
+			auto q = world.query_builder().with(flecs::Wildcard).build();
+			ent = q.find([&](flecs::entity e)
 				{
-					ent = e;
-					return;
-				}
-			});
-
+					return name == e.name().c_str();
+				});
+			if (ent)
+			{
+				cachedEntitiesTable[name] = ent;
+			}
+		}
 		return ent;
 	}
 	std::string Scene::GenUniqueName(std::string name)
@@ -311,7 +326,7 @@ namespace VE
 				}
 			}
 
-			deferredConstructs.push(constructFilePath);
+			deferredConstructs.push_back(constructFilePath);
 			return rootName;
 		}
 		else 
@@ -331,6 +346,7 @@ namespace VE
 					break;
 				}
 			}
+
 			flecs::entity root = LookupEntity(rootName);
 			if (root)
 			{
@@ -340,13 +356,16 @@ namespace VE
 			{
 				world.from_json(constructJson.c_str());
 				root = LookupEntity(rootName);
+				cachedEntitiesTable[rootName] = root;
 			}
 
 			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();
-			rootTC->SetWorldPosition(glm::vec3(0.0f));
-			rootTC->SetWorldRotation(glm::vec3(0.0f));
-			rootTC->SetWorldScale(glm::vec3(0.0f));
-
+			if (rootTC)
+			{
+				rootTC->SetWorldPosition(glm::vec3(0.0f));
+				rootTC->SetWorldRotation(glm::vec3(0.0f));
+				rootTC->SetWorldScale(glm::vec3(0.0f));
+			}
 			return rootName;
 		}
 	}

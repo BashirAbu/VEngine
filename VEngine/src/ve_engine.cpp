@@ -75,8 +75,6 @@ namespace VE
 
 		projectSharedLibrary = new SharedLibrary();
 
-		LoadProjectSharedLibrary();
-
 		sceneManager = new SceneManager();
 		
 		if (engineDesc.projectDetails.mainScenePath.empty())
