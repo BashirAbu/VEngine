@@ -5,6 +5,7 @@
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
 #include <imgui.h>
+#include <thread>
 namespace VE 
 {
 	Scene* Scene::singleton = nullptr;
@@ -80,7 +81,7 @@ namespace VE
 
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
-		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").each(Systems::Sprite2DRenderSystem);
+		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").multi_threaded().each(Systems::Sprite2DRenderSystem);
 		sceneSystems["Sprite2DRenderSystem"].add<_Components::RenderPhase>();
 		sceneSystems["Camera2DTransformSystem"] = world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").each(Systems::Camera2DTransformSystem);
 		sceneSystems["Camera2DTransformSystem"].add<_Components::PostUpdatePhase>();
@@ -111,6 +112,12 @@ namespace VE
 					systemsTable[e.name().c_str()] = e;
 				}
 			});
+
+		//set number of threads;
+		uint32_t numberOfThreads = std::thread::hardware_concurrency();
+		world.set_threads(numberOfThreads);
+
+
 	}
 	Scene::~Scene()
 	{
@@ -120,58 +127,125 @@ namespace VE
 	}
 	void Scene::Start()
 	{
-		world.defer_begin();
+		for (auto system : sceneSystems)
+		{
+			
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+			
+		}
+
 		for (auto system : sceneSystems) 
 		{
 			if (system.second.has<_Components::StartPhase>())
 			{
 				flecs::system* s = (flecs::system*) & system.second;
-				s->run();
+				s->enable();
 			}
 		}
+
+		world.progress();
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
 		flecs::entity e = world.lookup("StartPlayerSystem");
 		flecs::system* s = (flecs::system*)&e;
 		s->run();
-		world.defer_end();
 	}
 	void Scene::Update()
 	{
-		world.defer_begin();
+		//PreUpdate
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
 
 		for (auto system : sceneSystems)
 		{
 			if (system.second.has<_Components::PreUpdatePhase>())
 			{
 				flecs::system* s = (flecs::system*)&system.second;
-				s->run();
+				s->enable();
 			}
 		}
-		world.defer_end();
 
-		world.defer_begin();
+		world.progress();
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
+		//Update
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
 
 		for (auto system : sceneSystems)
 		{
 			if (system.second.has<_Components::UpdatePhase>())
 			{
 				flecs::system* s = (flecs::system*)&system.second;
-				s->run();
+				s->enable();
 			}
 		}
-		world.defer_end();
 
-		world.defer_begin();
+		world.progress();
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
+		//PostUpdate
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
 
 		for (auto system : sceneSystems)
 		{
 			if (system.second.has<_Components::PostUpdatePhase>())
 			{
 				flecs::system* s = (flecs::system*)&system.second;
-				s->run();
+				s->enable();
 			}
 		}
-		world.defer_end();
 
+		world.progress();
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
+		//deferred
 		for (auto it = deferredConstructs.begin(); it != deferredConstructs.end();)
 		{
 			AddConstruct(*it);
@@ -188,6 +262,35 @@ namespace VE
 			tss->run();
 		}
 
+		//render
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
+		for (auto system : sceneSystems)
+		{
+			if (system.second.has<_Components::RenderPhase>())
+			{
+				flecs::system* s = (flecs::system*)&system.second;
+				s->enable();
+			}
+		}
+
+		world.progress();
+
+		for (auto system : sceneSystems)
+		{
+
+			flecs::system* s = (flecs::system*)&system.second;
+			s->disable();
+
+		}
+
 		flecs::query cameras2D = world.query<Components::Camera2DComponent>();
 
 		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
@@ -197,14 +300,14 @@ namespace VE
 				BeginMode2D(cc.camera);
 				Color c;
 				ClearBackground(c = GLMVec4ToRayColor(cc.backgroundColor));
-				for (auto system : sceneSystems)
+
+				while (!texture2DRenderQueue.empty()) 
 				{
-					if (system.second.has<_Components::RenderPhase>())
-					{
-						flecs::system* s = (flecs::system*)&system.second;
-						s->run();
-					}
+					Texture2DRenderQueue texture2d;
+					texture2DRenderQueue.try_pop(texture2d);
+					DrawTexturePro(*texture2d.texture, texture2d.source, texture2d.dest, texture2d.origin, texture2d.rotation, texture2d.tint);
 				}
+
 
 				EndMode2D();
 				EndTextureMode();
@@ -286,9 +389,24 @@ namespace VE
 		}
 		return ent;
 	}
+	bool Scene::LookupEntityName(std::string name)
+	{
+		bool found = false;
+
+		if (cachedEntitiesTable.find(name) != cachedEntitiesTable.end()) 
+		{
+			found = true;
+		}
+		else 
+		{
+			cachedEntitiesTable[name] = flecs::entity();
+		}
+
+		return found;
+	}
 	std::string Scene::GenUniqueName(std::string name)
 	{
-		if (!LookupEntity(name))
+		if (!LookupEntityName(name))
 		{
 			return name;
 		}
@@ -297,7 +415,7 @@ namespace VE
 			std::string uniqueName = name;
 			std::string temp = name;
 			size_t entityIDGen = 0;
-			while (LookupEntity(temp))
+			while (LookupEntityName(temp))
 			{
 				temp = uniqueName + std::to_string(entityIDGen++);
 			}

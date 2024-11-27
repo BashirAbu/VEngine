@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <flecs.h>
 #include <queue>
+#include <mutex>
+#include <concurrent_queue.h>
 namespace VE 
 {
 	enum class SceneType 
@@ -40,6 +42,22 @@ namespace VE
 
 		flecs::entity LookupEntity(std::string name);
 
+		bool LookupEntityName(std::string name);
+
+
+		struct Texture2DRenderQueue
+		{
+			Texture2D* texture;
+			Rectangle source;
+			Rectangle dest;
+			Vector2 origin;
+			float rotation;
+			Color tint;
+		};
+
+		Concurrency::concurrent_queue<Texture2DRenderQueue> texture2DRenderQueue;
+
+
 
 	private:
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
@@ -60,12 +78,8 @@ namespace VE
 		std::filesystem::path scenePath = "";
 
 		std::vector<std::filesystem::path> deferredConstructs;
-		struct NewEntityName 
-		{
-			std::string newName;
-			flecs::entity entity;
-		};
-		std::queue<NewEntityName> deferredEntityRename;
+
+
 		friend class Editor;
 		friend class SceneManager;
 

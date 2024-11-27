@@ -136,21 +136,21 @@ namespace VE
 		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		DrawMainMenuBar();
 
-		DrawHierarchy();
+		//DrawHierarchy();
 
-		DrawInspector();
+		//DrawInspector();
 
 		DrawStatus();
 
-		DrawSceneViewport();
+		//DrawSceneViewport();
 
 		DrawGameViewport();
 
-		consoleWindow.Draw();
+		//consoleWindow.Draw();
 
 		ImGui::PopFont();
 		rlImGuiEnd();

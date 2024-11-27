@@ -1,10 +1,13 @@
 #include "ve_systems.h"
 #include "utils/ve_utils.h"
 #include <raylib.h>
+#include <thread>
 namespace VE::Systems
 {
+	void TransformSystem(flecs::entity e, Components::TransformComponent& tc)
+	{
 
-	
+	}
 	void Camera2DTransformSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc)
 	{
 		c2dc.camera.target.x = transform.GetWorldPosition().x;
@@ -41,7 +44,11 @@ namespace VE::Systems
 
 			Vector2 org = { dest.width * sc.origin.x, dest.height * sc.origin.y };
 			
-			DrawTexturePro(*sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor));
+
+			
+			VE::Scene::GetSingleton()->texture2DRenderQueue.push({ sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) });
+			
+
 		}
 	}
 
