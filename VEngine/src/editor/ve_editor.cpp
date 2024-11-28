@@ -170,7 +170,6 @@ namespace VE
 	{
 		ImGuiTreeNodeFlags flags = selectedEntity == (child) ? ImGuiTreeNodeFlags_Selected : 0 | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child.name().c_str());
-
 		if (ImGui::BeginDragDropSource())
 		{
 			void* payload = &child;
@@ -178,6 +177,45 @@ namespace VE
 
 			ImGui::EndDragDropSource();
 		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+
+			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY");
+
+			if (payload)
+			{
+				const flecs::entity* dropped = (const flecs::entity*)payload->Data;
+
+				std::function<void(flecs::entity parent, flecs::entity possibleChild)> checkDescendants;
+
+				bool result = false;
+				checkDescendants = [&](flecs::entity possibleChild, flecs::entity possibleParent)
+					{
+						if (possibleParent == possibleChild)
+						{
+							result =  true;
+						}
+						possibleParent.children([&](flecs::entity c)
+							{
+								if (c == possibleChild)
+								{
+									result = true;
+								}
+								checkDescendants(possibleChild, c);
+							});
+					};
+				checkDescendants(child, *dropped);
+				if (!result)
+				{
+					dropped->remove(flecs::ChildOf);
+					dropped->child_of(child);
+				}
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
 
 		if (ImGui::IsItemClicked())
 		{
@@ -232,6 +270,20 @@ namespace VE
 			ImGui::EndDragDropSource();
 		}
 
+		if (ImGui::BeginDragDropTarget())
+		{
+
+			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY");
+
+			if (payload)
+			{
+				const flecs::entity* dropped = (const flecs::entity*)payload->Data;
+				dropped->remove(flecs::ChildOf);
+				dropped->child_of(e);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 
 		if (ImGui::IsItemClicked())
 		{
@@ -268,6 +320,7 @@ namespace VE
 
 			ImGui::EndPopup();
 		}
+
 		if (opened)
 		{
 
@@ -283,7 +336,6 @@ namespace VE
 	{
 
 		ImGui::Begin("Hierarchy");
-
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
 			if (ImGui::BeginMenu("Add Entity"))
@@ -302,11 +354,33 @@ namespace VE
 			ImGui::EndPopup();
 		}
 		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
+		engine->sceneManager->currentScene->world.defer_begin();
 		sceneEntitiesQuery.each([&](flecs::entity e) 
 			{
 				std::string name = e.name().c_str();
 				AddEntityNode(e);
 			});
+		engine->sceneManager->currentScene->world.defer_end();
+
+		ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
+		if (ImGui::BeginDragDropTarget())
+		{
+
+			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY");
+
+			if (payload)
+			{
+				const flecs::entity* dropped = (const flecs::entity*)payload->Data;
+				if (dropped->parent())
+				{
+					dropped->remove(flecs::ChildOf, dropped->parent());
+				}
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+
 
 		while (!addEntities.empty()) 
 		{
@@ -328,6 +402,7 @@ namespace VE
 			engine->sceneManager->currentScene->AddEntity("EmptyEntity").child_of(addChildQueue.front());
 			addChildQueue.pop();
 		}
+
 		ImGui::End();
 	}
 

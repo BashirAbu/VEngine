@@ -374,7 +374,6 @@ namespace VE
 				}
 			}
 
-
 			flecs::query findConstruct = world.query_builder().with<_Components::ConstructTag>().build();
 			flecs::entity root = findConstruct.find([&](flecs::entity e) 
 				{
@@ -402,8 +401,6 @@ namespace VE
 					//Rename other entity.
 					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
 				}
-
-				
 				world.from_json(constructJson.c_str());
 				root = LookupEntity(rootName);
 				root.add<_Components::ConstructTag>();
