@@ -52,25 +52,25 @@ namespace VE
 				{
 					tc.e = e;
 				}));
-		AddMetaData(world.component<Components::SpriteComponent>());
-		AddMetaData(world.component<Components::Camera2DComponent>());
-		world.observer<Components::Camera2DComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::Camera2DComponent& c2dc) 
+		AddMetaData(world.component<Components::SpriteComponent>().on_add([](flecs::entity e, Components::SpriteComponent& sp)
+			{
+				e.add<Components::TransformComponent>();
+			})
+			.on_set([](flecs::entity e, Components::SpriteComponent& sp)
+				{
+					e.add<Components::TransformComponent>();
+				}));
+		AddMetaData(world.component<Components::Camera2DComponent>().on_add([](flecs::entity e, Components::Camera2DComponent& c2dc)
 			{
 				e.add<Components::TransformComponent>();
 				c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 				SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 				c2dc.camera.zoom = c2dc.zoom;
-			
-			});
-		world.observer<Components::Camera2DComponent>().event(flecs::OnRemove).each([](flecs::entity e, Components::Camera2DComponent& c2dc)
-			{
-				UnloadRenderTexture(c2dc.renderTarget);
-			});
 
-		world.observer<Components::SpriteComponent>().event(flecs::OnAdd).each([](flecs::entity e, Components::SpriteComponent& sp)
-			{
-				e.add<Components::TransformComponent>();
-			});
+			}).on_remove([](flecs::entity e, Components::Camera2DComponent& c2dc)
+				{
+					UnloadRenderTexture(c2dc.renderTarget);
+				}));
 		world.component<_Components::SceneEntityTag>();
 		
 		OnRender = world.entity("OnRender").add(flecs::PostUpdate);
@@ -175,9 +175,99 @@ namespace VE
 	}
 	flecs::entity Scene::AddEntity(std::string name)
 	{
-		flecs::entity e = world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>();
+		flecs::entity e = world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>().add<Components::TransformComponent>();
 		cachedEntitiesTable[e.name().c_str()] = e;
 		return e;
+	}
+
+	std::string Scene::SerializeScene()
+	{
+		std::string sceneJson;
+
+		flecs::query sceneEntities = world.query_builder().with<_Components::SceneEntityTag>().build();
+
+		sceneEntities.each([&](flecs::entity e)
+			{
+				std::string entityJson = SerializeEntity(e);
+				sceneJson += entityJson + ",";
+			});
+		if (!sceneJson.empty())
+		{
+			sceneJson.pop_back();
+		}
+		sceneJson = "{ \"results\":[" + sceneJson + "]}";
+
+		return sceneJson;
+	}
+
+	std::string Scene::SerializeEntity(flecs::entity e)
+	{
+		std::string entityJson = {};
+
+		bool hasChildren = false;
+
+		e.children([&](flecs::entity c)
+			{
+				hasChildren = true;
+				return;
+			});
+
+		if (hasChildren)
+		{
+			std::string parentJson = e.to_json().c_str();
+			std::string childrenJson = {};
+			e.children([&](flecs::entity child)
+				{
+					bool hasChildChildren = false;
+
+					child.children([&](flecs::entity c)
+						{
+							hasChildChildren = true;
+							return;
+						});
+
+					if (hasChildChildren)
+					{
+						
+						std::function<void(flecs::entity, std::string&)> serializeChildren;
+
+						serializeChildren = [&](flecs::entity child, std::string& entityJson)
+							{
+								child.children([&](flecs::entity child)
+									{
+										bool hasChildChildren = false;
+
+										child.children([&](flecs::entity c)
+											{
+												hasChildChildren = true;
+												return;
+											});
+
+										if (hasChildChildren)
+										{
+											serializeChildren(child, entityJson); 
+										}
+										entityJson += (std::string)child.to_json().c_str() + (std::string)",";
+									});
+							};
+
+						serializeChildren(child, childrenJson);
+					}
+					childrenJson += (std::string)child.to_json().c_str() + (std::string)",";
+				});
+
+			if (!childrenJson.empty())
+			{
+				childrenJson.pop_back();
+			}
+			entityJson = parentJson + ", " + childrenJson;
+		}
+		else
+		{
+			entityJson = (std::string)e.to_json().c_str();
+		}
+
+		return entityJson;
 	}
 
 	void Scene::CloneChildren(flecs::entity entity, flecs::entity cloneParent)

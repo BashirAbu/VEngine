@@ -43,6 +43,10 @@ namespace VE
 		flecs::entity updatePipeline;
 		flecs::entity renderPipeline;
 		Renderer renderer;
+
+		std::string SerializeScene();
+		std::string SerializeEntity(flecs::entity e);
+
 	private:
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);

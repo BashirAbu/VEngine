@@ -154,11 +154,11 @@ namespace VE
 
 		consoleWindow.Draw();
 
-		ImGui::Begin("Pick");
+		//ImGui::Begin("Pick");
 
-		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
+		//rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
 
-		ImGui::End();
+		//ImGui::End();
 
 		ImGui::PopFont();
 		rlImGuiEnd();
@@ -204,73 +204,7 @@ namespace VE
 		}
 	}
 
-	void SerializeConstructChildChildren(flecs::entity child, std::string& constructJson)
-	{
-		child.children([&](flecs::entity child)
-			{
-				bool hasChildChildren = false;
-
-				child.children([&](flecs::entity c)
-					{
-						hasChildChildren = true;
-						return;
-					});
-
-				if (hasChildChildren)
-				{
-					SerializeConstructChildChildren(child, constructJson);
-				}
-				constructJson += (std::string)child.to_json().c_str() + (std::string)",";
-			});
-	}
-
-	std::string SerializeConstruct(flecs::entity e)
-	{
-		std::string constructJson = {};
-
-		bool hasChildren = false;
-
-		e.children([&](flecs::entity c)
-			{
-				hasChildren = true;
-				return;
-			});
-
-		if (hasChildren)
-		{
-			std::string parentJson = e.to_json().c_str();
-			std::string childrenJson = {};
-			e.children([&](flecs::entity child)
-				{
-					bool hasChildChildren = false;
-
-					child.children([&](flecs::entity c)
-						{
-							hasChildChildren = true;
-							return;
-						});
-
-					if (hasChildChildren)
-					{
-						SerializeConstructChildChildren(child, childrenJson);
-					}
-					childrenJson += (std::string)child.to_json().c_str() + (std::string)",";
-				});
-
-			if (!childrenJson.empty())
-			{
-				childrenJson.pop_back();
-			}
-
-			constructJson = "{ \"results\":[" + parentJson + ", " + childrenJson + "]}";
-		}
-		else
-		{
-			constructJson = "{ \"results\":[ " + (std::string)e.to_json().c_str() + "]}";
-		}
-
-		return constructJson;
-	}
+	
 
 	void Editor::AddEntityNode(flecs::entity e)
 	{
@@ -297,8 +231,8 @@ namespace VE
 			}
 			if (ImGui::MenuItem("Make Construct"))
 			{
-				std::string constructJson = SerializeConstruct(e);
-
+				std::string constructJson = engine->sceneManager->currentScene->SerializeEntity(e);
+				constructJson = "{ \"results\":[" + constructJson + "]}";
 				std::filesystem::path constructPath = SaveFileDialog(VE_CONSTRUCT_FILE_EXTENSION);
 
 				std::ofstream constructFile(constructPath);

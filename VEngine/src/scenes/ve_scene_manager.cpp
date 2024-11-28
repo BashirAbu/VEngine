@@ -80,7 +80,7 @@ namespace VE
 
 		nlohmann::ordered_json sceneJson;
 
-		nlohmann::ordered_json flecsWorldJson = nlohmann::ordered_json::parse(currentScene->world.to_json().c_str());
+		nlohmann::ordered_json flecsWorldJson = nlohmann::ordered_json::parse(currentScene->SerializeScene());
 		sceneJson["flecs_world"] = flecsWorldJson;
 		size_t index = 0;
 		for (auto system : currentScene->systemsTable)
