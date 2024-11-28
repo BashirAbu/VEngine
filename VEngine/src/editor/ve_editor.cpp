@@ -758,18 +758,7 @@ namespace VE
 				}
 				else if (id)
 				{
-					flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
-					selectedEntity = sceneEntitiesQuery.find([&](flecs::entity e)
-						{
-							return (int)e == id;
-						});
-					
-					TraceLog(LOG_INFO, "ID: %d, world id: %d", (int)selectedEntity.id(), (int)selectedEntity.world().id());
-
-					if (selectedEntity)
-					{
-						TraceLog(LOG_DEBUG, "Hi");
-					}
+					selectedEntity = engine->sceneManager->currentScene->LookupEntity((flecs::entity)id);
 				}
 				else 
 				{

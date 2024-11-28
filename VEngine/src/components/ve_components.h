@@ -17,6 +17,8 @@ namespace VE
 	{
 		struct TransformComponent
 		{
+			TransformComponent() : localMatrix(1.0f), worldMatrix(1.0f)
+			{}
 			void SetWorldPosition(glm::vec3 newPosition) 
 			{
 				if (!e.parent())
@@ -192,6 +194,10 @@ namespace VE
 			glm::vec3 localRotation = {};
 			glm::vec3 localScale = {1.0f,1.0f,1.0f};
 			flecs::entity e;
+
+			//internal
+			glm::mat4 localMatrix;
+			glm::mat4 worldMatrix;
 		};
 
 		struct SpriteComponent

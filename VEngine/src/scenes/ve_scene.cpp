@@ -176,7 +176,6 @@ namespace VE
 	flecs::entity Scene::AddEntity(std::string name)
 	{
 		flecs::entity e = world.entity().set_name(GenUniqueName(name).c_str()).add<_Components::SceneEntityTag>().add<Components::TransformComponent>();
-		cachedEntitiesTable[e.name().c_str()] = e;
 		return e;
 	}
 
@@ -277,7 +276,6 @@ namespace VE
 			{
 				flecs::entity cloneChild = child.clone(true);
 				cloneChild.set_name(child.name());
-				cachedEntitiesTable[cloneChild.name().c_str()] = cloneChild;
 				cloneChild.remove(flecs::ChildOf, entity);
 				cloneChild.child_of(cloneParent);
 				CloneChildren(child, cloneChild);
@@ -292,7 +290,6 @@ namespace VE
 		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
 		const flecs::entity_t* p = (flecs::entity_t*) & entity;
 		clone.set_name(GenUniqueName(cloneName).c_str());
-		cachedEntitiesTable[clone.name().c_str()] = clone;
 		if (entity.parent())
 		{	
 			//use this line of you want duplicated entity to remove its parent.
@@ -305,22 +302,24 @@ namespace VE
 	{
 		flecs::entity ent = flecs::entity();
 		
-		if (cachedEntitiesTable.find(name) != cachedEntitiesTable.end())
-		{
-			ent = cachedEntitiesTable[name];
-		}
-		else 
-		{
-			auto q = world.query_builder().with(flecs::Wildcard).build();
-			ent = q.find([&](flecs::entity e)
-				{
-					return name == e.name().c_str();
-				});
-			if (ent)
+		
+		auto q = world.query_builder().with<_Components::SceneEntityTag>().build();
+		ent = q.find([&](flecs::entity e)
 			{
-				cachedEntitiesTable[name] = ent;
-			}
-		}
+				return name == e.name().c_str();
+			});
+		
+		return ent;
+	}
+
+	flecs::entity Scene::LookupEntity(flecs::entity id)
+	{
+		flecs::entity ent;
+		auto q = world.query_builder().with<_Components::SceneEntityTag>().build();
+		ent = q.find([&](flecs::entity e)
+			{
+				return (int)e == (int)id;
+			});
 		return ent;
 	}
 	
@@ -394,7 +393,6 @@ namespace VE
 			{
 				world.from_json(constructJson.c_str());
 				root = LookupEntity(rootName);
-				cachedEntitiesTable[root.name().c_str()] = root;
 			}
 
 			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();

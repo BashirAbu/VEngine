@@ -35,8 +35,9 @@ namespace VE
 		void AddMetaData(flecs::entity comp);
 
 		flecs::entity CloneEntity(flecs::entity entity);
-
 		flecs::entity LookupEntity(std::string name);
+		//You can use int for id.
+		flecs::entity LookupEntity(flecs::entity id);
 
 		//System render phase
 		flecs::entity OnRender;
@@ -62,7 +63,6 @@ namespace VE
 		};
 
 		std::unordered_map<std::string, SystemInfo> systemsTable;
-		std::unordered_map<std::string, flecs::entity> cachedEntitiesTable;
 		
 		SceneType sceneType;
 		bool started = false;
@@ -70,7 +70,6 @@ namespace VE
 		std::filesystem::path scenePath = "";
 
 		std::vector<std::filesystem::path> deferredConstructs;
-
 
 		friend class Editor;
 		friend class SceneManager;

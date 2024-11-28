@@ -68,9 +68,18 @@ namespace VE
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+			if (ImGui::BeginPopupContextItem(0, 1))
+			{
+				if (ImGui::MenuItem("Remove"))
+				{
+					entity.remove<VE::Components::Camera2DComponent>(); 
+					open = false;
+				}
+				ImGui::EndPopup();
+			}
+
 			if (open)
 			{
-				
 				Components::Camera2DComponent* cc = entity.get_mut<Components::Camera2DComponent>();
 				ImGui::Checkbox("IsMain", &cc->isMain);
 				if (cc->isMain)
@@ -98,6 +107,15 @@ namespace VE
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+			if (ImGui::BeginPopupContextItem(0, 1))
+			{
+				if (ImGui::MenuItem("Remove"))
+				{
+					entity.remove<VE::Components::SpriteComponent>();
+					open = false;
+				}
+				ImGui::EndPopup();
+			}
 			if (open)
 			{
 				Components::SpriteComponent* sp = entity.get_mut<Components::SpriteComponent>();

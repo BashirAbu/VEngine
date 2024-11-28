@@ -1,4 +1,4 @@
--Rewrite serialization to only serialize entities.
+
 -Add remove components.
 -Drag and drop child parent 
 
