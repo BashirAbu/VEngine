@@ -334,7 +334,6 @@ namespace VE
 	}
 	void Editor::DrawHierarchy()
 	{
-
 		ImGui::Begin("Hierarchy");
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
@@ -625,14 +624,16 @@ namespace VE
 		BeginTextureMode(editorCameraRenderTarget);
 		BeginMode2D(editorCamera);
 
-		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
+		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent, Components::TransformComponent>();
 		Components::Camera2DComponent* c2dc = nullptr;
+		Components::TransformComponent* tc = nullptr;
 
-		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc)
+		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc, Components::TransformComponent& _tc)
 			{
 				if (cc.isMain)
 				{
 					c2dc = &cc;
+					tc = &_tc;
 				}
 			});
 		if (c2dc)
@@ -658,11 +659,11 @@ namespace VE
 			};
 
 			glm::mat4 transform =
-				glm::translate(glm::mat4(1.0f), glm::vec3(c2dc->camera.target.x + c2dc->camera.offset.x, c2dc->camera.target.y + c2dc->camera.offset.y, 0.0f))
+				glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
 				* glm::rotate(glm::mat4(1.0f), -glm::radians(c2dc->camera.rotation), glm::vec3(0.0f, 0.0f, 1.0f))
 				* glm::scale(glm::mat4(1.0f), glm::vec3((1.0f / c2dc->camera.zoom), (1.0f / c2dc->camera.zoom), 1.0f))
-				* glm::translate(glm::mat4(1.0f), -glm::vec3(c2dc->camera.target.x + c2dc->camera.offset.x, c2dc->camera.target.y + c2dc->camera.offset.y, 0.0f))
-				* glm::translate(glm::mat4(1.0f), glm::vec3(c2dc->camera.target.x + c2dc->camera.offset.x, c2dc->camera.target.y + c2dc->camera.offset.y, 0.0f));
+				* glm::translate(glm::mat4(1.0f), -glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
+				* glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f));
 
 			std::vector<glm::vec2> transformedVertices;
 			for (const auto& vertex : vertices) {
