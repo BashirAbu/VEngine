@@ -79,7 +79,7 @@ namespace VE
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").kind(flecs::PostUpdate).each(Systems::Camera2DTransformSystem);
-		world.system<Components::TransformComponent>("TransformSystem").kind(flecs::PreUpdate).each(Systems::TransformSystem);
+		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).each(Systems::TransformSystem);
 		//register project components & systems.
 
 
@@ -114,21 +114,10 @@ namespace VE
 		uint32_t numberOfThreads = std::thread::hardware_concurrency();
 		world.set_threads(numberOfThreads);
 
-		world.pipeline().with(flecs::System).without(OnRender).build().set_name("UpdatePipeline");
+		updatePipeline = world.pipeline().with(flecs::System).without(OnRender).build().set_name("UpdatePipeline");
 			
-		world.pipeline().with(flecs::System).with(OnRender).build().set_name("RenderPipeline");
+		renderPipeline = world.pipeline().with(flecs::System).with(OnRender).build().set_name("RenderPipeline");
 
-		world.query_builder().with(flecs::Pipeline).build().each([&](flecs::entity e) 
-			{
-				if ((std::string)"UpdatePipeline" == e.name().c_str())
-				{
-					updatePipeline = e;
-				}
-				else if ((std::string)"RenderPipeline" == e.name().c_str())
-				{
-					renderPipeline = e;
-				}
-			});
 	}
 	Scene::~Scene()
 	{
@@ -385,15 +374,39 @@ namespace VE
 				}
 			}
 
-			flecs::entity root = LookupEntity(rootName);
+
+			flecs::query findConstruct = world.query_builder().with<_Components::ConstructTag>().build();
+			flecs::entity root = findConstruct.find([&](flecs::entity e) 
+				{
+					
+					if (rootName == e.name().c_str())
+					{
+						rootName = e.name().c_str();
+						return e;
+					}
+					return flecs::entity();
+				});
+
+			//if entity inside the scene has the same name as the construct we need to rename the construct's root entity.
 			if (root)
 			{
 				root = CloneEntity(root);
 			}
 			else
 			{
+				//Check if entity with same name as construct exist.
+				root = LookupEntity(rootName);
+				//Entity with same name exist.
+				if (root)
+				{
+					//Rename other entity.
+					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
+				}
+
+				
 				world.from_json(constructJson.c_str());
 				root = LookupEntity(rootName);
+				root.add<_Components::ConstructTag>();
 			}
 
 			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();

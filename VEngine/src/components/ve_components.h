@@ -11,6 +11,7 @@ namespace VE
 	{
 		struct OnRender {};
 		struct SceneEntityTag {};
+		struct ConstructTag {};
 	}
 
 	namespace Components

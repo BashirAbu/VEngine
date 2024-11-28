@@ -1,5 +1,3 @@
-
--Add remove components.
 -Drag and drop child parent 
 
 -UI render target (res same to the main render target).

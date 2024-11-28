@@ -171,6 +171,14 @@ namespace VE
 		ImGuiTreeNodeFlags flags = selectedEntity == (child) ? ImGuiTreeNodeFlags_Selected : 0 | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child.name().c_str());
 
+		if (ImGui::BeginDragDropSource())
+		{
+			void* payload = &child;
+			ImGui::SetDragDropPayload("ENTITY", payload, sizeof(child), ImGuiCond_Once);
+
+			ImGui::EndDragDropSource();
+		}
+
 		if (ImGui::IsItemClicked())
 		{
 			selectedEntity = child;
@@ -214,6 +222,17 @@ namespace VE
 		}
 		ImGuiTreeNodeFlags flags = ((selectedEntity == e) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)e), flags, e.name().c_str());
+
+
+		if (ImGui::BeginDragDropSource())
+		{
+			void* payload = &e;
+			ImGui::SetDragDropPayload("ENTITY", payload, sizeof(e), ImGuiCond_Once);
+
+			ImGui::EndDragDropSource();
+		}
+
+
 		if (ImGui::IsItemClicked())
 		{
 			selectedEntity = e;
@@ -262,6 +281,7 @@ namespace VE
 	}
 	void Editor::DrawHierarchy()
 	{
+
 		ImGui::Begin("Hierarchy");
 
 		if (ImGui::BeginPopupContextWindow(0, 1))
