@@ -9,7 +9,7 @@
 namespace VE 
 {
 	Scene* Scene::singleton = nullptr;
-	Scene::Scene(SceneType type)
+	Scene::Scene(SceneType type, std::string flecsJson) : renderer(this)
 	{
 		singleton = this;
 		sceneType = type;
@@ -71,21 +71,16 @@ namespace VE
 			{
 				e.add<Components::TransformComponent>();
 			});
-		
-		world.component<_Components::StartPhase>();
-		world.component<_Components::PreUpdatePhase>();
-		world.component<_Components::UpdatePhase>();
-		world.component<_Components::PostUpdatePhase>();
-		world.component<_Components::RenderPhase>();
 		world.component<_Components::SceneEntityTag>();
+		
+		OnRender = world.entity("OnRender").add(flecs::PostUpdate);
 
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
-		sceneSystems["Sprite2DRenderSystem"] = world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").multi_threaded().each(Systems::Sprite2DRenderSystem);
-		sceneSystems["Sprite2DRenderSystem"].add<_Components::RenderPhase>();
-		sceneSystems["Camera2DTransformSystem"] = world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").each(Systems::Camera2DTransformSystem);
-		sceneSystems["Camera2DTransformSystem"].add<_Components::PostUpdatePhase>();
+		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Sprite2DRenderSystem);
+		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").kind(flecs::PostUpdate).each(Systems::Camera2DTransformSystem);
 		//register project components & systems.
+
 
 		flecs::query regComponents = world.query<flecs::Component>();
 
@@ -109,7 +104,8 @@ namespace VE
 				std::string path = e.path().c_str();
 				if (!strstr(path.c_str(), "::flecs::"))
 				{
-					systemsTable[e.name().c_str()] = e;
+					systemsTable[e.name().c_str()].entity = e;
+					systemsTable[e.name().c_str()].enable = false;
 				}
 			});
 
@@ -117,7 +113,21 @@ namespace VE
 		uint32_t numberOfThreads = std::thread::hardware_concurrency();
 		world.set_threads(numberOfThreads);
 
+		world.pipeline().with(flecs::System).without(OnRender).build().set_name("UpdatePipeline");
+			
+		world.pipeline().with(flecs::System).with(OnRender).build().set_name("RenderPipeline");
 
+		world.query_builder().with(flecs::Pipeline).build().each([&](flecs::entity e) 
+			{
+				if ((std::string)"UpdatePipeline" == e.name().c_str())
+				{
+					updatePipeline = e;
+				}
+				else if ((std::string)"RenderPipeline" == e.name().c_str())
+				{
+					renderPipeline = e;
+				}
+			});
 	}
 	Scene::~Scene()
 	{
@@ -127,123 +137,13 @@ namespace VE
 	}
 	void Scene::Start()
 	{
-		for (auto system : sceneSystems)
-		{
-			
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-			
-		}
-
-		for (auto system : sceneSystems) 
-		{
-			if (system.second.has<_Components::StartPhase>())
-			{
-				flecs::system* s = (flecs::system*) & system.second;
-				s->enable();
-			}
-		}
-
-		world.progress();
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		flecs::entity e = world.lookup("StartPlayerSystem");
-		flecs::system* s = (flecs::system*)&e;
-		s->run();
 	}
 	void Scene::Update()
 	{
-		//PreUpdate
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		for (auto system : sceneSystems)
-		{
-			if (system.second.has<_Components::PreUpdatePhase>())
-			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->enable();
-			}
-		}
+		renderer.BeginFrame();
+		world.set_pipeline(updatePipeline);
 
 		world.progress();
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		//Update
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		for (auto system : sceneSystems)
-		{
-			if (system.second.has<_Components::UpdatePhase>())
-			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->enable();
-			}
-		}
-
-		world.progress();
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		//PostUpdate
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		for (auto system : sceneSystems)
-		{
-			if (system.second.has<_Components::PostUpdatePhase>())
-			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->enable();
-			}
-		}
-
-		world.progress();
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
 
 		//deferred
 		for (auto it = deferredConstructs.begin(); it != deferredConstructs.end();)
@@ -254,64 +154,8 @@ namespace VE
 	}
 	void Scene::Render()
 	{
-		if (Engine::GetSingleton()->GetSceneManager()->mode == SceneMode::Editor)
-		{
-			flecs::entity ts = sceneSystems["Camera2DTransformSystem"];
-			flecs::system* tss = (flecs::system*)&ts;
-
-			tss->run();
-		}
-
-		//render
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		for (auto system : sceneSystems)
-		{
-			if (system.second.has<_Components::RenderPhase>())
-			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->enable();
-			}
-		}
-
-		world.progress();
-
-		for (auto system : sceneSystems)
-		{
-
-			flecs::system* s = (flecs::system*)&system.second;
-			s->disable();
-
-		}
-
-		flecs::query cameras2D = world.query<Components::Camera2DComponent>();
-
-		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
-			{
-
-				BeginTextureMode(cc.renderTarget);
-				BeginMode2D(cc.camera);
-				Color c;
-				ClearBackground(c = GLMVec4ToRayColor(cc.backgroundColor));
-
-				while (!texture2DRenderQueue.empty()) 
-				{
-					Texture2DRenderQueue texture2d;
-					texture2DRenderQueue.try_pop(texture2d);
-					DrawTexturePro(*texture2d.texture, texture2d.source, texture2d.dest, texture2d.origin, texture2d.rotation, texture2d.tint);
-				}
-
-
-				EndMode2D();
-				EndTextureMode();
-			});
+		//call RenderScene
+		renderer.RenderScene();
 	}
 	void Scene::SetMainCamera(flecs::entity entity)
 	{
@@ -389,24 +233,10 @@ namespace VE
 		}
 		return ent;
 	}
-	bool Scene::LookupEntityName(std::string name)
-	{
-		bool found = false;
-
-		if (cachedEntitiesTable.find(name) != cachedEntitiesTable.end()) 
-		{
-			found = true;
-		}
-		else 
-		{
-			cachedEntitiesTable[name] = flecs::entity();
-		}
-
-		return found;
-	}
+	
 	std::string Scene::GenUniqueName(std::string name)
 	{
-		if (!LookupEntityName(name))
+		if (!LookupEntity(name))
 		{
 			return name;
 		}
@@ -415,7 +245,7 @@ namespace VE
 			std::string uniqueName = name;
 			std::string temp = name;
 			size_t entityIDGen = 0;
-			while (LookupEntityName(temp))
+			while (LookupEntity(temp))
 			{
 				temp = uniqueName + std::to_string(entityIDGen++);
 			}
@@ -474,7 +304,7 @@ namespace VE
 			{
 				world.from_json(constructJson.c_str());
 				root = LookupEntity(rootName);
-				cachedEntitiesTable[rootName] = root;
+				cachedEntitiesTable[root.name().c_str()] = root;
 			}
 
 			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();

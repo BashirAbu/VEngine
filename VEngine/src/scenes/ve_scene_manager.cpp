@@ -9,7 +9,7 @@
 #include <iostream>
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
-
+#include "components/ve_components.h"
 namespace VE
 {
 	SceneManager::SceneManager() : currentScene(nullptr), mode(SceneMode::Editor)
@@ -34,12 +34,12 @@ namespace VE
 		sceneFile >> sceneJson;
 		nlohmann::ordered_json sceneSystemsJson = sceneJson["scene_systems"];
 		
-		std::vector<std::string> systems;
+		std::vector<std::string> enabledSystems;
 
 		for (auto systemSceneJson : sceneSystemsJson)
 		{
 			std::string systemName = (std::string)systemSceneJson;
-			systems.push_back(systemName);
+			enabledSystems.push_back(systemName);
 		}
 
 
@@ -49,9 +49,9 @@ namespace VE
 		querySystem.each([&](flecs::entity e) 
 			{
 				std::string name = e.name().c_str();
-				if (std::find(systems.begin(), systems.end(), name) != systems.end())
+				if (std::find(enabledSystems.begin(), enabledSystems.end(), name) != enabledSystems.end())
 				{
-					(*currentScene->GetSceneSystems())[name] = e;
+					currentScene->systemsTable[name].enable = true;
 				}
 			});
 
@@ -83,11 +83,14 @@ namespace VE
 		nlohmann::ordered_json flecsWorldJson = nlohmann::ordered_json::parse(currentScene->world.to_json().c_str());
 		sceneJson["flecs_world"] = flecsWorldJson;
 		size_t index = 0;
-		for (auto system : currentScene->sceneSystems)
+		for (auto system : currentScene->systemsTable)
 		{
-			std::string systemName = "system" + std::to_string(index);
-			sceneJson["scene_systems"][systemName] = system.first;
-			index++;
+			if (system.second.enable)
+			{
+				std::string systemName = "system" + std::to_string(index);
+				sceneJson["scene_systems"][systemName] = system.first;
+				index++;
+			}
 		}
 
 		std::stringstream ss;

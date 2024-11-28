@@ -45,8 +45,8 @@ namespace VE::Systems
 			Vector2 org = { dest.width * sc.origin.x, dest.height * sc.origin.y };
 			
 
-			
-			VE::Scene::GetSingleton()->texture2DRenderQueue.push({ sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) });
+			VE::Renderer::Tex2D tex = { sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) };
+			VE::Scene::GetSingleton()->renderer.Submit(tex, sc.renderOrder, e);
 			
 
 		}

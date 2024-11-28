@@ -21,7 +21,7 @@ namespace VE
 		void SaveSceneAs();
 		//editor function
 		void SaveScene();
-
+		SceneMode GetMode() { return mode; }
 	private:
 
 		Scene* currentScene;
@@ -29,7 +29,5 @@ namespace VE
 		friend class Editor;
 		friend class Engine;
 		friend class Scene;
-		friend class Scene2D;
-		friend class Camera2DEntity;
 	};
 }

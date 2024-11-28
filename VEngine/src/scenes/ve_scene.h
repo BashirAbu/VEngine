@@ -7,6 +7,7 @@
 #include <queue>
 #include <mutex>
 #include <concurrent_queue.h>
+#include "ve_renderer.h"
 namespace VE 
 {
 	enum class SceneType 
@@ -17,7 +18,7 @@ namespace VE
 	class VE_API Scene
 	{
 	public:
-		Scene(SceneType type);
+		Scene(SceneType type, std::string flecsJson = "");
 		~Scene();
 
 		static Scene* GetSingleton() { return singleton; }
@@ -33,43 +34,30 @@ namespace VE
 		const SceneType GetSceneType() const { return sceneType; }
 		void AddMetaData(flecs::entity comp);
 
-		std::unordered_map<std::string, flecs::entity>* GetSceneSystems() 
-		{
-			return &sceneSystems;
-		}
-
 		flecs::entity CloneEntity(flecs::entity entity);
 
 		flecs::entity LookupEntity(std::string name);
 
-		bool LookupEntityName(std::string name);
-
-
-		struct Texture2DRenderQueue
-		{
-			Texture2D* texture;
-			Rectangle source;
-			Rectangle dest;
-			Vector2 origin;
-			float rotation;
-			Color tint;
-		};
-
-		Concurrency::concurrent_queue<Texture2DRenderQueue> texture2DRenderQueue;
-
-
-
+		//System render phase
+		flecs::entity OnRender;
+		flecs::entity updatePipeline;
+		flecs::entity renderPipeline;
+		Renderer renderer;
 	private:
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);
 		flecs::world world;
 		glm::vec4 clearColor;
 
-
-		std::unordered_map<std::string, flecs::entity> sceneSystems;
-
 		std::unordered_map<std::string, flecs::entity> componentsTable;
-		std::unordered_map<std::string, flecs::entity> systemsTable;
+
+		struct SystemInfo 
+		{
+			flecs::entity entity;
+			bool enable = false;
+		};
+
+		std::unordered_map<std::string, SystemInfo> systemsTable;
 		std::unordered_map<std::string, flecs::entity> cachedEntitiesTable;
 		
 		SceneType sceneType;
@@ -82,7 +70,7 @@ namespace VE
 
 		friend class Editor;
 		friend class SceneManager;
-
+		friend class Renderer;
 		static Scene* singleton;
 	};
 }

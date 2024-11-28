@@ -9,12 +9,7 @@ namespace VE
 	
 	namespace _Components 
 	{
-		//System phases
-		struct StartPhase {};
-		struct PreUpdatePhase {};
-		struct UpdatePhase {};
-		struct PostUpdatePhase {};
-		struct RenderPhase {};
+		struct OnRender {};
 		struct SceneEntityTag {};
 	}
 
@@ -204,6 +199,7 @@ namespace VE
 			std::filesystem::path texturePath = "";
 			glm::vec2 origin = {};
 			glm::vec4 tintColor = {1.0f, 1.0f, 1.0f, 1.0f};
+			int32_t renderOrder = 0;
 			Texture* texture = nullptr;
 		};
 

@@ -11,9 +11,11 @@
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
 #include <raymath.h>
+#include <mutex>
 namespace VE 
 {
-	std::vector<std::string>* logs = new std::vector<std::string>();
+	std::vector<std::string>* logs = nullptr;
+	std::mutex logsMutex;
 	bool scrollToBottom = false;
 	void GrayTheme()
 	{
@@ -140,17 +142,23 @@ namespace VE
 
 		DrawMainMenuBar();
 
-		//DrawHierarchy();
+		DrawHierarchy();
 
-		//DrawInspector();
+		DrawInspector();
 
 		DrawStatus();
 
-		//DrawSceneViewport();
+		DrawSceneViewport();
 
 		DrawGameViewport();
 
-		//consoleWindow.Draw();
+		consoleWindow.Draw();
+
+		ImGui::Begin("Pick");
+
+		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
+
+		ImGui::End();
 
 		ImGui::PopFont();
 		rlImGuiEnd();
@@ -458,7 +466,7 @@ namespace VE
 		
 		ImGui::EndMainMenuBar();
 	}
-
+	
 	void Editor::DrawInspector()
 	{
 		ImGui::Begin("Inspector");
@@ -526,42 +534,27 @@ namespace VE
 				ImGui::EndPopup();
 			}
 		}
-		else 
+		else
 		{
 			//stuff in scenes.
 			ImGui::Text("Scene Systems:");
-			for (auto systemScene : engine->sceneManager->currentScene->sceneSystems)
+			for (auto& system : engine->sceneManager->currentScene->systemsTable)
 			{
-				ImGui::Text("%s", systemScene.first.c_str());
-			}
-
-			ImGuiStyle& style = ImGui::GetStyle();
-
-			float size = ImGui::CalcTextSize("Add System").x + style.FramePadding.x * 2.0f;
-			float avail = ImGui::GetContentRegionAvail().x;
-
-			float off = (avail - size) * .5f;
-			if (off > 0.0f)
-				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
-
-			if (ImGui::Button("Add System"))
-			{
-				ImGui::OpenPopup("Add System");
-			}
-			if (ImGui::BeginPopup("Add System"))
-			{
-				for (auto system : engine->sceneManager->currentScene->systemsTable)
+				ImGui::Text("%s", system.first.c_str());
+				ImGui::SameLine();
+				ImGui::Checkbox((std::string("##chebox_") + system.first).c_str(), &system.second.enable);
+				if (ImGui::IsItemEdited())
 				{
-					if (ImGui::MenuItem(system.first.c_str()))
+					flecs::system* s = (flecs::system*)&system.second.entity;
+					if (system.second.enable)
 					{
-						
-						engine->sceneManager->currentScene->sceneSystems[system.first.c_str()] = system.second;
-						engine->sceneManager->currentScene->sceneSystems[system.first.c_str()].add<_Components::UpdatePhase>();
-						
+						s->enable();
 					}
-					ImGui::Separator();
+					else 
+					{
+						s->disable();
+					}
 				}
-				ImGui::EndPopup();
 			}
 		}
 		ImGui::End();
@@ -621,14 +614,9 @@ namespace VE
 		{
 			ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		}
-		for (auto system : engine->sceneManager->currentScene->sceneSystems)
-		{
-			if (system.second.has<_Components::RenderPhase>())
-			{
-				flecs::system* s = (flecs::system*)&system.second;
-				s->run();
-			}
-		}
+
+		engine->sceneManager->currentScene->renderer.RenderQueued();
+		
 
 		//Draw Camrea rectangle
 		if (c2dc)
@@ -652,7 +640,6 @@ namespace VE
 				glm::vec4 transformedVertex = transform * glm::vec4(vertex, 0.0f, 1.0f);
 				transformedVertices.push_back(glm::vec2(transformedVertex));
 			}
-
 
 			DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, GRAY);
 			DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, GRAY);
@@ -807,16 +794,19 @@ namespace VE
 				BeginShaderMode(colorPickingShader);
 				int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
 				EndShaderMode();
-				flecs::query entities = engine->sceneManager->currentScene->world.query<Components::TransformComponent, Components::SpriteComponent>();
 
-				entities.each([&](flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
+				for(const auto& tex2d : engine->sceneManager->currentScene->renderer.texture2DRenderQueue)
+				{
+					if (tex2d.entity)
 					{
 						BeginShaderMode(colorPickingShader);
-						float id = (float)e;
+						float id = (float)((int)tex2d.entity);
 						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-						Systems::Sprite2DRenderSystem(e, tc, sc);
+						DrawTexturePro(*tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
 						EndShaderMode();
-					});
+					}
+					
+				}
 				EndMode2D();
 				EndTextureMode();
 
@@ -832,9 +822,20 @@ namespace VE
 				{
 					//do nothing brother.	
 				}
-				else if (engine->sceneManager->currentScene->world.is_valid(id))
+				else if (id)
 				{
-					selectedEntity = engine->sceneManager->currentScene->world.entity(id);
+					flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
+					selectedEntity = sceneEntitiesQuery.find([&](flecs::entity e)
+						{
+							return (int)e == id;
+						});
+					
+					TraceLog(LOG_INFO, "ID: %d, world id: %d", (int)selectedEntity.id(), (int)selectedEntity.world().id());
+
+					if (selectedEntity)
+					{
+						TraceLog(LOG_DEBUG, "Hi");
+					}
 				}
 				else 
 				{
@@ -906,7 +907,12 @@ namespace VE
 	}
 	void AddLog(const std::string message)
 	{
-		if (logs->size() > 48) 
+		std::lock_guard<std::mutex> lock(logsMutex);
+		if (!logs)
+		{
+			logs = new std::vector<std::string>();
+		}
+		if (logs->size() > 50) 
 		{
 			logs->erase(logs->begin());
 		}

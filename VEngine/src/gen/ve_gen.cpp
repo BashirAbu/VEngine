@@ -33,14 +33,10 @@ namespace VE
 		else if (compName.find("SpriteComponent") != std::string::npos)
 		{
 			flecs::component<Components::SpriteComponent>* sc = (flecs::component<Components::SpriteComponent>*) & comp;
-			sc->member<std::filesystem::path>("texturePath").member<glm::vec2>("origin").member<glm::vec4>("tintColor");
+			sc->member<std::filesystem::path>("texturePath").member<glm::vec2>("origin").member<glm::vec4>("tintColor"). member<flecs::i32_t>("renderOrder");
 		}
 		else if (compName.find("Camera2DComponent") != std::string::npos)
 		{
-			/*glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
-			glm::vec4 backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-			float zoom = 1.0f;
-			bool isMain = false;*/
 			flecs::component<Components::Camera2DComponent>* cc = (flecs::component<Components::Camera2DComponent>*) & comp;
 			cc->member<glm::vec2>("renderTargetSize").member<glm::vec4>("backgroundColor").member<float>("zoom").member<bool>("isMain");
 		}
@@ -104,9 +100,6 @@ namespace VE
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 			if (open)
 			{
-				/*std::filesystem::path texturePath = "";
-				glm::vec2 origin = {};
-				glm::vec4 tintColor = {};*/
 				Components::SpriteComponent* sp = entity.get_mut<Components::SpriteComponent>();
 				ImGui::Text("Texture: %s", sp->texturePath.string().c_str());
 				ImGui::SameLine();
@@ -117,11 +110,15 @@ namespace VE
 					{
 						std::filesystem::path relativePath = path.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
 						sp->texturePath = relativePath.generic_string();
-						sp->texture = AssetsManager::GetSingleton()->LoadTexture(relativePath);
 					}
 				}
 
 				EditorElement::Vec2(sp->origin, "Origin");
+
+				ImGui::Text("Render Order: ");
+				ImGui::SameLine();
+				ImGui::DragInt("##renderOrder", &sp->renderOrder);
+
 				EditorElement::Color(sp->tintColor, "Tint Color");
 				ImGui::TreePop();
 			}
