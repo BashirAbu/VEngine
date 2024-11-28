@@ -17,7 +17,7 @@ namespace VE
 	{
 		struct TransformComponent
 		{
-			TransformComponent() : localMatrix(1.0f), worldMatrix(1.0f)
+			TransformComponent() : __localMatrix(1.0f), __worldMatrix(1.0f)
 			{}
 			void SetWorldPosition(glm::vec3 newPosition) 
 			{
@@ -29,7 +29,7 @@ namespace VE
 				{
 					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
 
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
+					glm::mat4 parentWorldTransform = parentTC->__worldMatrix;
 
 					glm::vec4 worldPos = glm::vec4(newPosition, 1.0f);
 
@@ -51,7 +51,7 @@ namespace VE
 
 					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
 
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
+					glm::mat4 parentWorldTransform = parentTC->__worldMatrix;
 
 					glm::quat parentWorldRotQuat = glm::quat_cast(glm::mat3(invParentScaleMatrix * parentWorldTransform));
 
@@ -72,7 +72,7 @@ namespace VE
 				{
 					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
 
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
+					glm::mat4 parentWorldTransform = parentTC->__worldMatrix;
 
 					glm::vec3 parentWorldScale;
 					parentWorldScale.x = glm::length(glm::vec3(parentWorldTransform[0]));
@@ -97,13 +97,7 @@ namespace VE
 				}
 				else 
 				{
-					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
-
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
-					glm::vec4 localPos = glm::vec4(localPosition, 1.0f);
-
-					glm::vec4 worldPos = parentWorldTransform * localPos;
-					return worldPos;
+					return __worldPosition;
 				}
 			}
 
@@ -115,20 +109,7 @@ namespace VE
 				}
 				else
 				{
-					glm::quat localRotQuat = glm::quat(glm::vec3(glm::radians(localRotation)));
-
-					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
-
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
-
-					glm::quat parentWorldRotQuat = glm::quat_cast(parentWorldTransform);
-
-					glm::quat worldRotQuat = parentWorldRotQuat * localRotQuat;
-
-					glm::vec3 worldRotEulerAngles = glm::eulerAngles(worldRotQuat);
-
-					worldRotEulerAngles = glm::degrees(worldRotEulerAngles);
-					return worldRotEulerAngles;
+					return __worldRotation;
 				}
 			}
 			glm::vec3 GetWorldScale() 
@@ -139,56 +120,10 @@ namespace VE
 				}
 				else
 				{
-					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
-
-					glm::mat4 parentWorldTransform = parentTC->GetWorldTransformMatrix();
 					
-					glm::vec3 parentWorldScale;
-					parentWorldScale.x = glm::length(glm::vec3(parentWorldTransform[0]));
-					parentWorldScale.y = glm::length(glm::vec3(parentWorldTransform[1]));
-					parentWorldScale.z = glm::length(glm::vec3(parentWorldTransform[2]));
-
-					glm::mat4 parentWorldScaleMatrix = glm::scale(glm::mat4(1.0f), parentWorldScale);
-
-					glm::vec4 localScl = glm::vec4(localScale, 1.0f);
-
-					glm::vec4 worldScl = parentWorldScaleMatrix * localScl;
-					return worldScl;
+					return __worldScale;
 				}
 			}
-
-			glm::mat4 GetLocalTransformMatrix()
-			{
-				Components::TransformComponent& tc = *e.get_mut<Components::TransformComponent>();
-				glm::mat4 transformMatrix = glm::mat4(1.0f);
-				transformMatrix = glm::translate(glm::mat4(1.0f), tc.localPosition)
-					* glm::rotate(glm::mat4(1.0f), glm::radians(tc.localRotation.z), glm::vec3(0.0f, 0.0f, 1.0f))
-					* glm::rotate(glm::mat4(1.0f), glm::radians(tc.localRotation.y), glm::vec3(0.0f, 1.0f, 0.0f))
-					* glm::rotate(glm::mat4(1.0f), glm::radians(tc.localRotation.x), glm::vec3(1.0f, 0.0f, 0.0f))
-					* glm::scale(glm::mat4(1.0f), tc.localScale);
-				return transformMatrix;
-			}
-			glm::mat4 GetWorldTransformMatrix()
-			{
-
-				glm::mat4 transformMatrix = glm::mat4(1.0f);
-				if (!e.parent())
-				{
-					transformMatrix = GetLocalTransformMatrix();
-				}
-				else
-				{
-					TransformComponent* parentTC = e.parent().get_mut<TransformComponent>();
-
-					glm::mat4 parentWorldTransformMatrix = parentTC->GetWorldTransformMatrix();
-
-					glm::mat4 childLocalTransformMatrix = GetLocalTransformMatrix();
-
-					transformMatrix = parentWorldTransformMatrix * childLocalTransformMatrix;
-				}
-				return transformMatrix;
-			}
-
 
 			glm::vec3 localPosition = {};
 			glm::vec3 localRotation = {};
@@ -196,8 +131,16 @@ namespace VE
 			flecs::entity e;
 
 			//internal
-			glm::mat4 localMatrix;
-			glm::mat4 worldMatrix;
+			//read write
+			glm::mat4 __localMatrix;
+			//read only
+			glm::mat4 __worldMatrix;
+			//read only
+			glm::vec3 __worldPosition = {};
+			//read only
+			glm::vec3 __worldRotation = {};
+			//read only
+			glm::vec3 __worldScale = { 1.0f,1.0f,1.0f };
 		};
 
 		struct SpriteComponent
