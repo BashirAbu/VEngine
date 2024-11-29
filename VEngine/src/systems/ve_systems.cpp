@@ -51,12 +51,13 @@ namespace VE::Systems
 			ApplyParentTransform(e, tc);
 		}
 	}
-	void Camera2DTransformSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc)
+	void Camera2DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc)
 	{
 		c2dc.camera.target.x = transform.GetWorldPosition().x;
 		c2dc.camera.target.y = transform.GetWorldPosition().y;
 
 		c2dc.camera.rotation = transform.GetWorldRotation().z;
+		c2dc.camera.zoom = c2dc.zoom;
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{

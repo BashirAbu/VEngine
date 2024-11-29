@@ -155,12 +155,12 @@ namespace VE
 
 		struct Camera2DComponent
 		{
-			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
-			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 			float zoom = 1.0f;
-			bool isMain = false;
-			Camera2D camera = {};
+			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
 			RenderTexture renderTarget = {};
+			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+			Camera2D camera = {};
+			bool isMain = false;
 		};
 	}
 }

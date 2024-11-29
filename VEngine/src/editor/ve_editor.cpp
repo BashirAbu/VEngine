@@ -561,11 +561,14 @@ namespace VE
 			{
 				for (auto comp : engine->sceneManager->currentScene->componentsTable) 
 				{
-					if (ImGui::MenuItem(comp.first.c_str()))
+					if (!comp.first.empty())
 					{
-						selectedEntity.add(comp.second);
+						if (ImGui::MenuItem(comp.first.c_str()))
+						{
+							selectedEntity.add(comp.second);
+						}
+						ImGui::Separator();
 					}
-					ImGui::Separator();
 				}
 				ImGui::EndPopup();
 			}

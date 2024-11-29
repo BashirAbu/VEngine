@@ -80,7 +80,7 @@ namespace VE
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Sprite2DRenderSystem);
-		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DTransformSystem").kind(flecs::PostUpdate).each(Systems::Camera2DTransformSystem);
+		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).each(Systems::TransformSystem);
 		//register project components & systems.
 

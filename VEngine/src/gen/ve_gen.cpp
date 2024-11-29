@@ -19,6 +19,8 @@ namespace VE
 		{
 			flecs::component<glm::vec3>* vec3 = (flecs::component<glm::vec3>*) & comp;
 			vec3->member<float>("x").member<float>("y").member<float>("z");
+
+			
 		}
 		else if (compName.find("vec<4") != std::string::npos)
 		{
@@ -37,8 +39,43 @@ namespace VE
 		}
 		else if (compName.find("Camera2DComponent") != std::string::npos)
 		{
-			flecs::component<Components::Camera2DComponent>* cc = (flecs::component<Components::Camera2DComponent>*) & comp;
-			cc->member<glm::vec2>("renderTargetSize").member<glm::vec4>("backgroundColor").member<float>("zoom").member<bool>("isMain");
+			flecs::component<Components::Camera2DComponent>& cc = *(flecs::component<Components::Camera2DComponent>*) & comp;
+			
+
+			cc.opaque(cc.world().component().member<glm::vec2>("renderTargetSize").member<glm::vec4>("backgroundColor").member<float>("zoom").member<bool>("isMain"))
+				.serialize([](const flecs::serializer* s, const VE::Components::Camera2DComponent* data) -> int
+					{
+						s->member("renderTargetSize");
+						s->value(data->renderTargetSize);
+						s->member("backgroundColor");
+						s->value(data->backgroundColor);
+						s->member("zoom");
+						s->value(data->zoom);
+						s->member("isMain");
+						s->value(data->isMain);
+						return 0;
+					}).ensure_member([](VE::Components::Camera2DComponent* data, const char* member) -> void*
+						{
+
+							if (!strcmp(member, "renderTargetSize"))
+							{
+								return &data->renderTargetSize;
+							}
+							else if (!strcmp(member, "backgroundColor"))
+							{
+								return &data->backgroundColor;
+							}
+							else if (!strcmp(member, "zoom"))
+							{
+								return &data->zoom;
+							}
+							else if (!strcmp(member, "isMain"))
+							{
+								return &data->isMain;
+							}
+
+							return nullptr;
+						});
 		}
 	}
 
@@ -85,13 +122,13 @@ namespace VE
 				{
 					engine->sceneManager->currentScene->SetMainCamera(entity);
 				}
-				EditorElement::Float(cc->camera.zoom, "Zoom");
-				glm::vec2 renderTargetSize = glm::vec2(cc->renderTarget.texture.width, cc->renderTarget.texture.height);
-				EditorElement::Vec2(renderTargetSize, "Render Target Size");
-				if (glm::vec2(cc->renderTarget.texture.width, cc->renderTarget.texture.height) != renderTargetSize)
+				EditorElement::Float(cc->zoom, "Zoom");
+
+				EditorElement::Vec2(cc->renderTargetSize, "Render Target Size");
+				if (glm::vec2(cc->renderTarget.texture.width, cc->renderTarget.texture.height) != cc->renderTargetSize)
 				{
 					UnloadRenderTexture(cc->renderTarget);
-					cc->renderTarget = LoadRenderTexture((int)renderTargetSize.x, (int)renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+					cc->renderTarget = LoadRenderTexture((int)cc->renderTargetSize.x, (int)cc->renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 					SetTextureFilter(cc->renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 				}
 

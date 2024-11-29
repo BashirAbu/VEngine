@@ -26,7 +26,7 @@ namespace VE
 		{
 			BeginFrame();
 
-			flecs::entity ts = scene->systemsTable["Camera2DTransformSystem"].entity;
+			flecs::entity ts = scene->systemsTable["Camera2DSystem"].entity;
 			flecs::system* tss = (flecs::system*)&ts;
 			tss->run();
 			ts = scene->systemsTable["TransformSystem"].entity;
