@@ -138,7 +138,7 @@ namespace VE
 		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		DrawMainMenuBar();
 
@@ -572,9 +572,7 @@ namespace VE
 			ImGui::Text("Scene Systems:");
 			for (auto& system : engine->sceneManager->currentScene->systemsTable)
 			{
-				ImGui::Text("%s", system.first.c_str());
-				ImGui::SameLine();
-				ImGui::Checkbox((std::string("##chebox_") + system.first).c_str(), &system.second.enable);
+				EditorElement::Checkbox(system.second.enable, system.first.c_str());
 				if (ImGui::IsItemEdited())
 				{
 					flecs::system* s = (flecs::system*)&system.second.entity;

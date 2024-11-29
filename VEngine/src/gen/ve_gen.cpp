@@ -80,14 +80,12 @@ namespace VE
 			if (open)
 			{
 				Components::Camera2DComponent* cc = entity.get_mut<Components::Camera2DComponent>();
-				ImGui::Checkbox("IsMain", &cc->isMain);
+				VE::EditorElement::Checkbox(cc->isMain, "Is Main");
 				if (cc->isMain)
 				{
 					engine->sceneManager->currentScene->SetMainCamera(entity);
 				}
-				ImGui::Text("Zoom");
-				ImGui::SameLine();
-				ImGui::DragFloat("##zoom", &cc->camera.zoom);
+				EditorElement::Float(cc->camera.zoom, "Zoom");
 				glm::vec2 renderTargetSize = glm::vec2(cc->renderTarget.texture.width, cc->renderTarget.texture.height);
 				EditorElement::Vec2(renderTargetSize, "Render Target Size");
 				if (glm::vec2(cc->renderTarget.texture.width, cc->renderTarget.texture.height) != renderTargetSize)
@@ -118,23 +116,12 @@ namespace VE
 			if (open)
 			{
 				Components::SpriteComponent* sp = entity.get_mut<Components::SpriteComponent>();
-				ImGui::Text("Texture: %s", sp->texturePath.string().c_str());
-				ImGui::SameLine();
-				if (ImGui::Button("Browse"))
-				{
-					std::filesystem::path path = VE::OpenFileDialog();
-					if (!path.empty())
-					{
-						std::filesystem::path relativePath = path.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
-						sp->texturePath = relativePath.generic_string();
-					}
-				}
+
+				EditorElement::FileSystem(sp->texturePath, "Texture");
 
 				EditorElement::Vec2(sp->origin, "Origin");
 
-				ImGui::Text("Render Order: ");
-				ImGui::SameLine();
-				ImGui::DragInt("##renderOrder", &sp->renderOrder);
+				EditorElement::Int(sp->renderOrder, "Render Order");
 
 				EditorElement::Color(sp->tintColor, "Tint Color");
 				ImGui::TreePop();
