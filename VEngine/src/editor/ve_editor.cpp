@@ -163,7 +163,7 @@ namespace VE
 		ImGui::PopFont();
 		rlImGuiEnd();
 		//make sure this gets called after DrawSceneViewport().
-		//UpdateEditor(GetFrameTime());
+		UpdateEditor(GetFrameTime());
 	}
 
 	void Editor::AddChildrenNode(flecs::entity child) 
@@ -361,7 +361,11 @@ namespace VE
 			});
 		engine->sceneManager->currentScene->world.defer_end();
 
-		ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail()));
+
+		ImGui::SetCursorPos(ImGui::GetStyle().FramePadding);
+		ImGui::Dummy(ImGui::GetContentRegionAvail());
+
+
 		if (ImGui::BeginDragDropTarget())
 		{
 

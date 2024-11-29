@@ -48,9 +48,9 @@ namespace VE
 	void Editor::DrawComponentElements(std::string name, flecs::entity entity) 
 	{
 		ImGui::PushID(name.c_str());
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		if (name == "TransformComponent")
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 			if (open)
 			{
@@ -66,7 +66,6 @@ namespace VE
 		}
 		else if (name == "Camera2DComponent")
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 			if (ImGui::BeginPopupContextItem(0, 1))
 			{
@@ -105,7 +104,7 @@ namespace VE
 		}
 		else if (name == "SpriteComponent")
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+			
 			bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 			if (ImGui::BeginPopupContextItem(0, 1))
 			{
