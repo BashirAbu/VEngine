@@ -6,6 +6,8 @@
 #include "utils/ve_utils.h"
 #include <imgui.h>
 #include <thread>
+
+
 namespace VE 
 {
 	Scene* Scene::singleton = nullptr;
@@ -121,7 +123,7 @@ namespace VE
 	}
 	Scene::~Scene()
 	{
-		world.reset();
+		world.release();
 		VE::Engine::GetSingleton()->UnloadProjectSharedLibrary();
 		singleton = nullptr;
 	}
@@ -278,7 +280,6 @@ namespace VE
 	{
 		flecs::entity clone = entity.clone(true);
 		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
-		const flecs::entity_t* p = (flecs::entity_t*) & entity;
 		clone.set_name(GenUniqueName(cloneName).c_str());
 		if (entity.parent())
 		{	
@@ -291,7 +292,6 @@ namespace VE
 	flecs::entity Scene::LookupEntity(std::string name)
 	{
 		flecs::entity ent = flecs::entity();
-		
 		
 		auto q = world.query_builder().with<_Components::SceneEntityTag>().build();
 		ent = q.find([&](flecs::entity e)
@@ -323,7 +323,7 @@ namespace VE
 		{
 			std::string uniqueName = name;
 			std::string temp = name;
-			size_t entityIDGen = 0;
+			static size_t entityIDGen = 0;
 			while (LookupEntity(temp))
 			{
 				temp = uniqueName + std::to_string(entityIDGen++);

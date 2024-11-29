@@ -142,12 +142,14 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/flecs/include/"
     }
     
-   
+    
     links
     {
         "raylib"
     }
-
+    
+    vectorextensions "Default"
+    
     filter "system:windows"
         cppdialect "C++20"
         staticruntime "off"
@@ -239,6 +241,7 @@ project "VEngine"
         "raylib",
     }
 
+    vectorextensions "Default"
 
     filter "system:windows"
         cppdialect "C++20"

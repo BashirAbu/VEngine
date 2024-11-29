@@ -163,7 +163,7 @@ namespace VE
 		ImGui::PopFont();
 		rlImGuiEnd();
 		//make sure this gets called after DrawSceneViewport().
-		UpdateEditor(GetFrameTime());
+		//UpdateEditor(GetFrameTime());
 	}
 
 	void Editor::AddChildrenNode(flecs::entity child) 

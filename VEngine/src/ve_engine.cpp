@@ -5,7 +5,7 @@
 #include "ve_assets_manager.h"
 #include <fstream>
 #include <iostream>
-
+#include "platform/ve_flecs_os_backend.h"
 namespace VE 
 {
 	void CustomLogCallback(int logLevel, const char* text, va_list args) {
@@ -40,8 +40,11 @@ namespace VE
 		buffer.clear();
 	}
 	Engine* Engine::singleton = nullptr;
+	
 	Engine::Engine(EngineDesc engineDesc)
 	{
+
+		stdcpp_set_os_api();
 		singleton = this;
 		//Parse project file.
 		std::ifstream projectFile(engineDesc.projectDetails.path);

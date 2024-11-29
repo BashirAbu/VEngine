@@ -10,6 +10,9 @@
 #include <flecs/addons/meta.h>
 #include <flecs/addons/json.h>
 #include <nlohmann/json.hpp>
+#define GLM_FORCE_SSE2
+#define GLM_FORCE_AVX
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -50,7 +53,8 @@
 #endif
 
 #define VE_STRINGIFY(x) #x
-
+#ifdef VE_WIN32
+#ifndef VE_STATIC
 #ifdef VE_EXPORT
 #define VE_API __declspec(dllexport)
 #else
@@ -62,6 +66,19 @@
 #else
 #define VE_PROJECT_API __declspec(dllimport)
 #endif
+#else
+
+#define VE_API
+#define VE_PROJECT_API
+
+#endif
+#endif
+
+#ifndef VE_WIN32
+#define VE_API
+#define VE_PROJECT_API
+#endif // !VE_WIN32
+
 
 
 #define VE_PROJECT_FILE_EXTENSION "VEProject"
