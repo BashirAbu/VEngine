@@ -119,6 +119,11 @@ namespace VE
 
 				EditorElement::FileSystem(sp->texturePath, "Texture");
 
+				if (!sp->texturePath.empty())
+				{
+					sp->texture = AssetsManager::GetSingleton()->LoadTexture(sp->texturePath);
+				}
+
 				EditorElement::Vec2(sp->origin, "Origin");
 
 				EditorElement::Int(sp->renderOrder, "Render Order");

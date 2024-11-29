@@ -383,6 +383,10 @@ namespace VE
 			ImGui::EndDragDropTarget();
 		}
 
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow))
+		{
+			selectedEntity = flecs::entity();
+		}
 
 
 		while (!addEntities.empty()) 
@@ -777,7 +781,7 @@ namespace VE
 
 	void Editor::UpdateEditor(float deltaTime)
 	{
-		if (sceneViewportFocused)
+		if (isSceneViewHovered)
 		{
 			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
 			{
@@ -807,7 +811,7 @@ namespace VE
 
 		}
 
-		if (IsSceneViewportFocused() && isSceneViewHovered)
+		if (isSceneViewHovered)
 		{
 			if (ImGui::IsMouseClicked(MOUSE_BUTTON_LEFT))
 			{

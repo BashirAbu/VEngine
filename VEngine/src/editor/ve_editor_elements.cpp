@@ -208,7 +208,7 @@ namespace VE
             ImGui::NextColumn();
             if (ImGui::Button("Browse"))
             {
-                std::filesystem::path path = VE::OpenFileDialog();
+                path = VE::OpenFileDialog();
                 if (!path.empty())
                 {
                     path = GetRelativePath(path);
