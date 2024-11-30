@@ -82,11 +82,10 @@
 
 
 //Header tool macros.
-
 #define VE_COMPONENT()
 #define VE_PROPERTY()
 #define VE_ENUM()
-#define VE_FUNCTION()
+#define VE_SYSTEM()
 
 
 #define VE_PROJECT_FILE_EXTENSION "VEProject"

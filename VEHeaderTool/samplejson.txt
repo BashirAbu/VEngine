@@ -1,0 +1,225 @@
+
+//No namespace
+[
+    {
+        "type": "include",
+        "file": "ve_defines.h"
+    },
+    {
+        "type": "class",
+        "line": 5,
+        "meta": {},
+        "isstruct": true,
+        "name": "PlayerComponent",
+        "members": [
+            {
+                "type": "property",
+                "line": 8,
+                "meta": {
+                    "EDIT": null,
+                    "SERIALIZE": null
+                },
+                "access": "public",
+                "dataType": {
+                    "type": "literal",
+                    "name": "float"
+                },
+                "name": "speed",
+                "elements": null
+            },
+            {
+                "type": "property",
+                "line": 10,
+                "meta": {},
+                "access": "public",
+                "dataType": {
+                    "type": "literal",
+                    "name": "glm::vec3"
+                },
+                "name": "direction",
+                "elements": null
+            }
+        ]
+    }
+]
+
+
+//namespace 
+[
+    {
+        "type": "include",
+        "file": "ve_defines.h"
+    },
+    {
+        "type": "include",
+        "file": "raylib.h"
+    },
+    {
+        "type": "include",
+        "file": "ve_engine.h"
+    },
+    {
+        "type": "include",
+        "file": "ve_assets_manager.h"
+    },
+    {
+        "type": "include",
+        "file": "utils/ve_utils.h"
+    },
+    {
+        "type": "namespace",
+        "name": "VE",
+        "members": [
+            {
+                "type": "namespace",
+                "name": "_Components",
+                "members": []
+            },
+            {
+                "type": "namespace",
+                "name": "Components",
+                "members": [
+                    {
+                        "type": "class",
+                        "line": 19,
+                        "meta": {},
+                        "isstruct": true,
+                        "name": "TheCompo",
+                        "members": [
+                            {
+                                "type": "property",
+                                "line": 22,
+                                "meta": {},
+                                "access": "public",
+                                "dataType": {
+                                    "type": "literal",
+                                    "name": "float"
+                                },
+                                "name": "age",
+                                "elements": null
+                            },
+                            {
+                                "type": "property",
+                                "line": 24,
+                                "meta": {},
+                                "access": "public",
+                                "dataType": {
+                                    "type": "literal",
+                                    "name": "std::string"
+                                },
+                                "name": "name",
+                                "elements": null
+                            },
+                            {
+                                "type": "property",
+                                "line": 26,
+                                "meta": {},
+                                "access": "public",
+                                "dataType": {
+                                    "type": "literal",
+                                    "name": "glm::vec3"
+                                },
+                                "name": "postion",
+                                "elements": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+/nested name space
+[
+    {
+        "type": "include",
+        "file": "ve_defines.h"
+    },
+    {
+        "type": "include",
+        "file": "raylib.h"
+    },
+    {
+        "type": "include",
+        "file": "ve_engine.h"
+    },
+    {
+        "type": "include",
+        "file": "ve_assets_manager.h"
+    },
+    {
+        "type": "include",
+        "file": "utils/ve_utils.h"
+    },
+    {
+        "type": "namespace",
+        "name": "VE",
+        "members": [
+            {
+                "type": "namespace",
+                "name": "VE2",
+                "members": [
+                    {
+                        "type": "namespace",
+                        "name": "_Components",
+                        "members": []
+                    },
+                    {
+                        "type": "namespace",
+                        "name": "Components",
+                        "members": [
+                            {
+                                "type": "class",
+                                "line": 20,
+                                "meta": {},
+                                "isstruct": true,
+                                "name": "TheCompo",
+                                "members": [
+                                    {
+                                        "type": "property",
+                                        "line": 23,
+                                        "meta": {},
+                                        "access": "public",
+                                        "dataType": {
+                                            "type": "literal",
+                                            "name": "float"
+                                        },
+                                        "name": "age",
+                                        "elements": null
+                                    },
+                                    {
+                                        "type": "property",
+                                        "line": 25,
+                                        "meta": {},
+                                        "access": "public",
+                                        "dataType": {
+                                            "type": "literal",
+                                            "name": "std::string"
+                                        },
+                                        "name": "name",
+                                        "elements": null
+                                    },
+                                    {
+                                        "type": "property",
+                                        "line": 27,
+                                        "meta": {},
+                                        "access": "public",
+                                        "dataType": {
+                                            "type": "literal",
+                                            "name": "glm::vec3"
+                                        },
+                                        "name": "postion",
+                                        "elements": null
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+

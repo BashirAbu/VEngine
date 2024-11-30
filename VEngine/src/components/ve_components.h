@@ -14,19 +14,35 @@ namespace VE
 		struct ConstructTag {};
 	}
 
+
 	namespace Components
 	{
+		namespace DOG 
+		{
+			VE_COMPONENT()
+			struct TheCompo
+			{
+				VE_PROPERTY();
+				float age;
+				VE_PROPERTY();
+				std::string name;
+				VE_PROPERTY();
+				glm::vec3 postion;
+			};
+		}
+
 		VE_COMPONENT()
-		struct TheCompo
+		struct PlayerMovement
 		{
 			VE_PROPERTY();
-			float age;
+			float speed;
 			VE_PROPERTY();
-			std::string name;
+			float rotationSpeed;
 			VE_PROPERTY();
-			glm::vec3 postion;
+			glm::vec3 velocity;
+			VE_PROPERTY();
+			glm::vec3 direction;
 		};
-
 
 		struct TransformComponent
 		{
@@ -175,5 +191,11 @@ namespace VE
 			float zoom = 1.0f;
 			bool isMain = false;
 		};
+
+
+
+		VE_SYSTEM(OnUpdate, Multithreaded);
+		void testSystem(flecs::entity e, TransformComponent& tc, SpriteComponent& sc);
+
 	}
 }

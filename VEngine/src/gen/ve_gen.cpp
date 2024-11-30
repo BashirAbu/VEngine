@@ -9,6 +9,8 @@ namespace VE
 	//Serialization stuff
 	void Scene::AddMetaData(flecs::entity comp)
 	{
+		
+
 		std::string compName = (std::string)comp.name().c_str();
 		if (compName.find("vec<2") != std::string::npos)
 		{

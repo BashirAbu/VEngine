@@ -47,7 +47,7 @@ namespace VE
 
 		std::string SerializeScene();
 		std::string SerializeEntity(flecs::entity e);
-
+		flecs::world GetFlecsWorld() { return world; }
 	private:
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);

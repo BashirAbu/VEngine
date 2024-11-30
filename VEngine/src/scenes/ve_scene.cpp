@@ -6,7 +6,7 @@
 #include "utils/ve_utils.h"
 #include <imgui.h>
 #include <thread>
-
+void EngineGeneratedRegistration();
 
 namespace VE 
 {
@@ -84,6 +84,8 @@ namespace VE
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).each(Systems::TransformSystem);
 		//register project components & systems.
 
+
+		EngineGeneratedRegistration();
 
 		flecs::query regComponents = world.query<flecs::Component>();
 
