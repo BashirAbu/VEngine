@@ -16,6 +16,18 @@ namespace VE
 
 	namespace Components
 	{
+		VE_COMPONENT()
+		struct TheCompo
+		{
+			VE_PROPERTY();
+			float age;
+			VE_PROPERTY();
+			std::string name;
+			VE_PROPERTY();
+			glm::vec3 postion;
+		};
+
+
 		struct TransformComponent
 		{
 			TransformComponent() : __localMatrix(1.0f), __worldMatrix(1.0f)
@@ -155,11 +167,12 @@ namespace VE
 
 		struct Camera2DComponent
 		{
-			float zoom = 1.0f;
-			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth, (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
-			RenderTexture renderTarget = {};
-			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 			Camera2D camera = {};
+			RenderTexture renderTarget = {};
+			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
+			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+			float zoom = 1.0f;
 			bool isMain = false;
 		};
 	}
