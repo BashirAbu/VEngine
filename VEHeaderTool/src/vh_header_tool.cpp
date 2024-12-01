@@ -23,8 +23,12 @@ namespace VH
 		
 		for (const HeaderFile& headerFile : headerFiles)
 		{
-			cppSourcefile += "#include \"" + headerFile.headerFilepath.generic_string() + "\"\n";
+			cppSourcefile += "#include \"" + headerFile.headerFilepath.generic_string() + "\"\n\n";
 		}
+
+		cppSourcefile += "using namespace VE;\n";
+		cppSourcefile += "using namespace VE::Components;\n";
+		cppSourcefile += "using namespace VE::_Components;\n\n\n";
 
 		for (const HeaderFile& headerFile : headerFiles)
 		{
@@ -111,22 +115,97 @@ namespace VH
 			cppSourcefile += "void ProjectGeneratedRegistration()\n";
 		}
 		cppSourcefile +=  "{\n";
-			for (const HeaderFile& headerFile : headerFiles)
-				for (const Component& comp : headerFile.components)
+		for (const HeaderFile& headerFile : headerFiles)
+			for (const Component& comp : headerFile.components)
+			{
+				std::string compFullSpacename = "";
+				for (std::string sn : comp.name.nameSpaces)
 				{
-					std::string compFullSpacename = "";
-					for (std::string sn : comp.name.nameSpaces)
-					{
-						compFullSpacename += sn + "::";
-					}
-					cppSourcefile += "	 VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">();\n";
-					
+					compFullSpacename += sn + "::";
 				}
+				cppSourcefile += "	 VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">();\n";
+					
+			}
 
 			//registere systems brother
-
-
-
+		for (const HeaderFile& headerFile : headerFiles)
+			for (const System& system : headerFile.systems)
+			{
+				std::string systemFullSpacename = "";
+				for (std::string sn : system.nameSpaces)
+				{
+					systemFullSpacename += sn + "::";
+				}
+				cppSourcefile += "	 VE::Scene::GetSingleton()->GetFlecsWorld().system<";
+				for (const ParsedName& com : system.components)
+				{
+					std::string compSpaceName = "";
+					for (std::string sn : com.nameSpaces)
+					{
+						compSpaceName += sn + "::";
+					}
+					cppSourcefile += compSpaceName + com.name + ",";
+				}
+				cppSourcefile.pop_back();
+				cppSourcefile += ">()";
+				if (system.meta.empty())
+				{
+					cppSourcefile += ".kind(flecs::OnUpdate)";
+				}
+				else 
+				{
+					if (std::find(system.meta.begin(), system.meta.end(), "OnStart") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::OnStart)";
+					}
+					else if(std::find(system.meta.begin(), system.meta.end(), "PreFrame") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PreFrame)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "OnLoad") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::OnLoad)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "PostLoad") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PostLoad)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "PreUpdate") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PreUpdate)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "OnUpdate") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::OnUpdate)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "OnValidate") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::OnValidate)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "PostUpdate") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PostUpdate)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "PreStore") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PreStore)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "OnStore") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::OnStore)";
+					}
+					else if (std::find(system.meta.begin(), system.meta.end(), "PostFrame") != system.meta.end())
+					{
+						cppSourcefile += ".kind(flecs::PostFrame)";
+					}
+					if (std::find(system.meta.begin(), system.meta.end(), "Multithreaded") != system.meta.end())
+					{
+						cppSourcefile += ".multi_threaded()";
+					}
+					//
+				}
+				cppSourcefile += ".each(" + systemFullSpacename + system.name + ");\n";
+			}
 		cppSourcefile +="}\n";
 
 

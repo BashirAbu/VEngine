@@ -194,7 +194,7 @@ namespace VE
 
 
 
-		VE_SYSTEM(OnUpdate, Multithreaded);
+		VE_SYSTEM(Multithreaded);
 		void testSystem(flecs::entity e, TransformComponent& tc, SpriteComponent& sc);
 
 	}

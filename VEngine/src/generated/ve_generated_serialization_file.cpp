@@ -1,6 +1,9 @@
 #include "ve_defines.h"
 #include "scenes/ve_scene.h"
 #include "components/ve_components.h"
+using namespace VE;
+using namespace VE::Components;
+using namespace VE::_Components;
 void Serialize_TheCompo()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -77,4 +80,5 @@ void EngineGeneratedRegistration()
 {
 	 VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::DOG::TheCompo>();
 	 VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::PlayerMovement>();
+	 VE::Scene::GetSingleton()->GetFlecsWorld().system<TransformComponent,SpriteComponent>().multi_threaded().each(VE::Components::testSystem);
 }
