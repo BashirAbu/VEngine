@@ -34,6 +34,14 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 	if (name == "SpriteComponent")
 	{
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::SpriteComponent>();
+			}
+			ImGui::EndPopup();
+		}
 		if (open)
 		{
 			
@@ -48,18 +56,18 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 			ImGui::TreePop();
 		}
-		if (ImGui::BeginPopupContextItem(0, 1))
-		{
-			if(ImGui::MenuItem("Remove"))
-			{
-				entity.remove<VE::Components::SpriteComponent>(); open = false;
-			}
-			ImGui::EndPopup();
-		}
 	}
 	if (name == "Camera2DComponent")
 	{
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::Camera2DComponent>();
+			}
+			ImGui::EndPopup();
+		}
 		if (open)
 		{
 			
@@ -73,14 +81,6 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			EditorElement::Checkbox(Camera2DComponent_->isMain, "Is Main");
 
 			ImGui::TreePop();
-		}
-		if (ImGui::BeginPopupContextItem(0, 1))
-		{
-			if(ImGui::MenuItem("Remove"))
-			{
-				entity.remove<VE::Components::Camera2DComponent>(); open = false;
-			}
-			ImGui::EndPopup();
 		}
 	}
 

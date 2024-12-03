@@ -126,18 +126,16 @@ namespace VH
 					compFullSpacename += sn + "::";
 				}
 
-				//if (ImGui::BeginPopupContextItem(0, 1))
-				//	//		{
-				//	//			if (ImGui::MenuItem("Remove"))
-				//	//			{
-				//	//				entity.remove<VE::Components::SpriteComponent>();
-				//	//				open = false;
-				//	//			}
-				//	//			ImGui::EndPopup();
-				//	//		}
-
 				cppSourcefile += "	if (name == \"" + comp.name.name + "\")\n	{\n"
 					"		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());\n";
+				if ((compFullSpacename + comp.name.name) != "VE::Components::TransformComponent")
+				{
+					cppSourcefile += "		if (ImGui::BeginPopupContextItem(0, 1))\n		{\n";
+					cppSourcefile += "			if(ImGui::MenuItem(\"Remove\"))\n			{\n";
+					cppSourcefile += "				entity.remove<" + compFullSpacename + comp.name.name + ">();\n";
+					cppSourcefile += "			}\n";
+					cppSourcefile += "			ImGui::EndPopup();\n		}\n";
+				}
 				cppSourcefile += "		if (open)\n		{\n"
 					"			\n";
 				cppSourcefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = entity.get_mut<" + compFullSpacename + comp.name.name + ">();\n";
@@ -151,14 +149,6 @@ namespace VH
 				}
 
 				cppSourcefile += "			ImGui::TreePop();\n		}\n";
-				if ((compFullSpacename + comp.name.name) != "VE::Components::TransformComponent")
-				{
-					cppSourcefile += "		if (ImGui::BeginPopupContextItem(0, 1))\n		{\n";
-					cppSourcefile += "			if(ImGui::MenuItem(\"Remove\"))\n			{\n";
-					cppSourcefile += "				entity.remove<" + compFullSpacename + comp.name.name + ">(); open = false;\n";
-					cppSourcefile += "			}\n";
-					cppSourcefile += "			ImGui::EndPopup();\n		}\n";
-				}
 				cppSourcefile += "	}\n";
 			}
 		}
@@ -309,7 +299,7 @@ namespace VH
 				{
 					systemFullSpacename += sn + "::";
 				}
-				cppSourcefile += "	 VE::Scene::GetSingleton()->GetFlecsWorld().system<";
+				cppSourcefile += "	VE::Scene::GetSingleton()->GetFlecsWorld().system<";
 				for (const ParsedName& com : system.components)
 				{
 					std::string compSpaceName = "";

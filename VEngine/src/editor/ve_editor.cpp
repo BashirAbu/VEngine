@@ -532,6 +532,7 @@ namespace VE
 			
 			ImGui::Separator();
 
+			engine->sceneManager->currentScene->world.defer_begin();
 			selectedEntity.each([&](flecs::id compId) 
 			{
 				if (compId.is_entity())
@@ -544,6 +545,7 @@ namespace VE
 					}
 				}
 			});
+			engine->sceneManager->currentScene->world.defer_end();
 
 			ImGuiStyle& style = ImGui::GetStyle();
 
