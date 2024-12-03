@@ -144,7 +144,7 @@ language "c++"
         cppdialect "C++20"
         staticruntime "off"
         systemversion "latest"
-        buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005"
+        buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
         defines
         {
             "VE_WINDOWS",
@@ -178,7 +178,10 @@ language "c++"
             "{MKDIR} build",
             "{CHDIR} build",
             "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config Debug"
+            "cmake --build . --config Debug",
+
+            "{CHDIR} %{prj.location}",
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_COMPONENT -e VE_ENUM -f VE_SYSTEM -p VE_PROPERTY"
         }
         postbuildcommands
         {

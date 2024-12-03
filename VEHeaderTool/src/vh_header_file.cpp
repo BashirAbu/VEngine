@@ -130,32 +130,34 @@ namespace VH
 						}
 						nameSpaces.pop_back();
 					}
-					else 
+					
+				}
+				else
+				{
+					if (elenJson["type"] == "class" && isComponent)
 					{
-						if (elenJson["type"] == "class" && isComponent)
-						{
-							Component comp;
-							comp.name.nameSpaces = nameSpaces;
-							componentDetails(elenJson, comp);
-							components.push_back(comp);
+						Component comp;
+						comp.name.nameSpaces = nameSpaces;
+						componentDetails(elenJson, comp);
+						components.push_back(comp);
 
-						}
-						else if (elenJson["type"] == "function" && !isComponent)
-						{
-							System system;
-							system.nameSpaces = nameSpaces;
-							systemDetails(elenJson, system);
-							systems.push_back(system);
-						}
+					}
+					else if (elenJson["type"] == "function" && !isComponent)
+					{
+						System system;
+						system.nameSpaces = nameSpaces;
+						systemDetails(elenJson, system);
+						systems.push_back(system);
 					}
 				}
 			};
-					
+		//comps			
 		for (auto elementJson : fileJson)
 		{
 			recursiveNamespaces(elementJson, true);
 		}
 		nameSpaces.clear();
+		//systems
 		for (auto elementJson : fileJson)
 		{
 			recursiveNamespaces(elementJson, false);

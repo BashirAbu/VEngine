@@ -136,6 +136,8 @@ namespace VE
 
 		OnSharedLibraryEntry = (PFN_OnSharedLibraryEntry)projectSharedLibrary->GetProcAddress("OnSharedLibraryEntry");
 		VE_ASSERT(OnSharedLibraryEntry);
+		ProjectDrawComponentElements = (PFN_ProjectDrawComponentElements)projectSharedLibrary->GetProcAddress("ProjectDrawComponentElements");
+		VE_ASSERT(ProjectDrawComponentElements);
 	}
 	void Engine::ReloadProjectSharedLibrary()
 	{

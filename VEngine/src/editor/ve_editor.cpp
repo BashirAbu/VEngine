@@ -539,6 +539,7 @@ namespace VE
 					if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
 					{
 						DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
+						ProjectDrawComponentElements(compId.entity().name().c_str(), selectedEntity);
 						ImGui::Separator();
 					}
 				}

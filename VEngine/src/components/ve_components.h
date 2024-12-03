@@ -162,6 +162,7 @@ namespace VE
 			Texture* texture = nullptr;
 		};
 
+
 		VE_COMPONENT()
 		struct Camera2DComponent
 		{

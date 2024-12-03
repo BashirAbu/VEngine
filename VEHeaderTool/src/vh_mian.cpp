@@ -44,7 +44,7 @@ int main(int argc, char** argv)
                 std::cout << jsonHeader << std::endl;
                 VH::HeaderFile headerFile;
                 headerFile.json = jsonHeader;
-                headerFile.headerFilepath = std::filesystem::relative(headerFilepath, "../VEngine/src/");
+                headerFile.headerFilepath = std::filesystem::relative(headerFilepath, "src/");
                 headerTool.headerFiles.push_back(headerFile);
             }
         }

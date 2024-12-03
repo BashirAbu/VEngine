@@ -104,8 +104,14 @@ namespace VH
 		cppSourcefile += "using namespace VE::Components;\n";
 		cppSourcefile += "using namespace VE::_Components;\n\n\n";
 
-		cppSourcefile += "void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)\n{\n";
-		
+		if (type == Type::Engine)
+		{
+			cppSourcefile += "void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)\n{\n";
+		} 
+		else 
+		{
+			cppSourcefile += "extern \"C\" VE_PROJECT_API void ProjectDrawComponentElements(std::string name, flecs::entity entity)\n{\n";
+		}
 		cppSourcefile += "	ImGui::PushID(name.c_str());\n"
 			"	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
 
@@ -314,7 +320,7 @@ namespace VH
 					cppSourcefile += compSpaceName + com.name + ",";
 				}
 				cppSourcefile.pop_back();
-				cppSourcefile += ">()";
+				cppSourcefile += ">(\"" + system.name + "\")";
 				if (system.meta.empty())
 				{
 					cppSourcefile += ".kind(flecs::OnUpdate)";
