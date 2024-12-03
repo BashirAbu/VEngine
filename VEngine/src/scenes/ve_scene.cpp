@@ -50,7 +50,7 @@ namespace VE
 			});
 
 		flecs::query regSystems = world.query_builder().with(flecs::System).build();
-
+		world.defer_begin();
 		regSystems.each([&](flecs::entity e) 
 			{
 				std::string path = e.path().c_str();
@@ -58,9 +58,12 @@ namespace VE
 				{
 					systemsTable[e.name().c_str()].entity = e;
 					systemsTable[e.name().c_str()].enable = false;
+
+					flecs::system* s = (flecs::system*)&e;
+					s->disable();
 				}
 			});
-
+		world.defer_end();
 		//set number of threads;
 		uint32_t numberOfThreads = std::thread::hardware_concurrency();
 		world.set_threads(numberOfThreads);

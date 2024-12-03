@@ -461,6 +461,7 @@ namespace VE
 		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload Project").x + ImGui::GetStyle().ItemSpacing.x * 4;
 		float spacing = (menuBarWidth - buttonWidth) / 2.0f;
 		ImGui::SameLine(spacing);
+		flecs::entity tempSelecetedEntity = selectedEntity;
 		if (engine->sceneManager->mode == SceneMode::Editor)
 		{
 			if (ImGui::Button("Start"))
@@ -499,7 +500,7 @@ namespace VE
 				selectedEntity = flecs::entity();
 			}
 		}
-		
+		selectedEntity = engine->sceneManager->currentScene->LookupEntity(tempSelecetedEntity);
 		ImGui::EndMainMenuBar();
 	}
 	

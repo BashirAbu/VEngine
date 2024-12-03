@@ -42,19 +42,13 @@ namespace VE
 			enabledSystems.push_back(systemName);
 		}
 
-
-		flecs::query querySystem = currentScene->world.query_builder().with(flecs::System).build();
-
-
-		querySystem.each([&](flecs::entity e) 
-			{
-				std::string name = e.name().c_str();
-				if (std::find(enabledSystems.begin(), enabledSystems.end(), name) != enabledSystems.end())
-				{
-					currentScene->systemsTable[name].enable = true;
-				}
-			});
-
+		for (auto enableSystem : enabledSystems)
+		{
+			currentScene->systemsTable[enableSystem].enable = true;
+			flecs::system* s = (flecs::system*)&currentScene->systemsTable[enableSystem];
+			s->enable();
+		}
+					
 		std::stringstream ss;
 		ss << sceneJson["flecs_world"];
 		std::string flecsWorld = ss.str();
