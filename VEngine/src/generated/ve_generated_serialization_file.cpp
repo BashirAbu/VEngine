@@ -103,11 +103,82 @@ void Serialize_Camera2DComponent()
 }
 
 
+void Serialize_UICanvasComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "UICanvasComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::UI::UICanvasComponent>* comp = (flecs::component<VE::Components::UI::UICanvasComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<glm::vec2>("canvasSize").member<bool>("isMain"))
+		.serialize([](const flecs::serializer* s, const VE::Components::UI::UICanvasComponent* data) -> int		{
+		s->member("canvasSize");
+		s->value(data->canvasSize);
+		s->member("isMain");
+		s->value(data->isMain);
+			 return 0;
+		}).ensure_member([](VE::Components::UI::UICanvasComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "canvasSize")) { return &data->canvasSize;}
+			else if (!strcmp(member, "isMain")) { return &data->isMain;}
+		return nullptr;
+		});
+	}
+}
+
+
+void Serialize_LabelComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "LabelComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::UI::LabelComponent>* comp = (flecs::component<VE::Components::UI::LabelComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("origin").member<int32_t>("renderOrder").member<NormalizedColor>("color").member<float>("size").member<float>("spacing"))
+		.serialize([](const flecs::serializer* s, const VE::Components::UI::LabelComponent* data) -> int		{
+		s->member("fontFilepath");
+		s->value(data->fontFilepath);
+		s->member("text");
+		s->value(data->text);
+		s->member("origin");
+		s->value(data->origin);
+		s->member("renderOrder");
+		s->value(data->renderOrder);
+		s->member("color");
+		s->value(data->color);
+		s->member("size");
+		s->value(data->size);
+		s->member("spacing");
+		s->value(data->spacing);
+			 return 0;
+		}).ensure_member([](VE::Components::UI::LabelComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "fontFilepath")) { return &data->fontFilepath;}
+			else if (!strcmp(member, "text")) { return &data->text;}
+			else if (!strcmp(member, "origin")) { return &data->origin;}
+			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
+			else if (!strcmp(member, "color")) { return &data->color;}
+			else if (!strcmp(member, "size")) { return &data->size;}
+			else if (!strcmp(member, "spacing")) { return &data->spacing;}
+		return nullptr;
+		});
+	}
+}
+
+
 void EngineGeneratedSerialization()
 {
 	 Serialize_TransformComponent();
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
+	 Serialize_UICanvasComponent();
+	 Serialize_LabelComponent();
 }
 
 
@@ -118,5 +189,7 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::TransformComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::LabelComponent>();
 	EngineGeneratedSerialization();
 }

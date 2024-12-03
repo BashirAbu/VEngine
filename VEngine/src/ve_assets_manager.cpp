@@ -65,6 +65,21 @@ namespace VE
 			return &sounds[filepath.string()];
 		}
 	}
+	Font* AssetsManager::LoadFont(std::filesystem::path filepath)
+	{
+		std::lock_guard<std::mutex> lock(fontsMutex);
+		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+
+		if (fonts.find(filepath.string()) != fonts.end())
+		{
+			return &fonts[filepath.string()];
+		}
+		else
+		{
+			fonts[filepath.string()] = ::LoadFont(fullpath.string().c_str());
+			return &fonts[filepath.string()];
+		}
+	}
 	void AssetsManager::Clear()
 	{
 		for (auto img : images)
@@ -78,11 +93,16 @@ namespace VE
 		}
 		textures.clear();
 
-
 		for (auto sound : sounds)
 		{
 			UnloadSound(sound.second);
 		}
 		sounds.clear();
+
+		for (auto font : fonts)
+		{
+			UnloadFont(font.second);
+		}
+		fonts.clear();
 	}
 }

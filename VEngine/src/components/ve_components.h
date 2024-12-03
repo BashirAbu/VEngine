@@ -11,6 +11,7 @@ namespace VE
 	{
 		struct OnRender {};
 		struct SceneEntityTag {};
+		struct SceneEntityUITag {};
 		struct ConstructTag {};
 	}
 
@@ -178,5 +179,40 @@ namespace VE
 			VE_PROPERTY(Editor)
 			bool isMain = false;
 		};
+
+
+		namespace UI
+		{
+			VE_COMPONENT()
+			struct UICanvasComponent 
+			{
+				RenderTexture canvasRenderTarget = {};
+				VE_PROPERTY(Editor)
+				glm::vec2 canvasSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+				VE_PROPERTY(Editor)
+				bool isMain = false;
+			};
+
+			VE_COMPONENT()
+			struct LabelComponent 
+			{
+				Font* font = nullptr;
+				VE_PROPERTY(Editor)
+				std::filesystem::path fontFilepath = "";
+				VE_PROPERTY(Editor)
+				std::string text = "";
+				VE_PROPERTY(Editor);
+				glm::vec2 origin = {};
+				VE_PROPERTY(Editor)
+				int32_t renderOrder = 0;
+				VE_PROPERTY(Editor)
+				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
+				VE_PROPERTY(Editor)
+				float size = 12;
+				VE_PROPERTY(Editor)
+				float spacing = 1;
+			};
+		}
 	}
 }

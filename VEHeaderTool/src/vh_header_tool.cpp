@@ -69,7 +69,7 @@ namespace VH
 		{
 			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
 		}
-		else if (dataType.find("int") != std::string::npos)
+		else if (dataType.find("int") != std::string::npos || dataType.find("size_t") != std::string::npos)
 		{
 			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
 		}

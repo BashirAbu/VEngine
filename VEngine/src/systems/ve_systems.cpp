@@ -1,5 +1,5 @@
-#include "ve_systems.h"
 #include "utils/ve_utils.h"
+#include "ve_systems.h"
 #include <raylib.h>
 #include <raymath.h>
 #include <thread>
@@ -105,6 +105,54 @@ namespace VE::Systems
 			VE::Scene::GetSingleton()->renderer.Submit(tex, sc.renderOrder, e);
 			
 
+		}
+	}
+	void CanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
+	{
+		if (canvas.isMain)
+		{
+			flecs::query cavases = VE::Scene::GetSingleton()->GetFlecsWorld().query<Components::UI::UICanvasComponent>();
+
+			cavases.each([&](flecs::entity entity, Components::UI::UICanvasComponent& c)
+				{
+					if (e == entity)
+					{
+						c.isMain = true;
+					}
+					else
+					{
+						c.isMain = false;
+					}
+				});
+		}
+
+		if (glm::vec2(canvas.canvasRenderTarget.texture.width, canvas.canvasRenderTarget.texture.height) != canvas.canvasSize)
+		{
+			UnloadRenderTexture(canvas.canvasRenderTarget);
+			canvas.canvasRenderTarget = LoadRenderTexture((int)canvas.canvasSize.x, (int)canvas.canvasSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+			SetTextureFilter(canvas.canvasRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
+		}
+	}
+	void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& transform, Components::UI::LabelComponent& label)
+	{
+		if (!label.fontFilepath.empty() && !label.font)
+		{
+			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath);
+		}
+		if (label.font)
+		{
+			VE::Renderer::Label2D l2d = {};
+			l2d.font = label.font;
+			l2d.fontSize = label.size;
+			l2d.origin = *(Vector2*) & label.origin;
+			glm::vec3 pos = transform.GetWorldPosition();
+			l2d.position = *(Vector2*)& pos;
+			l2d.rotation = transform.GetWorldRotation().z;
+			l2d.spacing = label.spacing;
+			l2d.text = label.text.c_str();
+			
+			l2d.tint = GLMVec4ToRayColor(label.color);
+			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
 		}
 	}
 

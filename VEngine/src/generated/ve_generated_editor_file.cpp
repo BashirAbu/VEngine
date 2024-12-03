@@ -83,6 +83,60 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			ImGui::TreePop();
 		}
 	}
+	if (name == "UICanvasComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::UI::UICanvasComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::UI::UICanvasComponent* UICanvasComponent_ = entity.get_mut<VE::Components::UI::UICanvasComponent>();
+			EditorElement::Vec2(UICanvasComponent_->canvasSize, "Canvas Size");
+
+			EditorElement::Checkbox(UICanvasComponent_->isMain, "Is Main");
+
+			ImGui::TreePop();
+		}
+	}
+	if (name == "LabelComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::UI::LabelComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::UI::LabelComponent* LabelComponent_ = entity.get_mut<VE::Components::UI::LabelComponent>();
+			EditorElement::FileSystem(LabelComponent_->fontFilepath, "Font Filepath");
+
+			EditorElement::String(LabelComponent_->text, "Text");
+
+			EditorElement::Vec2(LabelComponent_->origin, "Origin");
+
+			EditorElement::Int(LabelComponent_->renderOrder, "Render Order");
+
+			EditorElement::Color(LabelComponent_->color, "Color");
+
+			EditorElement::Float(LabelComponent_->size, "Size");
+
+			EditorElement::Float(LabelComponent_->spacing, "Spacing");
+
+			ImGui::TreePop();
+		}
+	}
 
 	ImGui::PopID();
 }

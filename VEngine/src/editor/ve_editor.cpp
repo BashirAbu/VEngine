@@ -749,39 +749,29 @@ namespace VE
 
 		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
 		
-		Components::Camera2DComponent* c2dc = nullptr;
+		
+		ImVec2 area = ImGui::GetContentRegionAvail();
 
-		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc) 
-			{
-				if (cc.isMain) 
-				{
-					c2dc = &cc;
-				}
-			});
+		const Texture mainRenderTexture = engine->sceneManager->currentScene->renderer.mainRenderTarget.texture;
 
-		if (c2dc)
+		float scale = area.x / mainRenderTexture.width;
+
+		float y = mainRenderTexture.height * scale;
+		if (y > area.y)
 		{
-			ImVec2 area = ImGui::GetContentRegionAvail();
-
-			float scale = area.x / c2dc->renderTarget.texture.width;
-
-			float y = c2dc->renderTarget.texture.height * scale;
-			if (y > area.y)
-			{
-				scale = area.y / c2dc->renderTarget.texture.height;
-			}
-
-			int sizeY = int(c2dc->renderTarget.texture.height * scale);
-
-			vec2 = ImGui::GetCursorScreenPos();
-			vec2.y = (area.y / 2 - sizeY / 2) + (vec2.y - .5f);
-			gameViewportPosition = *((glm::vec2*)&vec2);
-
-			const Texture* rt = &c2dc->renderTarget.texture;
-
-			rlImGuiImageRenderTextureFit(rt, true);
-
+			scale = area.y / mainRenderTexture.height;
 		}
+
+		int sizeY = int(mainRenderTexture.height * scale);
+
+		vec2 = ImGui::GetCursorScreenPos();
+		vec2.y = (area.y / 2 - sizeY / 2) + (vec2.y - .5f);
+		gameViewportPosition = *((glm::vec2*)&vec2);
+
+		const Texture* rt = &mainRenderTexture;
+
+		rlImGuiImageRenderTextureFit(&engine->sceneManager->currentScene->renderer.mainRenderTarget.texture, true);
+
 		ImGui::End();
 		ImGui::GetStyle().WindowPadding = oldPadding;
 	}

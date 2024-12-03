@@ -19,5 +19,10 @@ namespace VE
 		void Camera2DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc);
 		void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc);
 
+
+
+
+		void CanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas);
+		void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& transform, Components::UI::LabelComponent& label);
 	}
 }

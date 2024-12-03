@@ -30,6 +30,10 @@ namespace VE
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).each(Systems::TransformSystem);
+
+
+		world.system<Components::UI::UICanvasComponent>("CanvasSystem").kind(flecs::PostUpdate).each(Systems::CanvasSystem);
+		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Label2DRenderSystem);
 		//register project components & systems.
 
 
@@ -437,7 +441,9 @@ namespace VE
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
 
-		world.component<_Components::SceneEntityTag>();
+		world.component<Components::UI::LabelComponent>();
 
+		world.component<_Components::SceneEntityTag>();
+		world.component<_Components::SceneEntityUITag>();
 	}
 }

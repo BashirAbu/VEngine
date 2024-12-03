@@ -2,7 +2,8 @@
 #include "ve_defines.h"
 #include <raylib.h>
 #include <concurrent_vector.h>
-
+#include <mutex>
+#include <thread>
 namespace VE 
 {
 	class VE_API Renderer 
@@ -11,6 +12,7 @@ namespace VE
 		Renderer(class Scene* scene);
 		~Renderer();
 		void RenderQueued();
+		void RenderUIQueued();
 		void RenderScene();
 		struct Tex2D
 		{
@@ -22,15 +24,39 @@ namespace VE
 			Color tint;
 		};
 		void Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e);
+		struct Label2D 
+		{
+			Font* font;
+			const char* text;
+			Vector2 position;
+			Vector2 origin;
+			float rotation;
+			float fontSize;
+			float spacing;
+			Color tint;
+		};
+		void Submit(Label2D& label, int32_t renderOrder, flecs::entity e);
 		void BeginFrame();
+		RenderTexture GetMainRenderTarget() { return mainRenderTarget; }
 	private:
+		RenderTexture mainRenderTarget;
 		struct FullTex2D 
 		{
 			Tex2D texture;
 			flecs::entity entity;
 			int32_t renderOrder;
 		};
-		Concurrency::concurrent_vector<FullTex2D> texture2DRenderQueue;
+		std::vector<FullTex2D> texture2DRenderQueue;
+		std::mutex texture2DRenderQueueMutex;
+
+		struct FullLabel2D 
+		{
+			Label2D label;
+			flecs::entity entity;
+			int32_t renderOrder;
+		};
+		std::vector<FullLabel2D> label2DRenderQueue;
+		std::mutex label2DRenderQueueMutex;
 		class Scene* scene;
 		friend class Editor;
 	};
