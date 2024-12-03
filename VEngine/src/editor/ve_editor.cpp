@@ -1,4 +1,4 @@
-#include "ve_editor.h"
+﻿#include "ve_editor.h"
 #include "ve_editor_input.h"
 #include "ve_engine.h"
 #include <rlImGui.h>
@@ -100,8 +100,19 @@ namespace VE
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 		
 		GrayTheme();
+		static const ImWchar ranges[] =
+		{
+			0x0020, 0x00FF, // Latin
+			0x0600, 0x06FF, // Arabic
+			0x0750, 0x077F, // Arabic Supplement
+			0x08A0, 0x08FF, // Arabic extended
+			0xFB50, 0xFDFF, // Arabic Presentation Forms-A
+			0xFE70, 0xFEFF, // Arabic Presentation Forms-B
+			0x0590, 0x05FF, // Hebrew
+			0
+		};
 
-		font = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Medium.ttf", 18.0f);
+		font = io.Fonts->AddFontFromFileTTF("resources/fonts/GoNotoKurrent-Regular.ttf", 18.0f, nullptr, &ranges[0]);
 		consoleFont = io.Fonts->AddFontFromFileTTF("resources/fonts/SourceCodePro-Medium.ttf", 16.0f);
 
 		// required to be called to cache the font texture with raylib
@@ -131,6 +142,7 @@ namespace VE
 	{
 		return singleton;
 	}
+
 	void Editor::DrawUI()
 	{
 		// Start the Dear ImGui frame

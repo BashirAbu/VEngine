@@ -2,6 +2,7 @@
 #include "platform/ve_platform.h"
 #include "ve_engine.h"
 #include "utils/ve_utils.h"
+#include <FarsiType.h>
 namespace VE
 {
 	namespace EditorElement
@@ -223,12 +224,14 @@ namespace VE
             ImGui::Columns(1);
 
         }
+
         VE_API void String(std::string& variable, std::string label) 
         {
 
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
+
             char buffer[255];
             strcpy(buffer, variable.c_str());
             ImGui::InputText(((std::string)"##" + label).c_str(), buffer, sizeof(buffer));

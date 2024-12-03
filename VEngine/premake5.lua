@@ -144,7 +144,7 @@ language "c++"
         cppdialect "C++20"
         staticruntime "off"
         systemversion "latest"
-        buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
+        buildoptions "/utf-8 /MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
         defines
         {
             "VE_WINDOWS",
