@@ -10,11 +10,166 @@ namespace VH
 	HeaderTool::~HeaderTool()
 	{
 	}
+
+	std::string FormatName(std::string input) 
+	{
+		std::string result;
+
+		for (size_t i = 0; i < input.length(); ++i) {
+			// Capitalize the first letter of the string
+			if (i == 0) {
+				result += std::toupper(input[i]);
+			}
+			// Add a space before uppercase letters (if not the first character)
+			else if (std::isupper(input[i]) && std::islower(input[i - 1])) {
+				result += ' ';
+				result += input[i];
+			}
+			// Add a space if there's a transition like "Man" in "worldMan"
+			else if (std::isupper(input[i]) && std::islower(input[i - 1])) {
+				result += ' ';
+				result += input[i];
+			}
+			else {
+				result += input[i];
+			}
+		}
+
+		return result;
+	}
+
+	void HeaderTool::EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name)
+	{
+		std::string formatedName = FormatName(name);
+		if (dataType.find("vec2") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Vec2(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("vec3") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Vec3(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("vec4") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Vec4(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("NormalizedColor") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		
+		//VE_API void String(float& variable, std::string label);
+		//VE_API void FileSystem(std::filesystem::path & path, std::string label);
+		//VE_API void Checkbox(bool& variable, std::string label);
+		else if (dataType.find("float") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("double") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("int") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("string") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::String(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("path") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::FileSystem(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+		else if (dataType.find("bool") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Checkbox(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+		}
+
+		cppSourefile += "\n\n";
+
+	}
 	void HeaderTool::GenerateEditorUIFile()
 	{
 		std::string filename = "ve_generated_editor_file.cpp";
 
+		std::string cppSourcefile = "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"editor/ve_editor.h\"\n#include <imgui.h>\n#include \"editor/ve_editor_elements.h\"\n\n";
+
+		for (const HeaderFile& headerFile : headerFiles)
+		{
+			cppSourcefile += "#include \"" + headerFile.headerFilepath.generic_string() + "\"\n\n";
+		}
+
+		cppSourcefile += "using namespace VE;\n";
+		cppSourcefile += "using namespace VE::Components;\n";
+		cppSourcefile += "using namespace VE::_Components;\n\n\n";
+
+		cppSourcefile += "void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)\n{\n";
+		
+		cppSourcefile += "	ImGui::PushID(name.c_str());\n"
+			"	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
+
+
+		for (const HeaderFile& headerFile : headerFiles)
+		{
+			for (const Component& comp : headerFile.components)
+			{
+				std::string compFullSpacename = "";
+				for (std::string sn : comp.name.nameSpaces)
+				{
+					compFullSpacename += sn + "::";
+				}
+
+				//if (ImGui::BeginPopupContextItem(0, 1))
+				//	//		{
+				//	//			if (ImGui::MenuItem("Remove"))
+				//	//			{
+				//	//				entity.remove<VE::Components::SpriteComponent>();
+				//	//				open = false;
+				//	//			}
+				//	//			ImGui::EndPopup();
+				//	//		}
+
+				cppSourcefile += "	if (name == \"" + comp.name.name + "\")\n	{\n"
+					"		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());\n";
+				cppSourcefile += "		if (open)\n		{\n"
+					"			\n";
+				cppSourcefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = entity.get_mut<" + compFullSpacename + comp.name.name + ">();\n";
+				
+				for (ParsedName property : comp.properites)
+				{
+					if (std::find(property.meta.begin(), property.meta.end(), "Editor") != property.meta.end())
+					{
+						EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name);
+					}
+				}
+
+				cppSourcefile += "			ImGui::TreePop();\n		}\n";
+				if ((compFullSpacename + comp.name.name) != "VE::Components::TransformComponent")
+				{
+					cppSourcefile += "		if (ImGui::BeginPopupContextItem(0, 1))\n		{\n";
+					cppSourcefile += "			if(ImGui::MenuItem(\"Remove\"))\n			{\n";
+					cppSourcefile += "				entity.remove<" + compFullSpacename + comp.name.name + ">(); open = false;\n";
+					cppSourcefile += "			}\n";
+					cppSourcefile += "			ImGui::EndPopup();\n		}\n";
+				}
+				cppSourcefile += "	}\n";
+			}
+		}
+
+		cppSourcefile += "\n	ImGui::PopID();\n}\n";
+
+
+		std::cout << cppSourcefile << std::endl;
+
+		std::ofstream output(generatedFilepath / filename);
+		output << cppSourcefile;
+		output.close();
 	}
+
+
+
+
 	void HeaderTool::GenerateSerializationFile()
 	{
 		std::string filename = "ve_generated_serialization_file.cpp";
@@ -115,6 +270,9 @@ namespace VH
 			cppSourcefile += "void ProjectGeneratedRegistration()\n";
 		}
 		cppSourcefile +=  "{\n";
+
+		
+
 		for (const HeaderFile& headerFile : headerFiles)
 			for (const Component& comp : headerFile.components)
 			{
@@ -123,9 +281,18 @@ namespace VH
 				{
 					compFullSpacename += sn + "::";
 				}
-				cppSourcefile += "	 VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">();\n";
+				cppSourcefile += "	VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">();\n";
 					
 			}
+			
+		if (type == Type::Engine)
+		{
+			cppSourcefile += "	EngineGeneratedSerialization();\n";
+		}
+		else if (type == Type::Project)
+		{
+			cppSourcefile += "	ProjectGeneratedSerialization();\n";
+		}
 
 			//registere systems brother
 		for (const HeaderFile& headerFile : headerFiles)

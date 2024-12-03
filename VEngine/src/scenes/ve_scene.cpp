@@ -19,63 +19,11 @@ namespace VE
 		VE::Engine::GetSingleton()->LoadProjectSharedLibrary();
 
 		//register builtin components.
-		world.component<std::string>()
-			.opaque(flecs::String)
-			.serialize([](const flecs::serializer* s, const std::string* data) 
-			{
-				const char* str = data->c_str();
-				return s->value(flecs::String, &str);
-			})
-			.assign_string([](std::string* data, const char* value) 
-			{
-				*data = value;
-			});
-		world.component<std::filesystem::path>()
-			.opaque(flecs::String)
-			.serialize([](const flecs::serializer* s, const std::filesystem::path* data)
-				{
-					std::string temp = data->string();
-					const char* str = temp.c_str();
-					return s->value(flecs::String, &str);
-				})
-			.assign_string([](std::filesystem::path* data, const char* value)
-				{
-					*data = (std::string)value;
-				});
-		AddMetaData(world.component<glm::vec2>());
-		AddMetaData(world.component<glm::vec3>());
-		AddMetaData(world.component<glm::vec4>());
-		AddMetaData(world.component<Components::TransformComponent>()
-			.on_set([](flecs::entity e, Components::TransformComponent & tc)
-			{
-				tc.e = e;
-			})
-			.on_add([](flecs::entity e, Components::TransformComponent& tc)
-				{
-					tc.e = e;
-				}));
-		AddMetaData(world.component<Components::SpriteComponent>().on_add([](flecs::entity e, Components::SpriteComponent& sp)
-			{
-				e.add<Components::TransformComponent>();
-			})
-			.on_set([](flecs::entity e, Components::SpriteComponent& sp)
-				{
-					e.add<Components::TransformComponent>();
-				}));
-		AddMetaData(world.component<Components::Camera2DComponent>().on_add([](flecs::entity e, Components::Camera2DComponent& c2dc)
-			{
-				e.add<Components::TransformComponent>();
-				c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-				SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-				c2dc.camera.zoom = c2dc.zoom;
-
-			}).on_remove([](flecs::entity e, Components::Camera2DComponent& c2dc)
-				{
-					UnloadRenderTexture(c2dc.renderTarget);
-				}));
-		world.component<_Components::SceneEntityTag>();
+		ManualComponentRegisteration();
 		
 		OnRender = world.entity("OnRender").add(flecs::PostUpdate);
+
+		EngineGeneratedRegistration();
 
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
@@ -85,7 +33,6 @@ namespace VE
 		//register project components & systems.
 
 
-		EngineGeneratedRegistration();
 
 		flecs::query regComponents = world.query<flecs::Component>();
 
@@ -417,5 +364,77 @@ namespace VE
 			}
 			return rootName;
 		}
+	}
+
+
+	//Serialization stuff
+	void Scene::ManualComponentRegisteration()
+	{
+		world.component<std::string>()
+			.opaque(flecs::String)
+			.serialize([](const flecs::serializer* s, const std::string* data)
+				{
+					const char* str = data->c_str();
+					return s->value(flecs::String, &str);
+				})
+			.assign_string([](std::string* data, const char* value)
+				{
+					*data = value;
+				});
+		world.component<std::filesystem::path>()
+			.opaque(flecs::String)
+			.serialize([](const flecs::serializer* s, const std::filesystem::path* data)
+				{
+					std::string temp = data->string();
+					const char* str = temp.c_str();
+					return s->value(flecs::String, &str);
+				})
+			.assign_string([](std::filesystem::path* data, const char* value)
+				{
+					*data = (std::string)value;
+				});
+
+
+		world.component<glm::vec2>().member<float>("x").member<float>("y");
+		
+		world.component<glm::vec3>().member<float>("x").member<float>("y").member<float>("z");
+
+
+		world.component<glm::vec4>().member<float>("x").member<float>("y").member<float>("z").member<float>("w");
+		
+
+		world.component<Components::TransformComponent>()
+			.on_set([](flecs::entity e, Components::TransformComponent& tc)
+				{
+					tc.e = e;
+				})
+			.on_add([](flecs::entity e, Components::TransformComponent& tc)
+				{
+					tc.e = e;
+				});
+
+		world.component<Components::SpriteComponent>().on_add([](flecs::entity e, Components::SpriteComponent& sc)
+			{
+				e.add<Components::TransformComponent>();
+			})
+			.on_set([](flecs::entity e, Components::SpriteComponent& sc)
+				{
+					e.add<Components::TransformComponent>();					
+				});
+
+		world.component<Components::Camera2DComponent>().on_add([](flecs::entity e, Components::Camera2DComponent& c2dc)
+			{
+				e.add<Components::TransformComponent>();
+				c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+				SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+				c2dc.camera.zoom = c2dc.zoom;
+
+			}).on_remove([](flecs::entity e, Components::Camera2DComponent& c2dc)
+				{
+					UnloadRenderTexture(c2dc.renderTarget);
+				});
+
+		world.component<_Components::SceneEntityTag>();
+
 	}
 }

@@ -32,7 +32,7 @@ namespace VE
 		flecs::entity AddEntity(std::string name);
 		std::string AddConstruct(std::filesystem::path constructFilePath);
 		const SceneType GetSceneType() const { return sceneType; }
-		void AddMetaData(flecs::entity comp);
+		void ManualComponentRegisteration();
 
 		flecs::entity CloneEntity(flecs::entity entity);
 		flecs::entity LookupEntity(std::string name);

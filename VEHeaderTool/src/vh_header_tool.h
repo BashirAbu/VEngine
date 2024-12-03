@@ -13,9 +13,12 @@ namespace VH
 		HeaderTool(Type type);
 		~HeaderTool();
 
+		void EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name);
 		void GenerateEditorUIFile();
+		
 		void GenerateSerializationFile();
 		void Prase();
+
 		std::vector<HeaderFile> headerFiles;
 		std::filesystem::path generatedFilepath;
 		Type type;

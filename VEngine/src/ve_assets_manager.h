@@ -1,7 +1,7 @@
 #pragma once
 #include "ve_defines.h"
 #include <raylib.h>
-
+#include <mutex>
 namespace VE 
 {
 	class VE_API AssetsManager 
@@ -21,8 +21,12 @@ namespace VE
 
 		std::filesystem::path assetsFolderPath;
 		std::unordered_map<std::string, Texture> textures;
+		std::mutex texturesMutex;
 		std::unordered_map<std::string, Image> images;
+		std::mutex imagesMutex;
 		std::unordered_map<std::string, Sound> sounds;
+		std::mutex soundsMutex;
+
 		friend class SceneManager;
 		friend class Engine;
 	};

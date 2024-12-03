@@ -58,6 +58,18 @@ namespace VE::Systems
 
 		c2dc.camera.rotation = transform.GetWorldRotation().z;
 		c2dc.camera.zoom = c2dc.zoom;
+
+		if (c2dc.isMain)
+		{
+			VE::Scene::GetSingleton()->SetMainCamera(e);
+		}
+
+		if (glm::vec2(c2dc.renderTarget.texture.width, c2dc.renderTarget.texture.height) != c2dc.renderTargetSize)
+		{
+			UnloadRenderTexture(c2dc.renderTarget);
+			c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+			SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+		}
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{

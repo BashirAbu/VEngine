@@ -73,6 +73,48 @@ namespace VE
 
             ImGui::PopID();
 		}
+        void Vec4(glm::vec4& vec, std::string label)
+        {
+            ImGui::PushID(label.c_str());
+
+            ImGui::Text(label.c_str());
+
+            ImGui::Columns(4, 0, false);
+
+            ImGui::Text("X");
+            ImGui::SameLine();
+            ImGui::PushItemWidth(-1);
+            ImGui::DragFloat("##x", &vec.x);
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+
+            ImGui::Text("Y");
+            ImGui::SameLine();
+            ImGui::PushItemWidth(-1);
+            ImGui::DragFloat("##y", &vec.y);
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            ImGui::Text("Z");
+            ImGui::SameLine();
+            ImGui::PushItemWidth(-1);
+            ImGui::DragFloat("##z", &vec.z);
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            ImGui::Text("W");
+            ImGui::SameLine();
+            ImGui::PushItemWidth(-1);
+            ImGui::DragFloat("##w", &vec.w);
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+
+            ImGui::Columns(1);
+
+
+            ImGui::PopID();
+        }
         void Color(glm::vec4& color, std::string label)
         {
             ImGui::Columns(2, 0, false);
@@ -181,20 +223,20 @@ namespace VE
             ImGui::Columns(1);
 
         }
-        VE_API void String(float& variable, std::string label) 
+        VE_API void String(std::string& variable, std::string label) 
         {
 
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
             char buffer[255];
-            strcpy(buffer, label.c_str());
+            strcpy(buffer, variable.c_str());
             ImGui::InputText(((std::string)"##" + label).c_str(), buffer, sizeof(buffer));
-            if (label.capacity() < sizeof(buffer))
+            if (variable.capacity() < sizeof(buffer))
             {
-                label.resize(sizeof(buffer));
+                variable.resize(sizeof(buffer));
             }
-            strcpy(label.data(), buffer);;
+            strcpy(variable.data(), buffer);;
             ImGui::NextColumn();
             ImGui::Columns(1);
             

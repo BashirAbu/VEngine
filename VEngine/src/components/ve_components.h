@@ -17,33 +17,7 @@ namespace VE
 
 	namespace Components
 	{
-		namespace DOG 
-		{
-			VE_COMPONENT()
-			struct TheCompo
-			{
-				VE_PROPERTY();
-				float age;
-				VE_PROPERTY();
-				std::string name;
-				VE_PROPERTY();
-				glm::vec3 postion;
-			};
-		}
-
 		VE_COMPONENT()
-		struct PlayerMovement
-		{
-			VE_PROPERTY();
-			float speed;
-			VE_PROPERTY();
-			float rotationSpeed;
-			VE_PROPERTY();
-			glm::vec3 velocity;
-			VE_PROPERTY();
-			glm::vec3 direction;
-		};
-
 		struct TransformComponent
 		{
 			TransformComponent() : __localMatrix(1.0f), __worldMatrix(1.0f)
@@ -153,9 +127,11 @@ namespace VE
 					return __worldScale;
 				}
 			}
-
+			VE_PROPERTY(Editor)
 			glm::vec3 localPosition = {};
+			VE_PROPERTY(Editor)
 			glm::vec3 localRotation = {};
+			VE_PROPERTY(Editor)
 			glm::vec3 localScale = {1.0f,1.0f,1.0f};
 			flecs::entity e;
 
@@ -172,30 +148,34 @@ namespace VE
 			glm::vec3 __worldScale = { 1.0f,1.0f,1.0f };
 		};
 
+		VE_COMPONENT()
 		struct SpriteComponent
 		{
+			VE_PROPERTY(Editor)
 			std::filesystem::path texturePath = "";
+			VE_PROPERTY(Editor)
 			glm::vec2 origin = {};
-			glm::vec4 tintColor = {1.0f, 1.0f, 1.0f, 1.0f};
+			VE_PROPERTY(Editor)
+			NormalizedColor tintColor = {1.0f, 1.0f, 1.0f, 1.0f};
+			VE_PROPERTY(Editor)
 			int32_t renderOrder = 0;
 			Texture* texture = nullptr;
 		};
 
+		VE_COMPONENT()
 		struct Camera2DComponent
 		{
 			Camera2D camera = {};
 			RenderTexture renderTarget = {};
+			VE_PROPERTY(Editor)
 			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
 										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
-			glm::vec4 backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+			VE_PROPERTY(Editor)
+			NormalizedColor backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+			VE_PROPERTY(Editor)
 			float zoom = 1.0f;
+			VE_PROPERTY(Editor)
 			bool isMain = false;
 		};
-
-
-
-		VE_SYSTEM(Multithreaded);
-		void testSystem(flecs::entity e, TransformComponent& tc, SpriteComponent& sc);
-
 	}
 }

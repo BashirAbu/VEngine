@@ -1,5 +1,6 @@
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
+
 namespace VE 
 {
 	AssetsManager::AssetsManager() 
@@ -17,6 +18,8 @@ namespace VE
 	}
 	Texture* AssetsManager::LoadTexture(std::filesystem::path filepath)
 	{
+		std::lock_guard<std::mutex> lock(texturesMutex);
+		filepath = filepath.generic_string();
 		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 		if (textures.find(filepath.string()) != textures.end())
 		{
@@ -24,7 +27,7 @@ namespace VE
 		}
 		else 
 		{
-			textures[filepath.string()] = ::LoadTexture((assetsFolderPath.string() + filepath.generic_string()).c_str());
+			textures[filepath.string()] = ::LoadTexture(fullpath.string().c_str());
 			//This to avoid distortion while rotating or scaling.
 			SetTextureFilter(textures[filepath.string()], TEXTURE_FILTER_BILINEAR);
 			//This to avoid bleeding at the edges.
@@ -34,25 +37,31 @@ namespace VE
 	}
 	Image* AssetsManager::LoadImage(std::filesystem::path filepath)
 	{
+		std::lock_guard<std::mutex> lock(imagesMutex);
+		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+
 		if (images.find(filepath.string()) != images.end())
 		{
 			return &images[filepath.string()];
 		}
 		else
 		{
-			images[filepath.string()] = ::LoadImage((assetsFolderPath.string() + filepath.generic_string()).c_str());
+			images[filepath.string()] = ::LoadImage(fullpath.string().c_str());
 			return &images[filepath.string()];
 		}
 	}
 	Sound* AssetsManager::LoadSound(std::filesystem::path filepath)
 	{
+		std::lock_guard<std::mutex> lock(soundsMutex);
+		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+
 		if (sounds.find(filepath.string()) != sounds.end())
 		{
 			return &sounds[filepath.string()];
 		}
 		else
 		{
-			sounds[filepath.string()] = ::LoadSound((assetsFolderPath.string() + filepath.generic_string()).c_str());
+			sounds[filepath.string()] = ::LoadSound(fullpath.string().c_str());
 			return &sounds[filepath.string()];
 		}
 	}

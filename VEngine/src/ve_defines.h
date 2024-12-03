@@ -25,6 +25,13 @@
 #define VE_WIN32
 #endif
 
+
+namespace VE 
+{
+	using NormalizedColor = glm::vec4;
+}
+
+
 //TODO: VE_DEBUG macros for other operating systems.
 #ifdef VE_WIN32
 #ifdef _DEBUG
