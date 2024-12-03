@@ -16,7 +16,6 @@ project "VEHeaderTool"
     includedirs
     {
         "%{prj.location}/src",
-        "%{wks.location}/VEngine/src/",
         "%{wks.location}/VEngine/third_party/nlohmann_json/include/"
     }
     
@@ -31,16 +30,6 @@ project "VEHeaderTool"
         defines
         {
             "VE_WINDOWS"
-        }
-
-        libdirs 
-        {
-            "%{wks.location}/bin/" .. outputDir .. "/VEngine/"
-        }
-
-        links
-        {
-            "VEngine.lib"
         }
     
     filter "configurations:Debug"

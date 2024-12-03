@@ -9,7 +9,7 @@ namespace VE
 	{
 		mainRenderTarget = LoadRenderTexture(VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
 			VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight,
-			PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+			PIXELFORMAT_UNCOMPRESSED_R8G8B8);
 
 		SetTextureFilter(mainRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
 	}
@@ -112,7 +112,8 @@ namespace VE
 			Components::Camera2DComponent* mainCamera = mainCameraEntity.get_mut<Components::Camera2DComponent>();
 			if (mainCamera)
 			{
-				DrawTexture(mainCamera->renderTarget.texture, 0, 0, WHITE);
+				RaylibDrawTexturTargeteLetterBox(mainCamera->renderTarget, { (float)mainRenderTarget.texture.width, (float)mainRenderTarget.texture.height });
+
 			}
 		}
 
@@ -126,7 +127,7 @@ namespace VE
 			Components::UI::UICanvasComponent* mainCanvas = mainCanvasEntity.get_mut<Components::UI::UICanvasComponent>();
 			if (mainCanvas)
 			{
-				DrawTexture(mainCanvas->canvasRenderTarget.texture, 0, 0, WHITE);
+				RaylibDrawTexturTargeteLetterBox(mainCanvas->canvasRenderTarget, { (float)mainRenderTarget.texture.width, (float)mainRenderTarget.texture.height });
 			}
 		}
 		EndTextureMode();

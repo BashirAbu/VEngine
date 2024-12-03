@@ -7,4 +7,6 @@ namespace VE
 
 	VE_API std::filesystem::path GetRelativePath(std::filesystem::path path);
 	VE_API std::filesystem::path GetFullPath(std::filesystem::path path);
+
+	VE_API void RaylibDrawTexturTargeteLetterBox(RenderTexture renderTarget, glm::vec2 screenSize);
 }
