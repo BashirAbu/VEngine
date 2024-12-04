@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <thread>
+#include <codecvt>
+#include <locale>
 namespace VE::Systems
 {
 	void ApplyParentTransform(flecs::entity parent, Components::TransformComponent& parentTC)
@@ -137,20 +139,19 @@ namespace VE::Systems
 	{
 		if (!label.fontFilepath.empty() && !label.font)
 		{
-			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath);
+			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, 48);
 		}
 		if (label.font)
 		{
 			VE::Renderer::Label2D l2d = {};
 			l2d.font = label.font;
 			l2d.fontSize = label.size;
-			l2d.origin = *(Vector2*) & label.origin;
-			glm::vec3 pos = transform.GetWorldPosition();
-			l2d.position = *(Vector2*)& pos;
+			l2d.origin = label.origin;
+			l2d.position = transform.GetWorldPosition();
+			l2d.worldTransformMatrix = transform.__worldMatrix;
 			l2d.rotation = transform.GetWorldRotation().z;
 			l2d.spacing = label.spacing;
-			l2d.text = label.text.c_str();
-			
+			l2d.text = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(label.text);
 			l2d.tint = GLMVec4ToRayColor(label.color);
 			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
 		}

@@ -197,7 +197,7 @@ namespace VE
 			VE_COMPONENT()
 			struct LabelComponent 
 			{
-				Font* font = nullptr;
+				class VE::Font* font = nullptr;
 				VE_PROPERTY(Editor)
 				std::filesystem::path fontFilepath = "";
 				VE_PROPERTY(Editor)

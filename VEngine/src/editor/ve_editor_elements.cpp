@@ -2,7 +2,6 @@
 #include "platform/ve_platform.h"
 #include "ve_engine.h"
 #include "utils/ve_utils.h"
-#include <FarsiType.h>
 namespace VE
 {
 	namespace EditorElement

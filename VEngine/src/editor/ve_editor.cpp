@@ -143,6 +143,9 @@ namespace VE
 		return singleton;
 	}
 
+	char buffer[1024] = {};
+
+
 	void Editor::DrawUI()
 	{
 		// Start the Dear ImGui frame
@@ -165,7 +168,6 @@ namespace VE
 		DrawGameViewport();
 
 		consoleWindow.Draw();
-
 		//ImGui::Begin("Pick");
 
 		//rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);

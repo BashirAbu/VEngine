@@ -1,6 +1,6 @@
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
-
+#include "ve_font.h"
 namespace VE 
 {
 	AssetsManager::AssetsManager() 
@@ -65,19 +65,19 @@ namespace VE
 			return &sounds[filepath.string()];
 		}
 	}
-	Font* AssetsManager::LoadFont(std::filesystem::path filepath)
+	Font* AssetsManager::LoadFont(std::filesystem::path filepath, int32_t fontSize)
 	{
 		std::lock_guard<std::mutex> lock(fontsMutex);
 		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 
 		if (fonts.find(filepath.string()) != fonts.end())
 		{
-			return &fonts[filepath.string()];
+			return fonts[filepath.string()];
 		}
 		else
 		{
-			fonts[filepath.string()] = ::LoadFont(fullpath.string().c_str());
-			return &fonts[filepath.string()];
+			fonts[filepath.string()] = new Font(fullpath.string().c_str(), fontSize);
+			return fonts[filepath.string()];
 		}
 	}
 	void AssetsManager::Clear()
@@ -98,10 +98,9 @@ namespace VE
 			UnloadSound(sound.second);
 		}
 		sounds.clear();
-
 		for (auto font : fonts)
 		{
-			UnloadFont(font.second);
+			delete font.second;
 		}
 		fonts.clear();
 	}

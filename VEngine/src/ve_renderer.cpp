@@ -2,7 +2,6 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include <scenes/ve_scene.h>
-
 namespace VE 
 {
 	Renderer::Renderer(Scene* scene) : scene(scene)
@@ -30,7 +29,8 @@ namespace VE
 	{
 		for (const auto& l2d : label2DRenderQueue)
 		{
-			DrawTextPro(*l2d.label.font, l2d.label.text, l2d.label.position, l2d.label.origin, l2d.label.rotation, l2d.label.fontSize, l2d.label.spacing, l2d.label.tint);
+			//DrawTextPro(*l2d.label.font, l2d.label.text, l2d.label.position, l2d.label.origin, l2d.label.rotation, l2d.label.fontSize, l2d.label.spacing, l2d.label.tint);
+			RaylibDrawTextUTF8(l2d.label);
 		}
 	}
 

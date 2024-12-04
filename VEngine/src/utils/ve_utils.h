@@ -1,5 +1,6 @@
 #pragma once
 #include "ve_defines.h"
+#include "ve_renderer.h"
 #include <raylib.h>
 namespace VE 
 {
@@ -9,4 +10,6 @@ namespace VE
 	VE_API std::filesystem::path GetFullPath(std::filesystem::path path);
 
 	VE_API void RaylibDrawTexturTargeteLetterBox(RenderTexture renderTarget, glm::vec2 screenSize);
+
+	VE_API void RaylibDrawTextUTF8(const Renderer::Label2D& label);
 }

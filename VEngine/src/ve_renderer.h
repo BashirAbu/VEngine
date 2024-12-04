@@ -4,6 +4,8 @@
 #include <concurrent_vector.h>
 #include <mutex>
 #include <thread>
+#include "ve_font.h"
+
 namespace VE 
 {
 	class VE_API Renderer 
@@ -26,10 +28,11 @@ namespace VE
 		void Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e);
 		struct Label2D 
 		{
-			Font* font;
-			const char* text;
-			Vector2 position;
-			Vector2 origin;
+			VE::Font* font;
+			std::wstring text;
+			glm::vec3 position;
+			glm::mat4 worldTransformMatrix;
+			glm::vec2 origin;
 			float rotation;
 			float fontSize;
 			float spacing;
@@ -55,6 +58,9 @@ namespace VE
 			flecs::entity entity;
 			int32_t renderOrder;
 		};
+
+		
+
 		std::vector<FullLabel2D> label2DRenderQueue;
 		std::mutex label2DRenderQueueMutex;
 		class Scene* scene;
