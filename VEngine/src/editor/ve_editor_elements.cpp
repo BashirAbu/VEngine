@@ -231,14 +231,20 @@ namespace VE
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
 
-            char buffer[255];
-            strcpy(buffer, variable.c_str());
-            ImGui::InputText(((std::string)"##" + label).c_str(), buffer, sizeof(buffer));
-            if (variable.capacity() < sizeof(buffer))
-            {
-                variable.resize(sizeof(buffer));
-            }
-            strcpy(variable.data(), buffer);;
+           
+            ImGui::InputText(((std::string)"##" + label).c_str(), variable.data(), variable.size() + 1,
+                ImGuiInputTextFlags_CallbackResize, [](ImGuiInputTextCallbackData* data) -> int
+                {
+                    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+                    {
+                        auto* str = static_cast<std::string*>(data->UserData);
+                        str->resize(data->BufTextLen);
+                        data->Buf = str->data();
+                    }
+                    return 0;
+                }, &variable);
+
+
             ImGui::NextColumn();
             ImGui::Columns(1);
             

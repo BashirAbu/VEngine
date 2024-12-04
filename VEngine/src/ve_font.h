@@ -20,7 +20,7 @@ namespace VE
 	{
 	public:
 		Font() : fontSize(48){}
-		Font(std::filesystem::path filepath, int32_t fontSize = 48);
+		Font(std::filesystem::path filepath, int32_t fontSize);
 		~Font();
 
 		bool LoadGlyph(wchar_t character);

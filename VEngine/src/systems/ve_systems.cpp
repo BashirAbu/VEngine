@@ -151,7 +151,8 @@ namespace VE::Systems
 			l2d.worldTransformMatrix = transform.__worldMatrix;
 			l2d.rotation = transform.GetWorldRotation().z;
 			l2d.spacing = label.spacing;
-			l2d.text = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(label.text);
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+			l2d.text = converter.from_bytes(label.text);
 			l2d.tint = GLMVec4ToRayColor(label.color);
 			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
 		}

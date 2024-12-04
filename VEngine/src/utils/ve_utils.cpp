@@ -44,7 +44,7 @@ namespace VE
             src.height = glyph.texture.height;
 
             Rectangle dest = {};
-            glm::mat4 matrix = glm::translate(label.worldTransformMatrix, glm::vec3(x + glyph.bearingX, - glyph.bearingY, 0.0f));
+            glm::mat4 matrix = glm::translate(label.worldTransformMatrix, glm::vec3(x + glyph.bearingX,- glyph.bearingY, 0.0f));
             matrix = glm::scale(matrix, glm::vec3((label.fontSize / label.font->GetFontSize()), (label.fontSize / label.font->GetFontSize()), 1.0f));
             glm::vec3 pos;
             glm::vec3 scl;
