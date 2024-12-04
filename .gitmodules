@@ -27,3 +27,9 @@
 [submodule "VEngine/third_party/flecs"]
 	path = VEngine/third_party/flecs
 	url = https://github.com/BashirAbu/VE_flecs.git
+[submodule "VEngine/third_party/harfbuzz"]
+	path = VEngine/third_party/harfbuzz
+	url = https://github.com/BashirAbu/VE_harfbuzz.git
+[submodule "VEngine/third_party/freetype"]
+	path = VEngine/third_party/freetype
+	url = https://github.com/BashirAbu/VE_freetype.git
