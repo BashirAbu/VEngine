@@ -81,10 +81,10 @@ namespace VE
 				{
 					Pixel* gPixel = (Pixel*)glyphs[i].img.data;
 					int32_t bufferY = baseline - glyphs[i].bearingY + j;
-					pixel[bufferY * imageWidth + (k + xOffset)] = gPixel[j * glyphs[i].width + k];
+					pixel[bufferY * imageWidth + (k + xOffset + glyphs[i].bearingX)] = gPixel[j * glyphs[i].width + k];
 				}
 			}
-			xOffset += glyphs[i].bearingX + glyphs[i].advance;
+			xOffset += glyphs[i].advance;
 		}
 
 		Image textImage = {};

@@ -6,6 +6,13 @@
 #include <fstream>
 #include <iostream>
 #include "platform/ve_flecs_os_backend.h"
+#include "ShapingEngine.hpp"
+
+namespace ShapingEngine
+{
+	std::map<int, Glyph> glyphs;
+}
+
 namespace VE 
 {
 	void CustomLogCallback(int logLevel, const char* text, va_list args) {
@@ -96,6 +103,7 @@ namespace VE
 	get_ptr ptr;
 	Engine::~Engine()
 	{
+		ShapingEngine::glyphs.clear();
 		delete editor;
 		delete sceneManager;
 		delete projectSharedLibrary;

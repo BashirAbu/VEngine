@@ -131,7 +131,7 @@ namespace ShapingEngine {
 
     class Glyph;
 
-    static std::map<int, Glyph> glyphs;
+    extern std::map<int, Glyph> glyphs;
 
     class Glyph {
     public:
