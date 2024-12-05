@@ -1,8 +1,6 @@
 ﻿#include "ve_utils.h"
 #include "components/ve_components.h"
 #include "ve_font.h"
-#include <hb.h>
-#include <hb-ft.h>
 #include <codecvt>
 #include <locale>
 #include "ShapingEngine.hpp"
@@ -36,6 +34,7 @@ namespace VE
     VE_API void RaylibDrawTextUTF8(const Renderer::Label2D& label)
     {
         int32_t x = 0;
+
         for (wchar_t c : label.wideString)
         {
            
@@ -50,7 +49,7 @@ namespace VE
             src.height = (float)glyph.texture.height;
 
             Rectangle dest = {};
-            glm::mat4 matrix = glm::translate(label.worldTransformMatrix, glm::vec3(x + glyph.bearingX,- glyph.bearingY, 0.0f));
+            glm::mat4 matrix = glm::translate(label.worldTransformMatrix, glm::vec3(x + glyph.bearingX, 0, 0.0f));
             matrix = glm::scale(matrix, glm::vec3((label.fontSize / label.font->GetFontSize()), (label.fontSize / label.font->GetFontSize()), 1.0f));
             glm::vec3 pos;
             glm::vec3 scl;
@@ -62,6 +61,7 @@ namespace VE
 
             glm::vec3 rotation = glm::degrees(glm::eulerAngles(rot));
 
+            pos.y -= (glyph.bearingY * scl.y);
             dest.x = pos.x;
             dest.y = pos.y;
 
@@ -70,7 +70,7 @@ namespace VE
 
             DrawTexturePro(glyph.texture, src, dest, *(Vector2*) & label.origin, label.rotation, label.tint);
 
-            x += (glyph.bearingX + (int)(glyph.advance * label.spacing));
+            x += (int)((glyph.bearingX + glyph.advance + (int)label.spacing) * scl.x);
         }
     }
 }

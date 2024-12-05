@@ -130,7 +130,6 @@ language "c++"
         "%{prj.location}/third_party/ImGuizmo/",
         "%{prj.location}/third_party/glfw/include",
         "%{prj.location}/third_party/flecs/include/",
-        "%{prj.location}/third_party/harfbuzz/src/",
         "%{prj.location}/third_party/freetype/include/",
         "%{prj.location}/third_party/ShapingEngine/",
     }
@@ -138,13 +137,11 @@ language "c++"
     libdirs
     {
         "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
-        "%{prj.location}/third_party/harfbuzz/build/%{cfg.buildcfg}/",
         "%{prj.location}/third_party/freetype/build/%{cfg.buildcfg}/"
     }
     links
     {
         "raylib",
-        "harfbuzz",
         "freetype"
     }
 
