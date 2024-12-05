@@ -29,7 +29,7 @@ namespace VE
 	{
 		for (const auto& l2d : label2DRenderQueue)
 		{
-			RaylibDrawTextUTF8(l2d.label);
+			DrawTexturePro(*l2d.label.texture, l2d.label.source, l2d.label.dest, l2d.label.origin, l2d.label.rotation, l2d.label.tint);
 		}
 	}
 

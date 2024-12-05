@@ -154,6 +154,7 @@ namespace VE
 		{
 			VE_PROPERTY(Editor)
 			std::filesystem::path texturePath = "";
+			std::filesystem::path oldTexturePath = "";
 			VE_PROPERTY(Editor)
 			glm::vec2 origin = {};
 			VE_PROPERTY(Editor)
@@ -200,6 +201,7 @@ namespace VE
 				class VE::Font* font = nullptr;
 				VE_PROPERTY(Editor)
 				std::filesystem::path fontFilepath = "";
+				std::filesystem::path oldFontFilepath = "";
 				VE_PROPERTY(Editor)
 				std::string text = "";
 				VE_PROPERTY(Editor);
@@ -210,12 +212,11 @@ namespace VE
 				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
 				VE_PROPERTY(Editor)
 				float size = 12;
-				VE_PROPERTY(Editor)
-				float spacing = 1;
 
-				bool hasChanged = false;
 				std::string oldText = "";
 				std::wstring wideString = L"";
+
+				Texture2D texture = {};
 			};
 		}
 	}

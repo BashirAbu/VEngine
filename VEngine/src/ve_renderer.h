@@ -28,17 +28,12 @@ namespace VE
 		void Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e);
 		struct Label2D 
 		{
-			VE::Font* font;
-			std::string text;
-			glm::vec3 position;
-			glm::mat4 worldTransformMatrix;
-			glm::vec2 origin;
+			Texture2D* texture;
+			Rectangle source;
+			Rectangle dest;
+			Vector2 origin;
 			float rotation;
-			float fontSize;
-			float spacing;
 			Color tint;
-
-			std::wstring wideString = L"";
 		};
 		void Submit(Label2D& label, int32_t renderOrder, flecs::entity e);
 		void BeginFrame();
@@ -60,9 +55,6 @@ namespace VE
 			flecs::entity entity;
 			int32_t renderOrder;
 		};
-
-		
-
 		std::vector<FullLabel2D> label2DRenderQueue;
 		std::mutex label2DRenderQueueMutex;
 		class Scene* scene;

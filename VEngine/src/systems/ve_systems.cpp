@@ -77,7 +77,7 @@ namespace VE::Systems
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{
-		if (!sc.texturePath.empty() && !sc.texture)
+		if (sc.texturePath != sc.oldTexturePath)
 		{
 			sc.texture = AssetsManager::GetSingleton()->LoadTexture(sc.texturePath);
 		}
@@ -107,8 +107,7 @@ namespace VE::Systems
 
 			VE::Renderer::Tex2D tex = { sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) };
 			VE::Scene::GetSingleton()->renderer.Submit(tex, sc.renderOrder, e);
-			
-
+			sc.oldTexturePath = sc.texturePath;
 		}
 	}
 	void CanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
@@ -137,39 +136,57 @@ namespace VE::Systems
 			SetTextureFilter(canvas.canvasRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
 		}
 	}
-	void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& transform, Components::UI::LabelComponent& label)
+	void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::LabelComponent& label)
 	{
-		if (!label.fontFilepath.empty() && !label.font)
+		if (label.fontFilepath != label.oldFontFilepath)
 		{
-			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, 48);
+			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, (int32_t)label.size);
 		}
 		if (label.font)
 		{
-			VE::Renderer::Label2D l2d = {};
-			l2d.font = label.font;
-			l2d.fontSize = label.size;
-			l2d.origin = label.origin;
-			l2d.position = transform.GetWorldPosition();
-			l2d.worldTransformMatrix = transform.__worldMatrix;
-			l2d.rotation = transform.GetWorldRotation().z;
-			l2d.spacing = label.spacing;
-			l2d.text = label.text;
-			l2d.tint = GLMVec4ToRayColor(label.color);
-			if (label.oldText != label.text)
+			if (label.oldText != label.text || label.font->GetFontSize() != label.size)
 			{
-				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+				UnloadTexture(label.texture);
 
-				label.wideString = converter.from_bytes(label.text);
+				if (label.font->GetFontSize() != label.size)
+					label.font->SetFontSize((int32_t)label.size);
 
-				std::string processedString = ShapingEngine::render(label.wideString);
+				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
 
-				label.wideString = converter.from_bytes(processedString);
 			}
-			l2d.wideString = label.wideString;
+
+			Rectangle src, dest;
+			src.x = 0.0f;
+			src.width = (float)label.texture.width;
+			src.y = 0.0f;
+			src.height = (float)label.texture.height;
+			if (tc.GetWorldScale().x < 0.0f)
+			{
+				src.width *= -1.0f;
+			}
+			if (tc.GetWorldScale().y < 0.0f)
+			{
+				src.height *= -1.0f;
+			}
+
+			dest.x = tc.GetWorldPosition().x;
+			dest.y = tc.GetWorldPosition().y;
+			dest.width = glm::abs(label.texture.width * tc.GetWorldScale().x);
+			dest.height = glm::abs(label.texture.height * tc.GetWorldScale().y);
+
+			Vector2 org = { dest.width * label.origin.x, dest.height * label.origin.y };
+
+			Renderer::Label2D l2d = {};
+
+			l2d.source = src;
+			l2d.dest = dest;
+			l2d.origin = *(Vector2*) & label.origin;
+			l2d.texture = &label.texture;
+			l2d.rotation = tc.GetWorldRotation().z;
+			l2d.tint = GLMVec4ToRayColor(label.color);
 			label.oldText = label.text;
-
+			label.oldFontFilepath = label.fontFilepath;
 			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
-
 		}
 	}
 

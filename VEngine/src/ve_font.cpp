@@ -40,6 +40,7 @@ namespace VE
 		for (auto& glyph : glyphs)
 		{
 			UnloadTexture(glyph.second.texture);
+			delete[] glyph.second.img.data;
 		}
 	}
 	bool Font::LoadGlyph(FT_UInt character)
@@ -83,20 +84,27 @@ namespace VE
 
 		Glyph glyph = {};
 
-		glyph.texture = LoadTextureFromImage(img);
-		SetTextureFilter(glyph.texture, TEXTURE_FILTER_BILINEAR);
-		SetTextureWrap(glyph.texture, TEXTURE_WRAP_CLAMP);
+		glyph.img = img;
 		glyph.width = face->glyph->bitmap.width;
 		glyph.height = face->glyph->bitmap.rows;
 		glyph.bearingX = face->glyph->bitmap_left;
 		glyph.bearingY = face->glyph->bitmap_top;
 		glyph.advance = face->glyph->advance.x >> 6;
-
 		glyphs[character] = glyph;
-
-		delete buffer;
-
 		return true;
+	}
+	void Font::SetFontSize(int32_t size)
+	{
+		for (auto& glyph : glyphs)
+		{
+			UnloadTexture(glyph.second.texture);
+			delete[] glyph.second.img.data;
+		}
+
+		glyphs.clear();
+
+		FT_Set_Pixel_Sizes(face, 0, size);
+		fontSize = size;
 	}
 	Glyph Font::GetGlypth(FT_UInt character)
 	{

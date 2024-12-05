@@ -132,8 +132,6 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 			EditorElement::Float(LabelComponent_->size, "Size");
 
-			EditorElement::Float(LabelComponent_->spacing, "Spacing");
-
 			ImGui::TreePop();
 		}
 	}

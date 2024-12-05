@@ -9,6 +9,7 @@ namespace VE
 	struct Glyph 
 	{
 		Texture2D texture;
+		Image img;
 		int32_t width;
 		int32_t height;
 		int32_t bearingX;
@@ -24,6 +25,7 @@ namespace VE
 		~Font();
 
 		bool LoadGlyph(FT_UInt character);
+		void SetFontSize(int32_t size);
 		Glyph GetGlypth(FT_UInt character);
 		int32_t GetFontSize() { return fontSize; }
 		FT_Face GetFreeTypeFace() { return face; }

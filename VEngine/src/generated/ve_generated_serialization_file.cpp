@@ -139,7 +139,7 @@ void Serialize_LabelComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::UI::LabelComponent>* comp = (flecs::component<VE::Components::UI::LabelComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("origin").member<int32_t>("renderOrder").member<NormalizedColor>("color").member<float>("size").member<float>("spacing"))
+		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("origin").member<int32_t>("renderOrder").member<NormalizedColor>("color").member<float>("size"))
 		.serialize([](const flecs::serializer* s, const VE::Components::UI::LabelComponent* data) -> int		{
 		s->member("fontFilepath");
 		s->value(data->fontFilepath);
@@ -153,8 +153,6 @@ void Serialize_LabelComponent()
 		s->value(data->color);
 		s->member("size");
 		s->value(data->size);
-		s->member("spacing");
-		s->value(data->spacing);
 			 return 0;
 		}).ensure_member([](VE::Components::UI::LabelComponent* data, const char* member) -> void*
 		{
@@ -165,7 +163,6 @@ void Serialize_LabelComponent()
 			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
 			else if (!strcmp(member, "color")) { return &data->color;}
 			else if (!strcmp(member, "size")) { return &data->size;}
-			else if (!strcmp(member, "spacing")) { return &data->spacing;}
 		return nullptr;
 		});
 	}
