@@ -5,6 +5,8 @@
 #include <thread>
 #include <codecvt>
 #include <locale>
+#include "ShapingEngine.hpp"
+
 namespace VE::Systems
 {
 	void ApplyParentTransform(flecs::entity parent, Components::TransformComponent& parentTC)
@@ -151,10 +153,23 @@ namespace VE::Systems
 			l2d.worldTransformMatrix = transform.__worldMatrix;
 			l2d.rotation = transform.GetWorldRotation().z;
 			l2d.spacing = label.spacing;
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-			l2d.text = converter.from_bytes(label.text);
+			l2d.text = label.text;
 			l2d.tint = GLMVec4ToRayColor(label.color);
+			if (label.oldText != label.text)
+			{
+				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+				label.wideString = converter.from_bytes(label.text);
+
+				std::string processedString = ShapingEngine::render(label.wideString);
+
+				label.wideString = converter.from_bytes(processedString);
+			}
+			l2d.wideString = label.wideString;
+			label.oldText = label.text;
+
 			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
+
 		}
 	}
 

@@ -1,6 +1,11 @@
-#include "ve_utils.h"
+﻿#include "ve_utils.h"
 #include "components/ve_components.h"
 #include "ve_font.h"
+#include <hb.h>
+#include <hb-ft.h>
+#include <codecvt>
+#include <locale>
+#include "ShapingEngine.hpp"
 namespace VE 
 {
 
@@ -31,8 +36,9 @@ namespace VE
     VE_API void RaylibDrawTextUTF8(const Renderer::Label2D& label)
     {
         int32_t x = 0;
-        for (wchar_t c : label.text)
+        for (wchar_t c : label.wideString)
         {
+           
             if (c == '\0') { return; }
 
             const Glyph& glyph = label.font->GetGlypth(c);
@@ -40,8 +46,8 @@ namespace VE
                 
             src.x = 0.0f;
             src.y = 0.0f;
-            src.width = glyph.texture.width;
-            src.height = glyph.texture.height;
+            src.width = (float)glyph.texture.width;
+            src.height = (float)glyph.texture.height;
 
             Rectangle dest = {};
             glm::mat4 matrix = glm::translate(label.worldTransformMatrix, glm::vec3(x + glyph.bearingX,- glyph.bearingY, 0.0f));
@@ -64,7 +70,7 @@ namespace VE
 
             DrawTexturePro(glyph.texture, src, dest, *(Vector2*) & label.origin, label.rotation, label.tint);
 
-            x += (glyph.bearingX + glyph.advance + label.spacing);
+            x += (glyph.bearingX + (int)(glyph.advance * label.spacing));
         }
     }
 }

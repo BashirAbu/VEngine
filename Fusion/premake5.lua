@@ -22,7 +22,8 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/glm/",
         "%{wks.location}/VEngine/third_party/imgui/",
         "%{wks.location}/VEngine/third_party/rlImGui/",
-        "%{wks.location}/VEngine/third_party/flecs/include/"
+        "%{wks.location}/VEngine/third_party/flecs/include/",
+        "%{wks.location}/VEngine/third_party/freetype/include/",
     }
     
     

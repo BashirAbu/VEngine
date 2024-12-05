@@ -42,7 +42,7 @@ namespace VE
 			UnloadTexture(glyph.second.texture);
 		}
 	}
-	bool Font::LoadGlyph(wchar_t character)
+	bool Font::LoadGlyph(FT_UInt character)
 	{
 		if (FT_Load_Char(face, character, FT_LOAD_RENDER))
 		{
@@ -98,7 +98,7 @@ namespace VE
 
 		return true;
 	}
-	Glyph Font::GetGlypth(wchar_t character)
+	Glyph Font::GetGlypth(FT_UInt character)
 	{
 		if (glyphs.find(character) != glyphs.end())
 		{

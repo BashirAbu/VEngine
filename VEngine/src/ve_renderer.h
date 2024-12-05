@@ -29,7 +29,7 @@ namespace VE
 		struct Label2D 
 		{
 			VE::Font* font;
-			std::wstring text;
+			std::string text;
 			glm::vec3 position;
 			glm::mat4 worldTransformMatrix;
 			glm::vec2 origin;
@@ -37,6 +37,8 @@ namespace VE
 			float fontSize;
 			float spacing;
 			Color tint;
+
+			std::wstring wideString = L"";
 		};
 		void Submit(Label2D& label, int32_t renderOrder, flecs::entity e);
 		void BeginFrame();

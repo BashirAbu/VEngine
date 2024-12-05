@@ -132,6 +132,7 @@ language "c++"
         "%{prj.location}/third_party/flecs/include/",
         "%{prj.location}/third_party/harfbuzz/src/",
         "%{prj.location}/third_party/freetype/include/",
+        "%{prj.location}/third_party/ShapingEngine/",
     }
     
     libdirs

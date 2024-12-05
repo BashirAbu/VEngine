@@ -212,6 +212,10 @@ namespace VE
 				float size = 12;
 				VE_PROPERTY(Editor)
 				float spacing = 1;
+
+				bool hasChanged = false;
+				std::string oldText = "";
+				std::wstring wideString = L"";
 			};
 		}
 	}

@@ -7,9 +7,6 @@ namespace VE
 	namespace EditorElement
 	{
        
-
-
-
         void Vec2(glm::vec2& vec, std::string label)
         {
             ImGui::PushID(label.c_str());
@@ -249,6 +246,7 @@ namespace VE
             ImGui::Columns(1);
             
         }
+
 
         VE_API void FileSystem(std::filesystem::path& path, std::string label)
         {
