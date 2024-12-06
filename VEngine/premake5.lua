@@ -13,7 +13,7 @@ project "ImGui"
         "%{prj.location}/third_party/imgui/imgui_widgets.cpp",
         "%{prj.location}/third_party/imgui/imgui_demo.cpp",
         "%{prj.location}/third_party/imgui/backends/imgui_impl_opengl3.cpp",
-        "%{prj.location}/third_party/ImGuizmo/ImGuizmo.cpp"  
+        "%{prj.location}/third_party/ImGuizmo/ImGuizmo.cpp",
     }
 
     includedirs
@@ -21,7 +21,8 @@ project "ImGui"
         
         "%{prj.location}/third_party/imgui/",
         "%{prj.location}/third_party/glfw/include",
-        "%{prj.location}/third_party/ImGuizmo/"
+        "%{prj.location}/third_party/ImGuizmo/",
+        "%{prj.location}/third_party/ShapingEngine/",
     }
     
     links
@@ -31,76 +32,43 @@ project "ImGui"
 
 
     filter "system:windows"
+
         cppdialect "C++20"
         staticruntime "off"
         systemversion "latest"
-
+        buildoptions "/utf-8 /MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
         defines
         {
             "IMGUI_EXPORT"
         }
         
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
+        }
+        symbols "On"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config %{cfg.buildcfg}"
+        }
        
+        postbuildcommands
+        {
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
+        }
 
     filter "configurations:Debug"
-        libdirs
-        {
-            "%{prj.location}/third_party/glfw/build/src/Debug/"
-        }
+        
+    filter "configurations:Development"
         symbols "On"
         optimize "On"
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/glfw/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake ..",
-            "cmake --build . --config Debug"
-        }
-        postbuildcommands
-        {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
-        }
-
     filter "configurations:Release"
-        libdirs
-        {
-            "%{prj.location}/third_party/glfw/build/src/Release/"
-        }
         optimize "On"
-        symbols "On"
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/glfw/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake ..",
-            "cmake --build . --config Debug"
-        }
-        postbuildcommands
-        {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
-        }
-     filter "configurations:Development"
-        libdirs
-        {
-            "%{prj.location}/third_party/glfw/build/src/Release/"
-        }
-        symbols "On"
-        optimize "On"
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/glfw/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake ..",
-            "cmake --build . --config Release"
-        }
-        outputDirImGui = "Development_%{cfg.system}_%{cfg.architecture}"
-        postbuildcommands
-        {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDirImGui .. "/Fusion")
-        }
+
 
 project "VEngine"
 kind "SharedLib"

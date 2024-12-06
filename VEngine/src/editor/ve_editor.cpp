@@ -88,6 +88,108 @@ namespace VE
 		style.ChildRounding = 3.0f;
 		style.FramePadding = ImVec2(6.0f, 4.0f); // More padding for a spacious feel
 	}
+	void SetDarkThemeColors()
+	{
+		// Get style and colors references
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4* colors = style.Colors;
+
+		// Base color definitions for clarity
+		ImVec4 black = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		ImVec4 darkGray = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+		ImVec4 midGray = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+		ImVec4 lightGray = ImVec4(0.80f, 0.80f, 0.80f, 1.00f);
+		ImVec4 accentColor = ImVec4(0.36f, 0.50f, 0.75f, 1.00f); // bluish accent
+		ImVec4 accentHovered = ImVec4(0.46f, 0.60f, 0.85f, 1.00f);
+		ImVec4 accentActive = ImVec4(0.26f, 0.40f, 0.65f, 1.00f);
+
+		// Background and window colors
+		colors[ImGuiCol_WindowBg] = darkGray;
+		colors[ImGuiCol_ChildBg] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 0.00f);
+		colors[ImGuiCol_PopupBg] = ImVec4(midGray.x, midGray.y, midGray.z, 0.95f);
+		colors[ImGuiCol_Border] = ImVec4(lightGray.x, lightGray.y, lightGray.z, 0.10f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(black.x, black.y, black.z, 0.00f);
+
+		// Frame colors (like input boxes, checkboxes, etc.)
+		colors[ImGuiCol_FrameBg] = midGray;
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(midGray.x + 0.05f, midGray.y + 0.05f, midGray.z + 0.05f, 1.00f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(midGray.x + 0.10f, midGray.y + 0.10f, midGray.z + 0.10f, 1.00f);
+
+		// Title bar colors
+		colors[ImGuiCol_TitleBg] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 1.00f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 0.75f);
+
+		// Menubar/Toolbar
+		colors[ImGuiCol_MenuBarBg] = ImVec4(darkGray.x + 0.05f, darkGray.y + 0.05f, darkGray.z + 0.05f, 1.00f);
+
+		// Scrollbar
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 0.60f);
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(midGray.x, midGray.y, midGray.z, 0.90f);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(midGray.x + 0.05f, midGray.y + 0.05f, midGray.z + 0.05f, 0.90f);
+		colors[ImGuiCol_ScrollbarGrabActive] = accentActive;
+
+		// Check marks, sliders, etc.
+		colors[ImGuiCol_CheckMark] = accentColor;
+		colors[ImGuiCol_SliderGrab] = accentColor;
+		colors[ImGuiCol_SliderGrabActive] = accentActive;
+
+		// Buttons
+		colors[ImGuiCol_Button] = ImVec4(midGray.x, midGray.y, midGray.z, 1.00f);
+		colors[ImGuiCol_ButtonHovered] = accentHovered;
+		colors[ImGuiCol_ButtonActive] = accentActive;
+
+		// Header (for collapsing headers, selectable texts)
+		colors[ImGuiCol_Header] = ImVec4(midGray.x, midGray.y, midGray.z, 1.00f);
+		colors[ImGuiCol_HeaderHovered] = accentHovered;
+		colors[ImGuiCol_HeaderActive] = accentActive;
+
+		// Tabs
+		colors[ImGuiCol_Tab] = midGray;
+		colors[ImGuiCol_TabHovered] = accentHovered;
+		colors[ImGuiCol_TabActive] = accentColor;
+		colors[ImGuiCol_TabUnfocused] = darkGray;
+		colors[ImGuiCol_TabUnfocusedActive] = midGray;
+
+		// Separators and resizing handles
+		colors[ImGuiCol_Separator] = colors[ImGuiCol_Border];
+		colors[ImGuiCol_SeparatorHovered] = accentHovered;
+		colors[ImGuiCol_SeparatorActive] = accentActive;
+		colors[ImGuiCol_ResizeGrip] = ImVec4(midGray.x + 0.1f, midGray.y + 0.1f, midGray.z + 0.1f, 1.00f);
+		colors[ImGuiCol_ResizeGripHovered] = accentHovered;
+		colors[ImGuiCol_ResizeGripActive] = accentActive;
+
+		// Plot lines and histograms
+		colors[ImGuiCol_PlotLines] = lightGray;
+		colors[ImGuiCol_PlotLinesHovered] = accentColor;
+		colors[ImGuiCol_PlotHistogram] = accentColor;
+		colors[ImGuiCol_PlotHistogramHovered] = accentHovered;
+
+		// Text
+		colors[ImGuiCol_Text] = lightGray;
+		colors[ImGuiCol_TextDisabled] = ImVec4(lightGray.x, lightGray.y, lightGray.z, 0.50f);
+
+		// Modal window darkening
+		colors[ImGuiCol_ModalWindowDimBg] = ImVec4(black.x, black.y, black.z, 0.60f);
+		colors[ImGuiCol_NavHighlight] = accentColor;
+		colors[ImGuiCol_NavWindowingHighlight] = accentColor;
+		colors[ImGuiCol_NavWindowingDimBg] = ImVec4(black.x, black.y, black.z, 0.60f);
+		colors[ImGuiCol_DockingEmptyBg] = ImVec4(darkGray.x, darkGray.y, darkGray.z, 1.00f);
+
+		// Style adjustments
+		style.WindowRounding = 5.0f;
+		style.FrameRounding = 3.0f;
+		style.GrabRounding = 3.0f;
+		style.PopupRounding = 3.0f;
+		style.TabRounding = 3.0f;
+		style.ScrollbarRounding = 3.0f;
+
+		style.WindowPadding = ImVec2(8.0f, 8.0f);
+		style.FramePadding = ImVec2(5.0f, 3.0f);
+		style.ItemSpacing = ImVec2(8.0f, 4.0f);
+		style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
+		style.IndentSpacing = 20.0f;
+	}
 
 	Editor* Editor::singleton = nullptr;
 	Editor::Editor(class Engine* engine) : engine(engine)
@@ -99,7 +201,7 @@ namespace VE
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable docking
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 		
-		GrayTheme();
+		SetDarkThemeColors();
 		static const ImWchar ranges[] =
 		{
 			0x0020, 0x00FF, // Latin
@@ -703,9 +805,47 @@ namespace VE
 			DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, GRAY);
 			DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, GRAY);
 		}
+		//Render Canvas Rectangle
+		flecs::query UICanvases = engine->sceneManager->currentScene->world.query<Components::UI::UICanvasComponent, Components::TransformComponent>();
+		Components::UI::UICanvasComponent* canvas = nullptr;
+		tc = nullptr;
+
+		UICanvases.each([&](flecs::entity e, Components::UI::UICanvasComponent& c, Components::TransformComponent& _tc)
+			{
+				if (c.isMain)
+				{
+					canvas = &c;
+					tc = &_tc;
+				}
+			});
+
+		//Draw Camrea rectangle
+		if (canvas)
+		{
+			std::vector<glm::vec2> vertices = {
+									{0.0f                                        , canvas->canvasRenderTarget.texture.height}, // Bottom-left
+									{canvas->canvasRenderTarget.texture.width            , canvas->canvasRenderTarget.texture.height}, // Bottom-right
+									{canvas->canvasRenderTarget.texture.width, 0.0f}     , // Top-right
+									{0.0f,                                         0.0f}  // Top-left
+			};
+
+
+			std::vector<glm::vec2> transformedVertices = vertices;
+
+			DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, BROWN);
+			DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, BROWN);
+			DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, BROWN);
+			DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, BROWN);
+		}
+
+
 
 		EndMode2D();
 		EndTextureMode();
+
+
+
+
 		rlImGuiImageRenderTextureFit(&editorCameraRenderTarget.texture, false);
 		//Draw ImGuizmo stuff here.
 		ImGuizmo::BeginFrame();
