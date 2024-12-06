@@ -27,9 +27,9 @@ namespace VE
 
 	void Renderer::RenderUIQueued()
 	{
-		for (const auto& l2d : label2DRenderQueue)
+		for (const auto& t2d : UIRenderQueue)
 		{
-			DrawTexturePro(*l2d.label.texture, l2d.label.source, l2d.label.dest, l2d.label.origin, l2d.label.rotation, l2d.label.tint);
+			DrawTexturePro(*t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
 		}
 	}
 
@@ -65,6 +65,8 @@ namespace VE
 				return b.renderOrder > a.renderOrder;
 			});
 
+
+
 		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
 			{
 				BeginTextureMode(cc.renderTarget);
@@ -75,12 +77,13 @@ namespace VE
 
 				EndMode2D();
 				EndTextureMode();
+
 			});
 
 		flecs::query uiCanvas = scene->world.query<Components::UI::UICanvasComponent>();
 
 
-		std::sort(label2DRenderQueue.begin(), label2DRenderQueue.end(), [](FullLabel2D& a, FullLabel2D& b)
+		std::sort(UIRenderQueue.begin(), UIRenderQueue.end(), [](FullTex2D& a, FullTex2D& b)
 			{
 				return b.renderOrder > a.renderOrder;
 			});
@@ -94,6 +97,7 @@ namespace VE
 				RenderUIQueued();
 
 				EndTextureMode();
+
 			});
 
 		//Draw UI render Target
@@ -141,18 +145,19 @@ namespace VE
 		std::lock_guard<std::mutex> lock(texture2DRenderQueueMutex);
 		texture2DRenderQueue.push_back(t2d);
 	}
-	void Renderer::Submit(Label2D& label, int32_t renderOrder, flecs::entity e)
+	void Renderer::SubmitUI(Tex2D& UITexture, int32_t renderOrder, flecs::entity e)
 	{
-		FullLabel2D l2d;
+		FullTex2D l2d;
 		l2d.entity = e;
-		l2d.label = label;
+		l2d.texture = UITexture;
 		l2d.renderOrder = renderOrder;
-		std::lock_guard<std::mutex> lock(label2DRenderQueueMutex);
-		label2DRenderQueue.push_back(l2d);
+		std::lock_guard<std::mutex> lock(UIRenderQueueMutex);
+		UIRenderQueue.push_back(l2d);
 	}
+
 	void Renderer::BeginFrame()
 	{
 		texture2DRenderQueue.clear();
-		label2DRenderQueue.clear();
+		UIRenderQueue.clear();
 	}
 }

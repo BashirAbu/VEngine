@@ -143,7 +143,6 @@ namespace VE
 		return singleton;
 	}
 
-	char buffer[1024] = {};
 
 
 	void Editor::DrawUI()
@@ -153,7 +152,7 @@ namespace VE
 		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		DrawMainMenuBar();
 
@@ -673,6 +672,7 @@ namespace VE
 		}
 
 		engine->sceneManager->currentScene->renderer.RenderQueued();
+		engine->sceneManager->currentScene->renderer.RenderUIQueued();
 		
 
 		//Draw Camrea rectangle
@@ -841,7 +841,7 @@ namespace VE
 				BeginShaderMode(colorPickingShader);
 				int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
 				EndShaderMode();
-
+				//Draw Scene
 				for(const auto& tex2d : engine->sceneManager->currentScene->renderer.texture2DRenderQueue)
 				{
 					if (tex2d.entity)
@@ -852,8 +852,20 @@ namespace VE
 						DrawTexturePro(*tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
 						EndShaderMode();
 					}
-					
 				}
+				//Draw UI
+				for (const auto& tex2d : engine->sceneManager->currentScene->renderer.UIRenderQueue)
+				{
+					if (tex2d.entity)
+					{
+						BeginShaderMode(colorPickingShader);
+						float id = (float)((int)tex2d.entity);
+						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
+						DrawTexturePro(*tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+						EndShaderMode();
+					}
+				}
+
 				EndMode2D();
 				EndTextureMode();
 

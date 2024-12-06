@@ -29,7 +29,7 @@ namespace VE
             {(screenSize.x - (renderTarget.texture.width * scale)) * .5f, (screenSize.y - (renderTarget.texture.height * scale)) * .5f, renderTarget.texture.width * scale, renderTarget.texture.height * scale }
         , {0.0f, 0.0f}, 0.0f, WHITE);
     }
-    VE_API Texture RaylibGetTextureFromText_UTF8(Font* font, std::string text)
+    VE_API Texture RaylibGetTextureFromText_UTF8(Font* font, std::string text, float spacing)
     {
         Texture result = {};
 
@@ -56,48 +56,43 @@ namespace VE
 			glyphs.push_back(g);
 			imageHeight = glm::max(imageHeight, g.height);
 			baseline = glm::max(baseline, g.bearingY);
-			imageWidth += g.bearingX + g.advance;
+			imageWidth += (g.bearingX > 0? g.bearingX : 0) + g.advance;
 		}
 
 		imageHeight += baseline;
 
-		uint8_t* imgBuffer = new uint8_t[imageWidth * imageHeight * sizeof(uint8_t) * 4]{};
-
-		struct Pixel
-		{
-			uint8_t r, g, b, a;
-		};
-
-
-
-		Pixel* pixel = (Pixel*)imgBuffer;
-
+		
+		std::vector<uint32_t> imgBuffer(imageWidth * imageHeight);
 		int32_t xOffset = 0;
 		for (int32_t i = 0; i < glyphs.size(); i++)
 		{
+
 			for (int32_t j = 0; j < glyphs[i].height; j++)
 			{
 				for (int32_t k = 0; k < glyphs[i].width; k++)
 				{
-					Pixel* gPixel = (Pixel*)glyphs[i].img.data;
+					uint32_t* gPixel = (uint32_t*)glyphs[i].img.data;
 					int32_t bufferY = baseline - glyphs[i].bearingY + j;
-					pixel[bufferY * imageWidth + (k + xOffset + glyphs[i].bearingX)] = gPixel[j * glyphs[i].width + k];
+					int32_t _offset = (k + xOffset + glyphs[i].bearingX);
+					if (_offset > 0)
+					{
+						int32_t index = bufferY * imageWidth + _offset;
+						imgBuffer[index] = glm::max(gPixel[j * glyphs[i].width + k], imgBuffer[index]);
+					}
 				}
 			}
 			xOffset += glyphs[i].advance;
 		}
 
 		Image textImage = {};
-		textImage.data = imgBuffer;
+		textImage.data = imgBuffer.data();
 		textImage.width = imageWidth;
 		textImage.height = imageHeight;
 		textImage.mipmaps = 1;
 		textImage.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
-
 		result = LoadTextureFromImage(textImage);
 		SetTextureFilter(result, TEXTURE_FILTER_BILINEAR);
 		SetTextureWrap(result, TEXTURE_WRAP_CLAMP);
-		delete[] imgBuffer;
 
         return result;
     }

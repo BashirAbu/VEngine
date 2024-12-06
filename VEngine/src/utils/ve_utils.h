@@ -10,5 +10,5 @@ namespace VE
 	VE_API std::filesystem::path GetFullPath(std::filesystem::path path);
 
 	VE_API void RaylibDrawTexturTargeteLetterBox(RenderTexture renderTarget, glm::vec2 screenSize);
-	VE_API Texture RaylibGetTextureFromText_UTF8(class Font* font, std::string text);
+	VE_API Texture RaylibGetTextureFromText_UTF8(class Font* font, std::string text, float spacing = 1.0f);
 }

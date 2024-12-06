@@ -179,11 +179,6 @@ namespace VE
 			float zoom = 1.0f;
 			VE_PROPERTY(Editor)
 			bool isMain = false;
-
-			~Camera2DComponent() 
-			{
-				UnloadRenderTexture(renderTarget);
-			}
 		};
 
 
@@ -199,10 +194,6 @@ namespace VE
 				VE_PROPERTY(Editor)
 				bool isMain = false;
 
-				~UICanvasComponent() 
-				{
-					UnloadRenderTexture(canvasRenderTarget);
-				}
 			};
 
 			VE_COMPONENT()
@@ -222,13 +213,10 @@ namespace VE
 				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
 				VE_PROPERTY(Editor)
 				float size = 12;
+				VE_PROPERTY(Editor)
+				float spacing = 1.0f;
 				std::string oldText = "";
 				Texture2D texture = {};
-
-				~LabelComponent() 
-				{
-					UnloadTexture(texture);
-				}
 			};
 		}
 	}

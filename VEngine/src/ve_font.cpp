@@ -53,7 +53,7 @@ namespace VE
 
 		//rgba
 		uint8_t* buffer = new uint8_t[face->glyph->bitmap.width * face->glyph->bitmap.rows * sizeof(uint8_t) * 4]{};
-		
+
 		struct Col 
 		{
 			uint8_t r, g, b, a;
@@ -95,16 +95,19 @@ namespace VE
 	}
 	void Font::SetFontSize(int32_t size)
 	{
-		for (auto& glyph : glyphs)
+		if (size > 0)
 		{
-			UnloadTexture(glyph.second.texture);
-			delete[] glyph.second.img.data;
+			for (auto& glyph : glyphs)
+			{
+				UnloadTexture(glyph.second.texture);
+				delete[] glyph.second.img.data;
+			}
+
+			glyphs.clear();
+
+			FT_Set_Pixel_Sizes(face, 0, size);
+			fontSize = size;
 		}
-
-		glyphs.clear();
-
-		FT_Set_Pixel_Sizes(face, 0, size);
-		fontSize = size;
 	}
 	Glyph Font::GetGlypth(FT_UInt character)
 	{

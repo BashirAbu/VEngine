@@ -91,7 +91,6 @@ namespace VE
 		{
 			//Create emtpy scene;
 			sceneManager->currentScene = new Scene(SceneType::Scene2D);
-
 		}
 		else 
 		{

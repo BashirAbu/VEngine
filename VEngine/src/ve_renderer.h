@@ -26,16 +26,8 @@ namespace VE
 			Color tint;
 		};
 		void Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e);
-		struct Label2D 
-		{
-			Texture2D* texture;
-			Rectangle source;
-			Rectangle dest;
-			Vector2 origin;
-			float rotation;
-			Color tint;
-		};
-		void Submit(Label2D& label, int32_t renderOrder, flecs::entity e);
+		void SubmitUI(Tex2D& UITexture, int32_t renderOrder, flecs::entity e);
+		
 		void BeginFrame();
 		RenderTexture GetMainRenderTarget() { return mainRenderTarget; }
 	private:
@@ -49,14 +41,8 @@ namespace VE
 		std::vector<FullTex2D> texture2DRenderQueue;
 		std::mutex texture2DRenderQueueMutex;
 
-		struct FullLabel2D 
-		{
-			Label2D label;
-			flecs::entity entity;
-			int32_t renderOrder;
-		};
-		std::vector<FullLabel2D> label2DRenderQueue;
-		std::mutex label2DRenderQueueMutex;
+		std::vector<FullTex2D> UIRenderQueue;
+		std::mutex UIRenderQueueMutex;
 		class Scene* scene;
 		friend class Editor;
 	};

@@ -141,17 +141,24 @@ namespace VE::Systems
 		if (label.fontFilepath != label.oldFontFilepath)
 		{
 			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, (int32_t)label.size);
+			//Render
+			UnloadTexture(label.texture);
+
+			if (label.font->GetFontSize() != label.size)
+				label.font->SetFontSize((int32_t)label.size);
+
+			label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text, label.spacing);
 		}
 		if (label.font)
 		{
-			if (label.oldText != label.text || label.font->GetFontSize() != label.size)
+			if (label.oldText != label.text || (label.font->GetFontSize() != label.size && label.size > 0))
 			{
 				UnloadTexture(label.texture);
 
 				if (label.font->GetFontSize() != label.size)
 					label.font->SetFontSize((int32_t)label.size);
 
-				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
+				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text, label.spacing);
 
 			}
 
@@ -174,19 +181,17 @@ namespace VE::Systems
 			dest.width = glm::abs(label.texture.width * tc.GetWorldScale().x);
 			dest.height = glm::abs(label.texture.height * tc.GetWorldScale().y);
 
-			Vector2 org = { dest.width * label.origin.x, dest.height * label.origin.y };
-
-			Renderer::Label2D l2d = {};
-
+			Renderer::Tex2D l2d = {};
 			l2d.source = src;
 			l2d.dest = dest;
-			l2d.origin = *(Vector2*) & label.origin;
+			Vector2 org = { dest.width * label.origin.x, dest.height * label.origin.y };
+			l2d.origin = org;
 			l2d.texture = &label.texture;
 			l2d.rotation = tc.GetWorldRotation().z;
 			l2d.tint = GLMVec4ToRayColor(label.color);
 			label.oldText = label.text;
 			label.oldFontFilepath = label.fontFilepath;
-			VE::Scene::GetSingleton()->renderer.Submit(l2d, label.renderOrder, e);
+			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d, label.renderOrder, e);
 		}
 	}
 

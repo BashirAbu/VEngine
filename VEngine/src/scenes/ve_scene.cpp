@@ -33,7 +33,7 @@ namespace VE
 
 
 		world.system<Components::UI::UICanvasComponent>("CanvasSystem").kind(flecs::PostUpdate).each(Systems::CanvasSystem);
-		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Label2DRenderSystem);
+		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").multi_threaded().kind(OnRender).multi_threaded().each(Systems::Label2DRenderSystem);
 		//register project components & systems.
 
 
@@ -441,7 +441,10 @@ namespace VE
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
 
-		world.component<Components::UI::LabelComponent>();
+			world.component<Components::UI::LabelComponent>().on_remove([](flecs::entity e, Components::UI::LabelComponent& lb) 
+				{
+					UnloadTexture(lb.texture);
+				});
 
 		world.component<_Components::SceneEntityTag>();
 		world.component<_Components::SceneEntityUITag>();
