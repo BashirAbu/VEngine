@@ -418,12 +418,27 @@ namespace VE
 			if (ImGui::MenuItem("Make Construct"))
 			{
 				std::string constructJson = engine->sceneManager->currentScene->SerializeEntity(e);
-				constructJson = "{ \"results\":[" + constructJson + "]}";
+				nlohmann::ordered_json constructJsonWrapper;
+				nlohmann::ordered_json constructEntList = nlohmann::ordered_json::parse("[" + constructJson + "]");
+
+				constructJsonWrapper["entities"] = constructEntList;
+
+				/*for (auto& ent : constructJsonWrapper["entities"])
+				{
+					bool f = ent.is_string();
+					std::string entJson = ent.dump();
+
+					entJson = "{\"results\": " + entJson + "}";
+					nlohmann::ordered_json js = nlohmann::ordered_json::parse(entJson);
+					ent = js;
+				}*/
+
+
 				std::filesystem::path constructPath = SaveFileDialog(VE_CONSTRUCT_FILE_EXTENSION);
 
 				std::ofstream constructFile(constructPath);
 
-				constructFile << constructJson;
+				constructFile << constructJsonWrapper;
 
 				constructFile.close();
 				

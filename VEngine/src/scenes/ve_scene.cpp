@@ -223,7 +223,8 @@ namespace VE
 		entity.children([&](flecs::entity child)
 			{
 				flecs::entity cloneChild = child.clone(true);
-				cloneChild.set_name(child.name());
+				std::string cloneChildName = GenUniqueName( (std::string)child.name().c_str() + "Clone");
+				cloneChild.set_name(cloneChildName.c_str());
 				cloneChild.remove(flecs::ChildOf, entity);
 				cloneChild.child_of(cloneParent);
 				CloneChildren(child, cloneChild);
@@ -289,10 +290,8 @@ namespace VE
 		}
 	}
 
-	std::string Scene::AddConstruct(std::filesystem::path constructFilePath)
+	flecs::entity Scene::AddConstruct(std::filesystem::path constructFilePath)
 	{
-		/*if (world.is_deferred())
-		{
 			std::fstream constructFile(GetFullPath(constructFilePath));
 			std::stringstream ss;
 			ss << constructFile.rdbuf();
@@ -300,28 +299,7 @@ namespace VE
 
 			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
 			std::string rootName;
-			for (auto ent : constJson["results"])
-			{
-				if (!ent.contains("parent"))
-				{
-					rootName = ent["name"];
-					break;
-				}
-			}
-
-			deferredConstructs.push_back(constructFilePath);
-			return rootName;
-		}
-		else 
-		{*/
-			std::fstream constructFile(GetFullPath(constructFilePath));
-			std::stringstream ss;
-			ss << constructFile.rdbuf();
-			std::string constructJson = ss.str();
-
-			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
-			std::string rootName;
-			for (auto ent : constJson["results"])
+			for (auto ent : constJson["entities"])
 			{
 				if (!ent.contains("parent"))
 				{
@@ -358,9 +336,74 @@ namespace VE
 					//Rename other entity.
 					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
 				}
-				world.from_json(constructJson.c_str());
-				root = LookupEntity(rootName.c_str());
+				std::vector<flecs::entity> ents;
+				for (auto entityJson : constJson["entities"])
+				{
+					std::string entJsonString = entityJson.dump();
+					std::string entName = (std::string)entityJson["name"];
+					
+					flecs::entity e = flecs::entity();
+					for (auto ent : ents)
+					{
+						if (entName == ent.name().c_str())
+						{
+							e = ent;
+							break;
+						}
+					}
 
+					if (!e)
+					{
+						e = world.entity();
+						e.from_json(entJsonString.c_str());
+
+						if (e.parent())
+						{
+
+							flecs::entity parent = e.parent();
+							e.remove(flecs::ChildOf, e.parent());
+							ents.push_back(parent);
+						}
+						ents.push_back(e);
+					}
+					else 
+					{
+						e.from_json(entJsonString.c_str());
+					}
+				}
+				
+				//add chilren to parent.
+				for (auto entityJson : constJson["entities"])
+				{
+					if (entityJson.contains("parent"))
+					{
+						std::string parentPath = entityJson["parent"];
+						std::size_t pos = parentPath.rfind(".");
+						std::string parentName = (pos != std::string::npos)? parentPath.substr(pos + 1) : parentPath;
+						std::string childName = entityJson["name"];
+
+						flecs::entity child, parent;
+						for (auto e : ents)
+						{
+							if (childName == e.name().c_str())
+							{
+								child = e;
+							}
+							else if (parentName == e.name().c_str())
+							{
+								parent = e;
+								if (!parent.parent())
+								{
+									root = parent;
+								}
+							}
+						}
+						if (child && parent)
+						{
+							child.child_of(parent);
+						}
+					}
+				}
 				root.add<_Components::ConstructTag>();
 			}
 
@@ -371,7 +414,7 @@ namespace VE
 				rootTC->SetWorldRotation(glm::vec3(0.0f));
 				rootTC->SetWorldScale(glm::vec3(0.0f));
 			}
-			return root.name().c_str();
+			return root;
 		//}
 	}
 
