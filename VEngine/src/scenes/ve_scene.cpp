@@ -291,7 +291,7 @@ namespace VE
 
 	std::string Scene::AddConstruct(std::filesystem::path constructFilePath)
 	{
-		if (world.is_deferred())
+		/*if (world.is_deferred())
 		{
 			std::fstream constructFile(GetFullPath(constructFilePath));
 			std::stringstream ss;
@@ -313,7 +313,7 @@ namespace VE
 			return rootName;
 		}
 		else 
-		{
+		{*/
 			std::fstream constructFile(GetFullPath(constructFilePath));
 			std::stringstream ss;
 			ss << constructFile.rdbuf();
@@ -346,6 +346,7 @@ namespace VE
 			if (root)
 			{
 				root = CloneEntity(root);
+				rootName = root.name().c_str();
 			}
 			else
 			{
@@ -358,7 +359,8 @@ namespace VE
 					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
 				}
 				world.from_json(constructJson.c_str());
-				root = LookupEntity(rootName);
+				root = LookupEntity(rootName.c_str());
+
 				root.add<_Components::ConstructTag>();
 			}
 
@@ -369,8 +371,8 @@ namespace VE
 				rootTC->SetWorldRotation(glm::vec3(0.0f));
 				rootTC->SetWorldScale(glm::vec3(0.0f));
 			}
-			return rootName;
-		}
+			return root.name().c_str();
+		//}
 	}
 
 
@@ -392,7 +394,7 @@ namespace VE
 			.opaque(flecs::String)
 			.serialize([](const flecs::serializer* s, const std::filesystem::path* data)
 				{
-					std::string temp = data->string();
+					std::string temp = data->generic_string();
 					const char* str = temp.c_str();
 					return s->value(flecs::String, &str);
 				})
