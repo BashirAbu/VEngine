@@ -295,18 +295,11 @@ namespace VE
 			std::fstream constructFile(GetFullPath(constructFilePath));
 			std::stringstream ss;
 			ss << constructFile.rdbuf();
-			std::string constructJson = ss.str();
+			std::string constructJsonString = ss.str();
 
-			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJson);
-			std::string rootName;
-			for (auto ent : constJson["entities"])
-			{
-				if (!ent.contains("parent"))
-				{
-					rootName = ent["name"];
-					break;
-				}
-			}
+			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJsonString);
+			std::string rootName = constJson["root"];
+			
 
 			flecs::query findConstruct = world.query_builder().with<_Components::ConstructTag>().build();
 			flecs::entity root = findConstruct.find([&](flecs::entity e) 
@@ -335,87 +328,68 @@ namespace VE
 				{
 					//Rename other entity.
 					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
+					root = flecs::entity();
 				}
-				std::vector<flecs::entity> ents;
-				for (auto entityJson : constJson["entities"])
+
+				struct Node 
 				{
-					std::string entJsonString = entityJson.dump();
-					std::string entName = (std::string)entityJson["name"];
-					
-					flecs::entity e = flecs::entity();
-					for (auto ent : ents)
-					{
-						if (entName == ent.name().c_str())
-						{
-							e = ent;
-							break;
-						}
-					}
+					flecs::entity e;
+					std::string name;
+				};
 
-					if (!e)
-					{
-						e = world.entity();
-						e.from_json(entJsonString.c_str());
+				std::vector<Node> nodes;
 
-						if (e.parent())
-						{
-
-							flecs::entity parent = e.parent();
-							e.remove(flecs::ChildOf, e.parent());
-							ents.push_back(parent);
-						}
-						ents.push_back(e);
-					}
-					else 
-					{
-						e.from_json(entJsonString.c_str());
-					}
-				}
-				
-				//add chilren to parent.
-				for (auto entityJson : constJson["entities"])
+				for (auto ent : constJson["entities"])
 				{
-					if (entityJson.contains("parent"))
-					{
-						std::string parentPath = entityJson["parent"];
-						std::size_t pos = parentPath.rfind(".");
-						std::string parentName = (pos != std::string::npos)? parentPath.substr(pos + 1) : parentPath;
-						std::string childName = entityJson["name"];
-
-						flecs::entity child, parent;
-						for (auto e : ents)
-						{
-							if (childName == e.name().c_str())
-							{
-								child = e;
-							}
-							else if (parentName == e.name().c_str())
-							{
-								parent = e;
-								if (!parent.parent())
-								{
-									root = parent;
-								}
-							}
-						}
-						if (child && parent)
-						{
-							child.child_of(parent);
-						}
-					}
+					Node n;
+					flecs::entity e = world.entity();
+					std::string entJsonString = ent.dump();
+					e.from_json(entJsonString.c_str());
+					n.e = e;
+					n.name = ent["name"];
+					nodes.push_back(n);
 				}
-				root.add<_Components::ConstructTag>();
+
+
+				for (auto itr = constJson["relations"].begin(); itr != constJson["relations"].end(); itr++)
+				{
+					std::string childName = itr.key();
+					std::string parentName = itr.value();
+
+					auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
+						{
+							return node.name == childName;
+						});
+					Node child = *it;
+
+					it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
+						{
+							std::string nodeName = node.name;
+							return nodeName == parentName;
+						});
+					Node parent = *it;
+					child.e.child_of(parent.e);
+				}
+
+				auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
+					{
+						return node.name == rootName;
+					});
+				Node rootNode = *it;
+				root = rootNode.e;
 			}
 
-			Components::TransformComponent* rootTC = root.get_mut<Components::TransformComponent>();
-			if (rootTC)
+			
+			if (root)
 			{
-				rootTC->SetWorldPosition(glm::vec3(0.0f));
-				rootTC->SetWorldRotation(glm::vec3(0.0f));
-				rootTC->SetWorldScale(glm::vec3(0.0f));
+				Components::TransformComponent tc = {};
+				tc.e = root;
+				tc.SetWorldPosition(glm::vec3(0.0f));
+				tc.SetWorldRotation(glm::vec3(0.0f));
+				tc.SetWorldScale(glm::vec3(1.0f));
+				root.set<Components::TransformComponent>(tc);
 			}
 			return root;
-		//}
 	}
 
 

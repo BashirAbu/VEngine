@@ -422,17 +422,30 @@ namespace VE
 				nlohmann::ordered_json constructEntList = nlohmann::ordered_json::parse("[" + constructJson + "]");
 
 				constructJsonWrapper["entities"] = constructEntList;
-
-				/*for (auto& ent : constructJsonWrapper["entities"])
+				nlohmann::ordered_json relations;
+				nlohmann::ordered_json root;
+				for (auto& entJson : constructJsonWrapper["entities"])
 				{
-					bool f = ent.is_string();
-					std::string entJson = ent.dump();
+					if (entJson.contains("parent"))
+					{
+						std::string parentPath = entJson["parent"];
+						std::size_t pos = parentPath.rfind(".");
+						std::string parentName = (pos != std::string::npos) ? parentPath.substr(pos + 1) : parentPath;
 
-					entJson = "{\"results\": " + entJson + "}";
-					nlohmann::ordered_json js = nlohmann::ordered_json::parse(entJson);
-					ent = js;
-				}*/
+						relations[(std::string)entJson["name"]] = parentName;
+						entJson.erase("parent");
+					}
+					else 
+					{
+						root["root"] = entJson["name"];
+					}
+				}
+				constructJsonWrapper["relations"] = relations;
+				constructJsonWrapper["root"] = root["root"];
 
+
+
+				//constructJsonWrapper["relations"]["entname"] = "parent";
 
 				std::filesystem::path constructPath = SaveFileDialog(VE_CONSTRUCT_FILE_EXTENSION);
 
