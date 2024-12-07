@@ -70,7 +70,7 @@ namespace VE
 			{
 				if (!e.parent())
 				{
-					localPosition = newScale;
+					localScale = newScale;
 				}
 				else
 				{

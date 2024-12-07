@@ -292,104 +292,91 @@ namespace VE
 
 	flecs::entity Scene::AddConstruct(std::filesystem::path constructFilePath)
 	{
-			std::fstream constructFile(GetFullPath(constructFilePath));
-			std::stringstream ss;
-			ss << constructFile.rdbuf();
-			std::string constructJsonString = ss.str();
+		std::fstream constructFile(GetFullPath(constructFilePath));
+		std::stringstream ss;
+		ss << constructFile.rdbuf();
+		std::string constructJsonString = ss.str();
 
-			nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJsonString);
-			std::string rootName = constJson["root"];
+		nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJsonString);
+		std::string rootName = constJson["root"];
 			
 
-			flecs::query findConstruct = world.query_builder().with<_Components::ConstructTag>().build();
-			flecs::entity root = findConstruct.find([&](flecs::entity e) 
+			
+		//Check if entity with same name as construct exist.
+		flecs::entity root = LookupEntity(rootName);
+		
+		flecs::entity existingEnt = flecs::entity();
+
+		//Entity with same name exist.
+		if (root)
+		{
+			existingEnt = root;
+			existingEnt.set_name((rootName + "_").c_str());
+		}
+
+		struct Node 
+		{
+			flecs::entity e;
+			std::string name;
+		};
+
+		std::vector<Node> nodes;
+
+		for (auto ent : constJson["entities"])
+		{
+			Node n;
+			flecs::entity e = world.entity();
+			std::string entJsonString = ent.dump();
+			e.from_json(entJsonString.c_str());
+			n.e = e;
+			n.name = ent["name"];
+			nodes.push_back(n);
+		}
+
+
+		for (auto itr = constJson["relations"].begin(); itr != constJson["relations"].end(); itr++)
+		{
+			std::string childName = itr.key();
+			std::string parentName = itr.value();
+
+			auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
 				{
-					
-					if (rootName == e.name().c_str())
-					{
-						rootName = e.name().c_str();
-						return e;
-					}
-					return flecs::entity();
+					return node.name == childName;
 				});
+			Node child = *it;
 
-			//if entity inside the scene has the same name as the construct we need to rename the construct's root entity.
-			if (root)
+			it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
+				{
+					std::string nodeName = node.name;
+					return nodeName == parentName;
+				});
+			Node parent = *it;
+			child.e.child_of(parent.e);
+		}
+
+		auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
 			{
-				root = CloneEntity(root);
-				rootName = root.name().c_str();
-			}
-			else
-			{
-				//Check if entity with same name as construct exist.
-				root = LookupEntity(rootName);
-				//Entity with same name exist.
-				if (root)
-				{
-					//Rename other entity.
-					root.set_name(GenUniqueName((std::string)root.name().c_str() + "_").c_str());
-					root = flecs::entity();
-				}
+				return node.name == rootName;
+			});
+		Node rootNode = *it;
+		root = rootNode.e;
+		
+		if (existingEnt)
+		{
+			root.set_name(GenUniqueName(rootName + "_").c_str());
+			existingEnt.set_name(rootName.c_str());
+		}
 
-				struct Node 
-				{
-					flecs::entity e;
-					std::string name;
-				};
-
-				std::vector<Node> nodes;
-
-				for (auto ent : constJson["entities"])
-				{
-					Node n;
-					flecs::entity e = world.entity();
-					std::string entJsonString = ent.dump();
-					e.from_json(entJsonString.c_str());
-					n.e = e;
-					n.name = ent["name"];
-					nodes.push_back(n);
-				}
-
-
-				for (auto itr = constJson["relations"].begin(); itr != constJson["relations"].end(); itr++)
-				{
-					std::string childName = itr.key();
-					std::string parentName = itr.value();
-
-					auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
-						{
-							return node.name == childName;
-						});
-					Node child = *it;
-
-					it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
-						{
-							std::string nodeName = node.name;
-							return nodeName == parentName;
-						});
-					Node parent = *it;
-					child.e.child_of(parent.e);
-				}
-
-				auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& node)
-					{
-						return node.name == rootName;
-					});
-				Node rootNode = *it;
-				root = rootNode.e;
-			}
-
-			
-			if (root)
-			{
-				Components::TransformComponent tc = {};
-				tc.e = root;
-				tc.SetWorldPosition(glm::vec3(0.0f));
-				tc.SetWorldRotation(glm::vec3(0.0f));
-				tc.SetWorldScale(glm::vec3(1.0f));
-				root.set<Components::TransformComponent>(tc);
-			}
-			return root;
+		if (root)
+		{
+			Components::TransformComponent tc = {};
+			tc.e = root;
+			tc.SetWorldPosition(glm::vec3(0.0f));
+			tc.SetWorldRotation(glm::vec3(0.0f));
+			tc.SetWorldScale(glm::vec3(1.0f));
+			root.set<Components::TransformComponent>(tc);
+		}
+		return root;
 	}
 
 
