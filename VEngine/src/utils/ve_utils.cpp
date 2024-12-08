@@ -39,7 +39,7 @@ namespace VE
 
 		std::wstring wideString = converter.from_bytes(text);
 
-		std::string processedString = ShapingEngine::render(wideString);
+		std::string processedString = ShapingEngine::render(wideString, true, true);
 
 		wideString = converter.from_bytes(processedString);
 

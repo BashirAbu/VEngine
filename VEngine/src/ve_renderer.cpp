@@ -11,6 +11,7 @@ namespace VE
 			PIXELFORMAT_UNCOMPRESSED_R8G8B8);
 
 		SetTextureFilter(mainRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
+		SetTextureWrap(mainRenderTarget.texture, TEXTURE_WRAP_CLAMP);
 	}
 	Renderer::~Renderer()
 	{
@@ -55,7 +56,6 @@ namespace VE
 
 		//render
 		scene->world.set_pipeline(scene->renderPipeline);
-
 		scene->world.progress();
 
 		flecs::query cameras2D = scene->world.query<Components::Camera2DComponent>();
@@ -64,8 +64,6 @@ namespace VE
 			{
 				return b.renderOrder > a.renderOrder;
 			});
-
-
 
 		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
 			{

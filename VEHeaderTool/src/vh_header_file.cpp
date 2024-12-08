@@ -24,7 +24,13 @@ namespace VH
 				
 				for (auto itr = classJson["meta"].begin(); itr != classJson["meta"].end(); itr++)
 				{
-					comp.name.meta.push_back(itr.key());
+					Meta meta = {};
+					meta.key = itr.key();
+					if (!itr.value().is_null())
+					{
+						meta.value = itr.value();
+					}
+					comp.name.meta.push_back(meta);
 				}
 
 				for (auto member : classJson["members"])
@@ -32,7 +38,13 @@ namespace VH
 					ParsedName prop;
 					for (auto itr = member["meta"].begin(); itr != member["meta"].end(); itr++)
 					{
-						prop.meta.push_back(itr.key());
+						Meta meta = {};
+						meta.key = itr.key();
+						if (!itr.value().is_null())
+						{
+							meta.value = itr.value();
+						}
+						prop.meta.push_back(meta);
 					}
 					
 					std::string propertyNamespace;
@@ -59,7 +71,13 @@ namespace VH
 				system.name = systemJson["name"];
 				for (auto itr = systemJson["meta"].begin(); itr != systemJson["meta"].end(); itr++)
 				{
-					system.meta.push_back(itr.key());
+					Meta meta = {};
+					meta.key = itr.key();
+					if (!itr.value().is_null())
+					{
+						meta.value = itr.value();
+					}
+					system.meta.push_back(meta);
 				}
 				
 				for (auto argsJson : systemJson["arguments"])
@@ -96,6 +114,25 @@ namespace VH
 				}
 			};
 
+
+		std::function <void(nlohmann::ordered_json& callBackJson, Callback& callback)> callBackDetails;
+
+		callBackDetails = [&](nlohmann::ordered_json& callBackJson, Callback& callback)
+			{
+				callback.name = callBackJson["name"];
+				for (auto itr = callBackJson["meta"].begin(); itr != callBackJson["meta"].end(); itr++)
+				{
+					Meta meta = {};
+					meta.key = itr.key();
+					if (!itr.value().is_null())
+					{
+						meta.value = itr.value();
+					}
+					callback.meta.push_back(meta);
+				}
+			};
+
+
 		std::function <void(nlohmann::ordered_json& elenJson, bool component)> recursiveNamespaces;
 
 		std::vector<std::string> nameSpaces;
@@ -110,18 +147,39 @@ namespace VH
 						{
 							if (member["type"] == "class" && isComponent)
 							{
-								Component comp;
-								comp.name.nameSpaces = nameSpaces;
-								componentDetails(member, comp);
-								components.push_back(comp);
-								
+								for (auto itr = member["meta"].begin(); itr != member["meta"].end(); itr++)
+								{
+									if (itr.key() == "Component")
+									{
+										Component comp;
+										comp.name.nameSpaces = nameSpaces;
+										componentDetails(member, comp);
+										components.push_back(comp);
+									}
+								}
 							}
 							else if (member["type"] == "function" && !isComponent)
 							{
-								System system;
-								system.nameSpaces = nameSpaces;
-								systemDetails(member, system);
-								systems.push_back(system);
+								for (auto itr = member["meta"].begin(); itr != member["meta"].end(); itr++)
+								{
+									if (itr.key() == "System")
+									{
+										System system;
+										system.nameSpaces = nameSpaces;
+										systemDetails(member, system);
+										systems.push_back(system);
+										
+									}
+
+									else if (itr.key() == "Callback") 
+									{
+										Callback callback;
+										callback.nameSpaces = nameSpaces;
+										callBackDetails(member, callback);
+										callbacks.push_back(callback);
+									}
+								}
+									
 							}
 							else if (member["type"] == "namespace")
 							{
@@ -136,18 +194,39 @@ namespace VH
 				{
 					if (elenJson["type"] == "class" && isComponent)
 					{
-						Component comp;
-						comp.name.nameSpaces = nameSpaces;
-						componentDetails(elenJson, comp);
-						components.push_back(comp);
+						for (auto itr = elenJson["meta"].begin(); itr != elenJson["meta"].end(); itr++)
+						{
+							if (itr.key() == "Component")
+							{
+								Component comp;
+								comp.name.nameSpaces = nameSpaces;
+								componentDetails(elenJson, comp);
+								components.push_back(comp);
+							}
+						}
 
 					}
 					else if (elenJson["type"] == "function" && !isComponent)
 					{
-						System system;
-						system.nameSpaces = nameSpaces;
-						systemDetails(elenJson, system);
-						systems.push_back(system);
+						for (auto itr = elenJson["meta"].begin(); itr != elenJson["meta"].end(); itr++)
+						{
+							if (itr.key() == "System")
+							{
+								System system;
+								system.nameSpaces = nameSpaces;
+								systemDetails(elenJson, system);
+								systems.push_back(system);
+							}
+
+							else if (itr.key() == "Callback")
+							{
+								Callback callback;
+								callback.nameSpaces = nameSpaces;
+								callBackDetails(elenJson, callback);
+								callbacks.push_back(callback);
+
+							}
+						}
 					}
 				}
 			};

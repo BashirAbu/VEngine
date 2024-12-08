@@ -250,7 +250,7 @@ namespace VE
 
         VE_API void FileSystem(std::filesystem::path& path, std::string label)
         {
-
+            ImGui::PushID(path.c_str());
             ImGui::Columns(2, 0, false);
             ImGui::Text((label + ": %s").c_str(), path.generic_string().c_str());
             ImGui::NextColumn();
@@ -264,7 +264,7 @@ namespace VE
             }
             ImGui::NextColumn();
             ImGui::Columns(1);
-
+            ImGui::PopID();
         }
 
         VE_API void Checkbox(bool& variable, std::string label)

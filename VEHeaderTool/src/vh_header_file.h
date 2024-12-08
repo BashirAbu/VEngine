@@ -2,9 +2,14 @@
 #include <filesystem>
 namespace VH 
 {
+	struct Meta 
+	{
+		std::string key;
+		std::string value;
+	};
 	struct ParsedName
 	{
-		std::vector<std::string> meta;
+		std::vector<Meta> meta;
 		std::vector<std::string> nameSpaces;
 		std::string dataType = "";
 		std::string name = "";
@@ -19,9 +24,16 @@ namespace VH
 	struct System 
 	{
 		std::string name;
-		std::vector<std::string> meta;
+		std::vector<Meta> meta;
 		std::vector<std::string> nameSpaces;
 		std::vector<ParsedName> components;
+	};
+
+	struct Callback
+	{
+		std::string name;
+		std::vector<Meta> meta;
+		std::vector<std::string> nameSpaces;
 	};
 
 	class HeaderFile 
@@ -35,6 +47,7 @@ namespace VH
 		std::string json;
 		std::vector<Component> components;
 		std::vector<System> systems;
+		std::vector<Callback> callbacks;
 		std::filesystem::path headerFilepath;
 	private:
 	};

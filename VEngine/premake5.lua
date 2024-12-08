@@ -149,7 +149,7 @@ language "c++"
             "cmake --build . --config %{cfg.buildcfg}",
 
             "{CHDIR} %{prj.location}",
-            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_COMPONENT -e VE_ENUM -f VE_SYSTEM -p VE_PROPERTY"
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
         }
         postbuildcommands
         {

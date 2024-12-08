@@ -1,6 +1,7 @@
--Drag and drop child parent 
+--enabel and disable enities and they still be visible.
 
--UI render target (res same to the main render target).
+--scene switching.
+
 
 -add setting window.
 	-set backbuffer width and height.

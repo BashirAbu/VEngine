@@ -18,7 +18,7 @@ namespace VE
 
 	namespace Components
 	{
-		VE_COMPONENT()
+		VE_CLASS(Component)
 		struct TransformComponent
 		{
 			TransformComponent() : __localMatrix(1.0f), __worldMatrix(1.0f)
@@ -89,12 +89,13 @@ namespace VE
 					glm::vec4 worldScl = glm::vec4(newScale, 1.0f);
 
 					glm::vec4 localScl = glm::inverse(parentWorldScaleMatrix) * worldScl;
-					localScl = localScl;
+					localScale = localScl;
 				}
 			}
 
 			glm::vec3 GetWorldPosition() 
 			{
+				
 				if (!e.parent())
 				{
 					return localPosition;
@@ -149,7 +150,7 @@ namespace VE
 			glm::vec3 __worldScale = { 1.0f,1.0f,1.0f };
 		};
 
-		VE_COMPONENT()
+		VE_CLASS(Component)
 		struct SpriteComponent
 		{
 			VE_PROPERTY(Editor)
@@ -165,7 +166,7 @@ namespace VE
 		};
 
 
-		VE_COMPONENT()
+		VE_CLASS(Component)
 		struct Camera2DComponent
 		{
 			Camera2D camera = {};
@@ -184,7 +185,7 @@ namespace VE
 
 		namespace UI
 		{
-			VE_COMPONENT()
+			VE_CLASS(Component)
 			struct UICanvasComponent 
 			{
 				RenderTexture canvasRenderTarget = {};
@@ -196,7 +197,7 @@ namespace VE
 
 			};
 
-			VE_COMPONENT()
+			VE_CLASS(Component)
 			struct LabelComponent 
 			{
 				class VE::Font* font = nullptr;

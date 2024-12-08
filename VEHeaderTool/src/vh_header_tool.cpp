@@ -58,9 +58,6 @@ namespace VH
 			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
 		}
 		
-		//VE_API void String(float& variable, std::string label);
-		//VE_API void FileSystem(std::filesystem::path & path, std::string label);
-		//VE_API void Checkbox(bool& variable, std::string label);
 		else if (dataType.find("float") != std::string::npos)
 		{
 			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
@@ -142,7 +139,7 @@ namespace VH
 				
 				for (ParsedName property : comp.properites)
 				{
-					if (std::find(property.meta.begin(), property.meta.end(), "Editor") != property.meta.end())
+					if (std::find_if(property.meta.begin(), property.meta.end(), [](const Meta& meta) { return meta.key == "Editor";}) != property.meta.end())
 					{
 						EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name);
 					}
@@ -277,8 +274,84 @@ namespace VH
 				{
 					compFullSpacename += sn + "::";
 				}
-				cppSourcefile += "	VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">();\n";
-					
+				cppSourcefile += "	VE::Scene::GetSingleton()->GetFlecsWorld().component<" + compFullSpacename + comp.name.name + ">()";
+				
+				auto itr = std::find_if(comp.name.meta.begin(), comp.name.meta.end(), [](const Meta& meta) { return meta.key == "OnAdd"; });
+
+				if (itr != comp.name.meta.end())
+				{
+					Meta meta = *itr;
+					Callback callBack;
+					for (const HeaderFile& headerFile : headerFiles)
+					{
+						auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+						if (iterator != headerFile.callbacks.end())
+						{
+							callBack = *iterator;
+							break;
+						}
+	
+					}
+
+					std::string fullNameSpace = "";
+					for (std::string sn : callBack.nameSpaces)
+					{
+						fullNameSpace += sn + "::";
+					}
+					cppSourcefile += ".on_add(" + fullNameSpace + callBack.name + ")";
+				}
+
+
+				itr = std::find_if(comp.name.meta.begin(), comp.name.meta.end(), [](const Meta& meta) { return meta.key == "OnRemove"; });
+
+				if (itr != comp.name.meta.end())
+				{
+					Meta meta = *itr;
+					Callback callBack;
+					for (const HeaderFile& headerFile : headerFiles)
+					{
+						auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+						if (iterator != headerFile.callbacks.end())
+						{
+							callBack = *iterator;
+							break;
+						}
+
+					}
+					std::string fullNameSpace = "";
+					for (std::string sn : callBack.nameSpaces)
+					{
+						fullNameSpace += sn + "::";
+					}
+					cppSourcefile += ".on_remove(" + fullNameSpace + callBack.name + ")";
+				}
+
+
+				itr = std::find_if(comp.name.meta.begin(), comp.name.meta.end(), [](const Meta& meta) { return meta.key == "OnSet"; });
+
+				if (itr != comp.name.meta.end())
+				{
+					Meta meta = *itr;
+					Callback callBack;
+					for (const HeaderFile& headerFile : headerFiles)
+					{
+						auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+						if (iterator != headerFile.callbacks.end())
+						{
+							callBack = *iterator;
+							break;
+						}
+
+					}
+					std::string fullNameSpace = "";
+					for (std::string sn : callBack.nameSpaces)
+					{
+						fullNameSpace += sn + "::";
+					}
+					cppSourcefile += ".on_set(" + fullNameSpace + callBack.name + ")";
+				}
+
+				cppSourcefile += ";\n";
 			}
 			
 		if (type == Type::Engine)
@@ -311,62 +384,66 @@ namespace VH
 				}
 				cppSourcefile.pop_back();
 				cppSourcefile += ">(\"" + system.name + "\")";
-				if (system.meta.empty())
+				
+				if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "OnStart";}) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::OnStart)";
+				}
+				else if(std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PreFrame"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PreFrame)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "OnLoad"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::OnLoad)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PostLoad"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PostLoad)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PreUpdate"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PreUpdate)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "OnUpdate"; }) != system.meta.end())
 				{
 					cppSourcefile += ".kind(flecs::OnUpdate)";
 				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "OnValidate"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::OnValidate)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PostUpdate"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PostUpdate)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PreStore"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PreStore)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "OnStore"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::OnStore)";
+				}
+				else if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "PostFrame"; }) != system.meta.end())
+				{
+					cppSourcefile += ".kind(flecs::PostFrame)";
+				}
 				else 
 				{
-					if (std::find(system.meta.begin(), system.meta.end(), "OnStart") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::OnStart)";
-					}
-					else if(std::find(system.meta.begin(), system.meta.end(), "PreFrame") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PreFrame)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "OnLoad") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::OnLoad)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "PostLoad") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PostLoad)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "PreUpdate") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PreUpdate)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "OnUpdate") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::OnUpdate)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "OnValidate") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::OnValidate)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "PostUpdate") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PostUpdate)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "PreStore") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PreStore)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "OnStore") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::OnStore)";
-					}
-					else if (std::find(system.meta.begin(), system.meta.end(), "PostFrame") != system.meta.end())
-					{
-						cppSourcefile += ".kind(flecs::PostFrame)";
-					}
-					if (std::find(system.meta.begin(), system.meta.end(), "Multithreaded") != system.meta.end())
-					{
-						cppSourcefile += ".multi_threaded()";
-					}
-					//
+					cppSourcefile += ".kind(flecs::OnUpdate)";
 				}
+
+
+				if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "Multithreaded"; }) != system.meta.end())
+				{
+					cppSourcefile += ".multi_threaded()";
+				}
+				if (std::find_if(system.meta.begin(), system.meta.end(), [](const Meta& meta) { return meta.key == "Immediate"; }) != system.meta.end())
+				{
+					cppSourcefile += ".immediate()";
+				}
+				
 				cppSourcefile += ".each(" + systemFullSpacename + system.name + ");\n";
 			}
 		cppSourcefile +="}\n";

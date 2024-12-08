@@ -85,11 +85,23 @@ namespace VE
 	}
 	void Scene::Start()
 	{
+		flecs::entity transformSystem = flecs::entity();
+
+		flecs::query q = world.query_builder().with(flecs::System).build();
+
+		transformSystem = q.find([](flecs::entity e) 
+			{
+				return (std::string)"TransformSystem" == e.name().c_str();
+			});
+
+		flecs::system* system = (flecs::system*)&transformSystem;
+		system->run();
 	}
 	void Scene::Update()
 	{
 		renderer.BeginFrame();
 		world.set_pipeline(updatePipeline);
+
 
 		world.progress();
 
@@ -120,6 +132,19 @@ namespace VE
 					cc.isMain = false;
 				}
 			});
+	}
+	flecs::entity Scene::GetMainCamera()
+	{
+		flecs::entity mainCamera = flecs::entity();
+
+		flecs::query cameras = world.query<Components::Camera2DComponent>();
+
+		mainCamera =  cameras.find([&](flecs::entity e, Components::Camera2DComponent& cc)
+			{
+				return cc.isMain;
+			});
+
+		return mainCamera;
 	}
 	flecs::entity Scene::AddEntity(std::string name)
 	{
@@ -365,16 +390,6 @@ namespace VE
 		{
 			root.set_name(GenUniqueName(rootName + "_").c_str());
 			existingEnt.set_name(rootName.c_str());
-		}
-
-		if (root)
-		{
-			Components::TransformComponent tc = {};
-			tc.e = root;
-			tc.SetWorldPosition(glm::vec3(0.0f));
-			tc.SetWorldRotation(glm::vec3(0.0f));
-			tc.SetWorldScale(glm::vec3(1.0f));
-			root.set<Components::TransformComponent>(tc);
 		}
 		return root;
 	}
