@@ -22,8 +22,13 @@ namespace VE
 		//editor function
 		void SaveScene();
 		SceneMode GetMode() { return mode; }
-	private:
 
+		void ReloadCurrentScene();
+		void ChangeScene(std::filesystem::path filepath);
+	private:
+		bool reloadCurrentScene = false;
+		bool changeScene = false;
+		std::filesystem::path changeScenePath = "";
 		Scene* currentScene;
 		SceneMode mode;
 		friend class Editor;

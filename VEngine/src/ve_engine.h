@@ -58,6 +58,7 @@ namespace VE
 		Editor* GetEditor() { return editor; }
 
 	private:
+		
 		Editor* editor;
 
 		EngineDesc desc;

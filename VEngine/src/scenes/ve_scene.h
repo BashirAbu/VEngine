@@ -52,6 +52,8 @@ namespace VE
 		std::string SerializeScene();
 		std::string SerializeEntity(flecs::entity e);
 		flecs::world GetFlecsWorld() { return world; }
+
+		const std::filesystem::path GetScenePath() { return scenePath; }
 	private:
 		flecs::entity _LookupEntity(std::string name);
 		//You can use int for id.

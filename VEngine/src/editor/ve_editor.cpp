@@ -249,57 +249,27 @@ namespace VE
 
 	void Editor::DrawUI()
 	{
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
-
 		// Start the Dear ImGui frame
 		rlImGuiBegin();
 		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		//ImGui::ShowDemoWindow();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawMainMenuBar();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawHierarchy();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawInspector();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawStatus();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawSceneViewport();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		DrawGameViewport();
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
+
 		consoleWindow.Draw();
 
-		if (selectedEntity)
-		{
-			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
-		}
 
 		//ImGui::Begin("Pick");
 
@@ -382,7 +352,6 @@ namespace VE
 			}
 			if (ImGui::MenuItem("Duplicate"))
 			{
-				//engine->sceneManager->currentScene->CloneEntity(selectedEntity);
 				cloneEntities.push(child);
 			}
 			ImGui::EndPopup();
@@ -602,9 +571,6 @@ namespace VE
 			{
 				if (ImGui::MenuItem("2D scene"))
 				{
-					//std::filesystem::path scenePath = VE::SaveFileDialog();
-					
-					//engine->sceneManager->LoadScene(GetRelativePath(scenePath));
 					engine->sceneManager->UnloadScene();
 					engine->sceneManager->currentScene = new Scene(SceneType::Scene2D);
 					selectedEntity = flecs::entity();
@@ -631,19 +597,24 @@ namespace VE
 		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload Project").x + ImGui::GetStyle().ItemSpacing.x * 4;
 		float spacing = (menuBarWidth - buttonWidth) / 2.0f;
 		ImGui::SameLine(spacing);
-		flecs::entity tempSelecetedEntity = selectedEntity;
+		
 		if (engine->sceneManager->mode == SceneMode::Editor)
 		{
+			
 			if (ImGui::Button("Start"))
 			{
 				engine->sceneManager->SaveScene();
 				if (!engine->sceneManager->currentScene->scenePath.empty())
 				{
+					tempSelecetedEntity = selectedEntity ? selectedEntity.name().c_str() : "_398743984_k;dslajf;kds";
 					engine->sceneManager->mode = SceneMode::Game;
-					std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
+
+					reloadScenePath = engine->sceneManager->currentScene->scenePath;
+					
 					engine->sceneManager->LoadScene(reloadScenePath);
 					ImGui::SetWindowFocus("GameViewport");
-					selectedEntity = flecs::entity();
+					selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
+
 				}
 
 			}
@@ -652,11 +623,13 @@ namespace VE
 
 			if (ImGui::Button("Reload Project"))
 			{
+				tempSelecetedEntity = selectedEntity ? selectedEntity.name().c_str() : "_398743984_k;dslajf;kds";
 				engine->sceneManager->SaveScene();
-				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
-
+				reloadScenePath = engine->sceneManager->currentScene->scenePath;
 				engine->sceneManager->LoadScene(reloadScenePath);
 				selectedEntity = flecs::entity();
+				selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
+
 			}
 		}
 		else
@@ -664,13 +637,12 @@ namespace VE
 			if (ImGui::Button("End"))
 			{
 				engine->sceneManager->mode = SceneMode::Editor;
-				std::filesystem::path reloadScenePath = engine->sceneManager->currentScene->scenePath;
 				engine->sceneManager->LoadScene(reloadScenePath);
 				ImGui::SetWindowFocus("SceneViewport");
 				selectedEntity = flecs::entity();
 			}
+			selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
 		}
-		selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity);
 		ImGui::EndMainMenuBar();
 	}
 	

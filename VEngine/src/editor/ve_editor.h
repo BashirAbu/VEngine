@@ -46,6 +46,8 @@ namespace VE
 		void DrawComponentElements(std::string name, flecs::entity entity);
 
 	private:
+		std::string tempSelecetedEntity;
+		std::filesystem::path reloadScenePath;
 
 		std::vector<char> entityName;
 		bool saveName = false;

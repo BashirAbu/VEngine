@@ -26,6 +26,12 @@ namespace VE
 		{
 			UnloadScene();
 		}
+
+		if (scenePath.empty())
+		{
+			return;
+		}
+
 		currentScene = new Scene(SceneType::Scene2D);
 		currentScene->scenePath = scenePath;
 		std::fstream sceneFile(GetFullPath(scenePath));
@@ -97,6 +103,15 @@ namespace VE
 		sceneFile.close();
 	}
 
+	void SceneManager::ReloadCurrentScene()
+	{
+		reloadCurrentScene = true;
+	}
+	void SceneManager::ChangeScene(std::filesystem::path filepath) 
+	{
+		changeScenePath = filepath;
+		changeScene = true;
+	}
 
 	void SceneManager::SaveSceneAs()
 	{

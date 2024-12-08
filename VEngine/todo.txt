@@ -1,6 +1,4 @@
---enabel and disable enities and they still be visible.
-
---scene switching.
+--scene switching & relaoding.
 
 
 -add setting window.

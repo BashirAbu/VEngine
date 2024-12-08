@@ -127,6 +127,20 @@ namespace VE
 			sceneManager->RunCurrentScene();
 			editor->DrawUI();
 			EndDrawing();
+
+			if (sceneManager->reloadCurrentScene)
+			{
+				sceneManager->LoadScene(sceneManager->currentScene->GetScenePath());
+				sceneManager->reloadCurrentScene = false;
+				sceneManager->changeScene = false;
+			}
+
+			if (sceneManager->changeScene)
+			{
+				sceneManager->LoadScene(sceneManager->changeScenePath);
+				sceneManager->reloadCurrentScene = false;
+				sceneManager->changeScene = false;
+			}
 		}
 	}
 	
