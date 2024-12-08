@@ -27,13 +27,13 @@ namespace VE
 
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
-		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).multi_threaded().each(Systems::Sprite2DRenderSystem);
-		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).each(Systems::Camera2DSystem);
-		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).each(Systems::TransformSystem);
+		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Sprite2DRenderSystem);
+		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
+		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);
 
 
-		world.system<Components::UI::UICanvasComponent>("CanvasSystem").kind(flecs::PostUpdate).each(Systems::CanvasSystem);
-		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").multi_threaded().kind(OnRender).multi_threaded().each(Systems::Label2DRenderSystem);
+		world.system<Components::UI::UICanvasComponent>("CanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::CanvasSystem);
+		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").multi_threaded().kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Label2DRenderSystem);
 		//register project components & systems.
 
 
@@ -273,18 +273,58 @@ namespace VE
 	}
 	flecs::entity Scene::LookupEntity(std::string name)
 	{
+		flecs::entity e = _LookupEntity(name);
+
+		if (e)
+		{
+			e = e.has<_Components::Disabled>() ? flecs::entity() : e;
+		}
+
+		return e;
+	}
+
+	flecs::entity Scene::LookupEntity(flecs::entity id)
+	{
+		flecs::entity e = _LookupEntity(id);
+
+		if (e)
+		{
+			e = e.has<_Components::Disabled>() ? flecs::entity() : e;
+		}
+
+		return e;
+	}
+
+	void Scene::EnableEntity(flecs::entity e)
+	{
+		if (e)
+		{
+			e.remove<_Components::Disabled>();
+		}
+	}
+
+	void Scene::DisableEntity(flecs::entity e)
+	{
+		if (e)
+		{
+			e.add<_Components::Disabled>();
+		}
+	}
+
+	flecs::entity Scene::_LookupEntity(std::string name) 
+	{
 		flecs::entity ent = flecs::entity();
-		
+
 		auto q = world.query_builder().with<_Components::SceneEntityTag>().build();
 		ent = q.find([&](flecs::entity e)
 			{
 				return name == e.name().c_str();
 			});
-		
+
 		return ent;
 	}
-
-	flecs::entity Scene::LookupEntity(flecs::entity id)
+	//You can use int for id.
+	flecs::entity Scene::_LookupEntity(flecs::entity id)
 	{
 		flecs::entity ent;
 		auto q = world.query_builder().with<_Components::SceneEntityTag>().build();
@@ -297,7 +337,7 @@ namespace VE
 	
 	std::string Scene::GenUniqueName(std::string name)
 	{
-		if (!LookupEntity(name))
+		if (!_LookupEntity(name))
 		{
 			return name;
 		}
@@ -306,7 +346,7 @@ namespace VE
 			std::string uniqueName = name;
 			std::string temp = name;
 			static size_t entityIDGen = 0;
-			while (LookupEntity(temp))
+			while (_LookupEntity(temp))
 			{
 				temp = uniqueName + std::to_string(entityIDGen++);
 			}
@@ -328,7 +368,7 @@ namespace VE
 
 			
 		//Check if entity with same name as construct exist.
-		flecs::entity root = LookupEntity(rootName);
+		flecs::entity root = _LookupEntity(rootName);
 		
 		flecs::entity existingEnt = flecs::entity();
 

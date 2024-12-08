@@ -35,9 +35,13 @@ namespace VE
 		void ManualComponentRegisteration();
 
 		flecs::entity CloneEntity(flecs::entity entity);
+
 		flecs::entity LookupEntity(std::string name);
 		//You can use int for id.
 		flecs::entity LookupEntity(flecs::entity id);
+
+		void EnableEntity(flecs::entity e);
+		void DisableEntity(flecs::entity e);
 
 		//System render phase
 		flecs::entity OnRender;
@@ -49,6 +53,11 @@ namespace VE
 		std::string SerializeEntity(flecs::entity e);
 		flecs::world GetFlecsWorld() { return world; }
 	private:
+		flecs::entity _LookupEntity(std::string name);
+		//You can use int for id.
+		flecs::entity _LookupEntity(flecs::entity id);
+
+
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);
 		flecs::world world;

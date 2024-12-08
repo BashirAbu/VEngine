@@ -13,6 +13,7 @@ namespace VE
 		struct SceneEntityTag {};
 		struct SceneEntityUITag {};
 		struct ConstructTag {};
+		struct Disabled {};
 	}
 
 

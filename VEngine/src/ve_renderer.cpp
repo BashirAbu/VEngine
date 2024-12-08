@@ -67,14 +67,17 @@ namespace VE
 
 		cameras2D.each([&](flecs::entity e, Components::Camera2DComponent& cc)
 			{
-				BeginTextureMode(cc.renderTarget);
-				BeginMode2D(cc.camera);
-				ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
+				if (!e.has<_Components::Disabled>())
+				{
+					BeginTextureMode(cc.renderTarget);
+					BeginMode2D(cc.camera);
+					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
 
-				RenderQueued();
+					RenderQueued();
 
-				EndMode2D();
-				EndTextureMode();
+					EndMode2D();
+					EndTextureMode();
+				}
 
 			});
 
@@ -88,13 +91,16 @@ namespace VE
 
 		uiCanvas.each([&](flecs::entity e, Components::UI::UICanvasComponent& canvas) 
 			{
-				BeginTextureMode(canvas.canvasRenderTarget);
+				if (!e.has<_Components::Disabled>())
+				{
+					BeginTextureMode(canvas.canvasRenderTarget);
 
-				ClearBackground(BLANK);
+					ClearBackground(BLANK);
 
-				RenderUIQueued();
+					RenderUIQueued();
 
-				EndTextureMode();
+					EndTextureMode();
+				}
 
 			});
 
@@ -105,7 +111,7 @@ namespace VE
 
 		flecs::entity mainCameraEntity = scene->world.query<Components::Camera2DComponent>().find([](flecs::entity e, Components::Camera2DComponent& camera)
 			{
-				return camera.isMain ? e : flecs::entity();
+				return camera.isMain && !e.has<_Components::Disabled>() ? e : flecs::entity();
 			});
 
 		if (mainCameraEntity)
@@ -120,7 +126,7 @@ namespace VE
 
 		flecs::entity mainCanvasEntity = scene->world.query<Components::UI::UICanvasComponent>().find([](flecs::entity e, Components::UI::UICanvasComponent& canvas)
 			{
-				return canvas.isMain ? e : flecs::entity();
+				return canvas.isMain && !e.has<_Components::Disabled>() ? e : flecs::entity();
 			});
 
 		if (mainCanvasEntity)

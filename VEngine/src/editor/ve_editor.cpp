@@ -249,26 +249,58 @@ namespace VE
 
 	void Editor::DrawUI()
 	{
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
+
 		// Start the Dear ImGui frame
 		rlImGuiBegin();
 		ImGui::PushFont(font);
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		//ImGui::ShowDemoWindow();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawMainMenuBar();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawHierarchy();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawInspector();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawStatus();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawSceneViewport();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		DrawGameViewport();
-
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
 		consoleWindow.Draw();
+
+		if (selectedEntity)
+		{
+			TraceLog(LOG_INFO, "%s", selectedEntity.name().c_str());
+		}
+
 		//ImGui::Begin("Pick");
 
 		//rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
@@ -376,7 +408,6 @@ namespace VE
 		ImGuiTreeNodeFlags flags = ((selectedEntity == e) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool opened = ImGui::TreeNodeEx((void*)((uint64_t)e), flags, e.name().c_str());
 
-
 		if (ImGui::BeginDragDropSource())
 		{
 			void* payload = &e;
@@ -442,10 +473,6 @@ namespace VE
 				}
 				constructJsonWrapper["relations"] = relations;
 				constructJsonWrapper["root"] = root["root"];
-
-
-
-				//constructJsonWrapper["relations"]["entname"] = "parent";
 
 				std::filesystem::path constructPath = SaveFileDialog(VE_CONSTRUCT_FILE_EXTENSION);
 
@@ -643,14 +670,68 @@ namespace VE
 				selectedEntity = flecs::entity();
 			}
 		}
-		selectedEntity = engine->sceneManager->currentScene->LookupEntity(tempSelecetedEntity);
+		selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity);
 		ImGui::EndMainMenuBar();
 	}
 	
 	void Editor::DrawInspector()
 	{
 		ImGui::Begin("Inspector");
+		if (selectedEntity)
+		{
+			ImGui::SameLine();
+
+			bool enabled = !selectedEntity.has<_Components::Disabled>();
+
+			ImGui::Checkbox(((std::string)"##" + selectedEntity.name().c_str()).c_str(), &enabled);
+
+			std::function<void(flecs::entity child, bool enable)> enableChildren;
+
+			enableChildren = [&](flecs::entity e, bool enable) -> void
+				{
+					
+					if (!enable)
+					{
+						e.add< _Components::Disabled>();
+					}
+					else 
+					{
+						e.remove< _Components::Disabled>();
+					}
+					e.children([&](flecs::entity c)
+						{
+							if (!enable)
+							{
+								c.add<_Components::Disabled>();
+							}
+							else
+							{
+								c.remove< _Components::Disabled>();
+							}
+
+							enableChildren(c, enable);
+						});
+				};
+
 		
+			if (!enabled && !selectedEntity.has<_Components::Disabled>())
+			{
+				selectedEntity.world().defer_begin();
+				enableChildren(selectedEntity, enabled);
+				selectedEntity.world().defer_end();
+
+			}
+			if (enabled && selectedEntity.has<_Components::Disabled>())
+			{
+				selectedEntity.world().defer_begin();
+				enableChildren(selectedEntity, enabled);
+				selectedEntity.world().defer_end();
+			}
+		}
+
+		ImGui::SameLine();
+
+
 		if (selectedEntity)
 		{
 			ImGui::Text("Name");
@@ -662,7 +743,7 @@ namespace VE
 			}
 			else if (ImGui::IsItemDeactivated())
 			{
-				if (!engine->sceneManager->currentScene->LookupEntity(entityName.data()) && saveName)
+				if (!engine->sceneManager->currentScene->_LookupEntity(entityName.data()) && saveName)
 				{
 					selectedEntity.set_name(entityName.data());
 					saveName = false;
@@ -1051,7 +1132,7 @@ namespace VE
 				}
 				else if (id)
 				{
-					selectedEntity = engine->sceneManager->currentScene->LookupEntity((flecs::entity)id);
+					selectedEntity = engine->sceneManager->currentScene->_LookupEntity((flecs::entity)id);
 				}
 				else 
 				{

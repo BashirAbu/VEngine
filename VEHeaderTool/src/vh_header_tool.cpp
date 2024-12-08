@@ -444,7 +444,7 @@ namespace VH
 					cppSourcefile += ".immediate()";
 				}
 				
-				cppSourcefile += ".each(" + systemFullSpacename + system.name + ");\n";
+				cppSourcefile += ".without<_Components::Disabled>().each(" + systemFullSpacename + system.name + ");\n";
 			}
 		cppSourcefile +="}\n";
 

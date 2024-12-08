@@ -44,9 +44,12 @@ namespace VE
 
 		for (auto enableSystem : enabledSystems)
 		{
-			currentScene->systemsTable[enableSystem].enable = true;
-			flecs::system* s = (flecs::system*)&currentScene->systemsTable[enableSystem];
-			s->enable();
+			if (currentScene->systemsTable[enableSystem].entity)
+			{
+				currentScene->systemsTable[enableSystem].enable = true;
+				flecs::system* s = (flecs::system*)&currentScene->systemsTable[enableSystem].entity;
+				s->enable();
+			}
 		}
 					
 		std::stringstream ss;
