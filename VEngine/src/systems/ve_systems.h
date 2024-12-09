@@ -22,7 +22,9 @@ namespace VE
 
 
 
-		void CanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas);
-		void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& transform, Components::UI::LabelComponent& label);
+		void UICanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas);
+		void UILabelRenderSystem(flecs::entity e, Components::TransformComponent& transform, Components::UI::UILabelComponent& label);
+		void UIImageRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIImageComponent& img);
+		void UIButtonSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIButtonComponent& button);
 	}
 }

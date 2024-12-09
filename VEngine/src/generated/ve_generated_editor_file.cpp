@@ -9,6 +9,7 @@
 using namespace VE;
 using namespace VE::Components;
 using namespace VE::_Components;
+using namespace VE::Components::UI;
 
 
 void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
@@ -105,34 +106,96 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			ImGui::TreePop();
 		}
 	}
-	if (name == "LabelComponent")
+	if (name == "UILabelComponent")
 	{
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if (ImGui::BeginPopupContextItem(0, 1))
 		{
 			if(ImGui::MenuItem("Remove"))
 			{
-				entity.remove<VE::Components::UI::LabelComponent>();
+				entity.remove<VE::Components::UI::UILabelComponent>();
 			}
 			ImGui::EndPopup();
 		}
 		if (open)
 		{
 			
-			VE::Components::UI::LabelComponent* LabelComponent_ = entity.get_mut<VE::Components::UI::LabelComponent>();
-			EditorElement::FileSystem(LabelComponent_->fontFilepath, "Font Filepath");
+			VE::Components::UI::UILabelComponent* UILabelComponent_ = entity.get_mut<VE::Components::UI::UILabelComponent>();
+			EditorElement::FileSystem(UILabelComponent_->fontFilepath, "Font Filepath");
 
-			EditorElement::String(LabelComponent_->text, "Text");
+			EditorElement::String(UILabelComponent_->text, "Text");
 
-			EditorElement::Vec2(LabelComponent_->origin, "Origin");
+			EditorElement::Vec2(UILabelComponent_->origin, "Origin");
 
-			EditorElement::Int(LabelComponent_->renderOrder, "Render Order");
+			EditorElement::Int(UILabelComponent_->renderOrder, "Render Order");
 
-			EditorElement::Color(LabelComponent_->color, "Color");
+			EditorElement::Color(UILabelComponent_->color, "Color");
 
-			EditorElement::Float(LabelComponent_->size, "Size");
+			EditorElement::Float(UILabelComponent_->size, "Size");
 
-			EditorElement::Float(LabelComponent_->spacing, "Spacing");
+			ImGui::TreePop();
+		}
+	}
+	if (name == "UIImageComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::UI::UIImageComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::UI::UIImageComponent* UIImageComponent_ = entity.get_mut<VE::Components::UI::UIImageComponent>();
+			EditorElement::FileSystem(UIImageComponent_->imageFilepath, "Image Filepath");
+
+			EditorElement::Vec2(UIImageComponent_->origin, "Origin");
+
+			EditorElement::Color(UIImageComponent_->tintColor, "Tint Color");
+
+			EditorElement::Int(UIImageComponent_->renderOrder, "Render Order");
+
+			ImGui::TreePop();
+		}
+	}
+	if (name == "UIButtonComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::UI::UIButtonComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::UI::UIButtonComponent* UIButtonComponent_ = entity.get_mut<VE::Components::UI::UIButtonComponent>();
+			EditorElement::FileSystem(UIButtonComponent_->fontFilepath, "Font Filepath");
+
+			EditorElement::String(UIButtonComponent_->text, "Text");
+
+			EditorElement::Vec2(UIButtonComponent_->textOrigin, "Text Origin");
+
+			EditorElement::Color(UIButtonComponent_->textColor, "Text Color");
+
+			EditorElement::Float(UIButtonComponent_->textSize, "Text Size");
+
+			EditorElement::FileSystem(UIButtonComponent_->imageFilepath, "Image Filepath");
+
+			EditorElement::Vec2(UIButtonComponent_->imageOrigin, "Image Origin");
+
+			EditorElement::Color(UIButtonComponent_->tintColor, "Tint Color");
+
+			EditorElement::Color(UIButtonComponent_->pressTintColor, "Press Tint Color");
+
+			EditorElement::Int(UIButtonComponent_->imageRenderOrder, "Image Render Order");
 
 			ImGui::TreePop();
 		}

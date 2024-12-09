@@ -99,7 +99,8 @@ namespace VH
 
 		cppSourcefile += "using namespace VE;\n";
 		cppSourcefile += "using namespace VE::Components;\n";
-		cppSourcefile += "using namespace VE::_Components;\n\n\n";
+		cppSourcefile += "using namespace VE::_Components;\n";
+		cppSourcefile += "using namespace VE::Components::UI;\n\n\n";
 
 		if (type == Type::Engine)
 		{
@@ -176,6 +177,7 @@ namespace VH
 
 		cppSourcefile += "using namespace VE;\n";
 		cppSourcefile += "using namespace VE::Components;\n";
+		cppSourcefile += "using namespace VE::Components::UI;\n";
 		cppSourcefile += "using namespace VE::_Components;\n\n\n";
 
 		for (const HeaderFile& headerFile : headerFiles)

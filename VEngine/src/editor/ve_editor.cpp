@@ -640,8 +640,8 @@ namespace VE
 				engine->sceneManager->LoadScene(reloadScenePath);
 				ImGui::SetWindowFocus("SceneViewport");
 				selectedEntity = flecs::entity();
+				selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
 			}
-			selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
 		}
 		ImGui::EndMainMenuBar();
 	}
@@ -977,8 +977,7 @@ namespace VE
 		ImGui::GetStyle().WindowPadding = ImVec2(0.0f, 0.0f);
 		ImGui::Begin("GameViewport");
 
-		ImVec2 vec2 = ImGui::GetContentRegionAvail();
-		gameViewportSize = *((glm::vec2*)&vec2);
+		ImVec2 vec2(0.0f, 0.0f);
 
 		gameViewportFocused = ImGui::IsWindowFocused();
 
@@ -1006,6 +1005,8 @@ namespace VE
 		const Texture* rt = &mainRenderTexture;
 
 		rlImGuiImageRenderTextureFit(&engine->sceneManager->currentScene->renderer.mainRenderTarget.texture, true);
+
+		gameViewportSize = glm::vec2(mainRenderTexture.width * scale, mainRenderTexture.height * scale);
 
 		ImGui::End();
 		ImGui::GetStyle().WindowPadding = oldPadding;
@@ -1070,7 +1071,7 @@ namespace VE
 						BeginShaderMode(colorPickingShader);
 						float id = (float)((int)tex2d.entity);
 						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-						DrawTexturePro(*tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+						DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
 						EndShaderMode();
 					}
 				}
@@ -1082,7 +1083,7 @@ namespace VE
 						BeginShaderMode(colorPickingShader);
 						float id = (float)((int)tex2d.entity);
 						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-						DrawTexturePro(*tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+						DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
 						EndShaderMode();
 					}
 				}

@@ -32,8 +32,12 @@ namespace VE
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);
 
 
-		world.system<Components::UI::UICanvasComponent>("CanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::CanvasSystem);
-		world.system<Components::TransformComponent, Components::UI::LabelComponent>("Label2DRenderSystem").multi_threaded().kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Label2DRenderSystem);
+		world.system<Components::UI::UICanvasComponent>("UICanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::UICanvasSystem);
+		world.system<Components::TransformComponent, Components::UI::UILabelComponent>("UILabelRenderSystem").multi_threaded().kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UILabelRenderSystem);
+		world.system<Components::TransformComponent, Components::UI::UIImageComponent>("UIImageRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UIImageRenderSystem);
+		world.system<Components::TransformComponent, Components::UI::UIButtonComponent>("UIButtonSystem ").kind(OnRender).without<_Components::Disabled>().each(Systems::UIButtonSystem);
+
+
 		//register project components & systems.
 
 
@@ -297,17 +301,79 @@ namespace VE
 
 	void Scene::EnableEntity(flecs::entity e)
 	{
-		if (e)
+		std::function<void(flecs::entity child, bool enable)> enableChildren;
+		enableChildren = [&](flecs::entity e, bool enable) -> void
+			{
+
+				if (!enable)
+				{
+					e.add< _Components::Disabled>();
+				}
+				else
+				{
+					e.remove< _Components::Disabled>();
+				}
+				e.children([&](flecs::entity c)
+					{
+						if (!enable)
+						{
+							c.add<_Components::Disabled>();
+						}
+						else
+						{
+							c.remove< _Components::Disabled>();
+						}
+
+						enableChildren(c, enable);
+					});
+			};
+
+
+		if (e.has<_Components::Disabled>())
 		{
-			e.remove<_Components::Disabled>();
+			e.world().defer_begin();
+			enableChildren(e, true);
+			e.world().defer_end();
+
 		}
 	}
 
 	void Scene::DisableEntity(flecs::entity e)
 	{
-		if (e)
+		std::function<void(flecs::entity child, bool enable)> enableChildren;
+		enableChildren = [&](flecs::entity e, bool enable) -> void
+			{
+
+				if (!enable)
+				{
+					e.add< _Components::Disabled>();
+				}
+				else
+				{
+					e.remove< _Components::Disabled>();
+				}
+				e.children([&](flecs::entity c)
+					{
+						if (!enable)
+						{
+							c.add<_Components::Disabled>();
+						}
+						else
+						{
+							c.remove< _Components::Disabled>();
+						}
+
+						enableChildren(c, enable);
+					});
+			};
+
+
+		if (!e.has<_Components::Disabled>())
 		{
-			e.add<_Components::Disabled>();
+			e.world().defer_begin();
+			enableChildren(e, false);
+			e.world().defer_end();
+
 		}
 	}
 
@@ -502,7 +568,7 @@ namespace VE
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
 
-			world.component<Components::UI::LabelComponent>().on_remove([](flecs::entity e, Components::UI::LabelComponent& lb) 
+			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
 				{
 					UnloadTexture(lb.texture);
 				});

@@ -133,6 +133,7 @@ namespace VE
 				sceneManager->LoadScene(sceneManager->currentScene->GetScenePath());
 				sceneManager->reloadCurrentScene = false;
 				sceneManager->changeScene = false;
+				editor->selectedEntity = flecs::entity();
 			}
 
 			if (sceneManager->changeScene)
@@ -140,6 +141,8 @@ namespace VE
 				sceneManager->LoadScene(sceneManager->changeScenePath);
 				sceneManager->reloadCurrentScene = false;
 				sceneManager->changeScene = false;
+				editor->selectedEntity = flecs::entity();
+
 			}
 		}
 	}

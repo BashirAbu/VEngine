@@ -3,10 +3,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <thread>
-#include <codecvt>
-#include <locale>
-#include "ShapingEngine.hpp"
-
+#include "ve_input.h"
 namespace VE::Systems
 {
 	void ApplyParentTransform(flecs::entity parent, Components::TransformComponent& parentTC)
@@ -105,12 +102,12 @@ namespace VE::Systems
 			Vector2 org = { dest.width * sc.origin.x, dest.height * sc.origin.y };
 			
 
-			VE::Renderer::Tex2D tex = { sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) };
+			VE::Renderer::Tex2D tex = { *sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) };
 			VE::Scene::GetSingleton()->renderer.Submit(tex, sc.renderOrder, e);
 			sc.oldTexturePath = sc.texturePath;
 		}
 	}
-	void CanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
+	void UICanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
 	{
 		if (canvas.isMain)
 		{
@@ -136,7 +133,43 @@ namespace VE::Systems
 			SetTextureFilter(canvas.canvasRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
 		}
 	}
-	void Label2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::LabelComponent& label)
+	void UIImageRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIImageComponent& img)
+	{
+		if (img.imageFilepath != img.oldImageFilepath)
+		{
+			img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
+		}
+		if (img.texture)
+		{
+			Rectangle src, dest;
+			src.x = 0.0f;
+			src.width = (float)img.texture->width;
+			src.y = 0.0f;
+			src.height = (float)img.texture->height;
+			if (tc.GetWorldScale().x < 0.0f)
+			{
+				src.width *= -1.0f;
+			}
+			if (tc.GetWorldScale().y < 0.0f)
+			{
+				src.height *= -1.0f;
+			}
+
+			dest.x = tc.GetWorldPosition().x;
+			dest.y = tc.GetWorldPosition().y;
+			dest.width = glm::abs(img.texture->width * tc.GetWorldScale().x);
+			dest.height = glm::abs(img.texture->height * tc.GetWorldScale().y);
+
+			Vector2 org = { dest.width * img.origin.x, dest.height * img.origin.y };
+
+
+			VE::Renderer::Tex2D tex = { *img.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(img.tintColor) };
+			VE::Scene::GetSingleton()->renderer.SubmitUI(tex, img.renderOrder, e);
+			img.oldImageFilepath = img.imageFilepath;
+		}
+	}
+
+	void UILabelRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UILabelComponent& label)
 	{
 		if (label.fontFilepath != label.oldFontFilepath)
 		{
@@ -146,19 +179,18 @@ namespace VE::Systems
 
 			if (label.font->GetFontSize() != label.size)
 				label.font->SetFontSize((int32_t)label.size);
-
-			label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text, label.spacing);
+			label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
 		}
 		if (label.font)
 		{
-			if (label.oldText != label.text || (label.font->GetFontSize() != label.size && label.size > 0))
+			if (label.oldText != label.text || (label.oldTextSize != label.size && label.size > 0))
 			{
 				UnloadTexture(label.texture);
 
 				if (label.font->GetFontSize() != label.size)
 					label.font->SetFontSize((int32_t)label.size);
 
-				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text, label.spacing);
+				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
 
 			}
 
@@ -186,13 +218,137 @@ namespace VE::Systems
 			l2d.dest = dest;
 			Vector2 org = { dest.width * label.origin.x, dest.height * label.origin.y };
 			l2d.origin = org;
-			l2d.texture = &label.texture;
+			l2d.texture = label.texture;
 			l2d.rotation = tc.GetWorldRotation().z;
 			l2d.tint = GLMVec4ToRayColor(label.color);
 			label.oldText = label.text;
 			label.oldFontFilepath = label.fontFilepath;
+			label.oldTextSize = label.size;
 			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d, label.renderOrder, e);
 		}
 	}
+
+
+	void UIButtonSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIButtonComponent& button)
+	{
+		//get main canvas.
+		flecs::query qCanvas = e.world().query<VE::Components::UI::UICanvasComponent>();
+
+		flecs::entity canvasEntity = qCanvas.find([](flecs::entity e, VE::Components::UI::UICanvasComponent& canvas) 
+			{
+				return canvas.isMain;
+			});
+		if (canvasEntity)
+		{
+			VE::Components::UI::UICanvasComponent* canvas = canvasEntity.get_mut<VE::Components::UI::UICanvasComponent>();
+			flecs::entity cameraEntity =  VE::Scene::GetSingleton()->GetMainCamera();
+
+			if (canvas)
+			{
+				glm::vec2 mousePos = VE::Input::GetMousePosistion();
+				glm::vec2 vMousePos = glm::vec2(mousePos.x / VE::Scene::GetSingleton()->renderer.GetMainRenderTarget().texture.width,
+					mousePos.y / VE::Scene::GetSingleton()->renderer.GetMainRenderTarget().texture.height);
+				vMousePos = glm::vec2(vMousePos.x * canvas->canvasSize.x, vMousePos.y * canvas->canvasSize.y);
+				if (button.imgTexture) 
+				{
+					Rectangle rect = {};
+					rect.x = tc.GetWorldPosition().x - button.imageOrigin.x * button.imgTexture->width;
+					rect.width = button.imgTexture->width * tc.GetWorldScale().x;
+					rect.y = tc.GetWorldPosition().y - button.imageOrigin.y * button.imgTexture->height;
+					rect.height = button.imgTexture->height * tc.GetWorldScale().x;
+
+					Vector2 point = {vMousePos.x, vMousePos.y};
+					if (CheckCollisionPointRec(point, rect))
+					{
+						if (VE::Input::IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+						{
+							button.__down = true;
+						}
+						else 
+						{
+							button.__down = false;
+						}
+
+						if (VE::Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+						{
+							if (button.callback)
+							{
+								button.callback();
+							}
+						}
+					}
+					else 
+					{
+						button.__down = false;
+
+					}
+				}
+			}
+		}
+
+		
+
+
+
+		Components::UI::UIImageComponent img;
+
+		img.imageFilepath = button.imageFilepath;
+		img.oldImageFilepath = button.oldImageFilepath;
+		img.origin = button.imageOrigin;
+		img.renderOrder = button.imageRenderOrder;
+		img.tintColor = button.__down ? button.pressTintColor : button.tintColor;
+
+
+		if (button.imageFilepath != button.oldImageFilepath)
+		{
+			button.imgTexture = AssetsManager::GetSingleton()->LoadTexture(button.imageFilepath);
+		}
+		img.texture = button.imgTexture;
+
+		UIImageRenderSystem(e, tc, img);
+		button.oldImageFilepath = button.imageFilepath;
+
+		Components::UI::UILabelComponent text;
+		text.color = button.textColor;
+		text.fontFilepath = button.fontFilepath;
+		text.oldFontFilepath = button.oldFontFilepath;
+		text.oldText = button.oldText;
+		text.origin = button.textOrigin;
+		text.renderOrder = button.imageRenderOrder + 1;
+		text.size = button.textSize;
+		text.text = button.text;
+
+		if (button.fontFilepath != button.oldFontFilepath)
+		{
+			button.font = AssetsManager::GetSingleton()->LoadFont(button.fontFilepath, (int32_t)button.textSize);
+			//Render
+			UnloadTexture(text.texture);
+
+			if (button.font->GetFontSize() != button.textSize)
+				button.font->SetFontSize((int32_t)button.textSize);
+
+			button.textTexture = RaylibGetTextureFromText_UTF8(button.font, button.text);
+		}
+		if (button.oldText != button.text || (button.oldTextSize!= button.textSize && button.textSize > 0))
+		{
+			UnloadTexture(button.textTexture);
+
+			if (button.font->GetFontSize() != button.textSize)
+				button.font->SetFontSize((int32_t)button.textSize);
+
+			button.textTexture = RaylibGetTextureFromText_UTF8(button.font, button.text);
+
+		}
+
+		text.font = button.font;
+		text.texture = button.textTexture;
+		text.size = button.textSize;
+		text.oldTextSize = button.oldTextSize;
+		UILabelRenderSystem(e, tc, text);
+		button.oldFontFilepath = button.fontFilepath;
+		button.oldText = button.text;
+		button.oldTextSize = button.textSize;
+	}
+	
 
 }

@@ -192,14 +192,14 @@ namespace VE
 				RenderTexture canvasRenderTarget = {};
 				VE_PROPERTY(Editor)
 				glm::vec2 canvasSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
-										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+										 (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
 				VE_PROPERTY(Editor)
 				bool isMain = false;
 
 			};
 
 			VE_CLASS(Component)
-			struct LabelComponent 
+			struct UILabelComponent 
 			{
 				class VE::Font* font = nullptr;
 				VE_PROPERTY(Editor)
@@ -215,10 +215,63 @@ namespace VE
 				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
 				VE_PROPERTY(Editor)
 				float size = 12;
-				VE_PROPERTY(Editor)
-				float spacing = 1.0f;
+				float oldTextSize = 12;
 				std::string oldText = "";
 				Texture2D texture = {};
+			};
+
+			VE_CLASS(Component)
+			struct UIImageComponent
+			{
+				VE_PROPERTY(Editor)
+				std::filesystem::path imageFilepath = "";
+				std::filesystem::path oldImageFilepath = "";
+				VE_PROPERTY(Editor)
+				glm::vec2 origin = {};
+				VE_PROPERTY(Editor)
+				NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+				VE_PROPERTY(Editor)
+				int32_t renderOrder = 0;
+				Texture* texture = nullptr;
+			};
+
+			VE_CLASS(Component)
+			struct UIButtonComponent
+			{
+				//Text
+				class VE::Font* font = nullptr;
+				VE_PROPERTY(Editor)
+				std::filesystem::path fontFilepath = "";
+				std::filesystem::path oldFontFilepath = "";
+				VE_PROPERTY(Editor)
+				std::string text = "";
+				VE_PROPERTY(Editor);
+				glm::vec2 textOrigin = {};
+				VE_PROPERTY(Editor)
+				NormalizedColor textColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+				VE_PROPERTY(Editor)
+				float textSize = 12;
+				float oldTextSize = 12;
+				std::string oldText = "";
+				Texture2D textTexture = {};
+
+				//Image
+				VE_PROPERTY(Editor)
+				std::filesystem::path imageFilepath = "";
+				std::filesystem::path oldImageFilepath = "";
+				VE_PROPERTY(Editor)
+				glm::vec2 imageOrigin = {};
+				VE_PROPERTY(Editor)
+				NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+				VE_PROPERTY(Editor)
+				NormalizedColor pressTintColor = { .78f, .78f, .78f, 1.0f };
+				VE_PROPERTY(Editor)
+				int32_t imageRenderOrder = 0;
+				Texture* imgTexture = nullptr;
+
+				std::function<void()> callback = nullptr;
+
+				bool __down = false;
 			};
 		}
 	}

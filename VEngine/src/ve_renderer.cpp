@@ -22,7 +22,7 @@ namespace VE
 	{
 		for (const auto& t2d : texture2DRenderQueue)
 		{
-			DrawTexturePro(*t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
+			DrawTexturePro(t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
 		}
 	}
 
@@ -30,7 +30,7 @@ namespace VE
 	{
 		for (const auto& t2d : UIRenderQueue)
 		{
-			DrawTexturePro(*t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
+			DrawTexturePro(t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
 		}
 	}
 
@@ -49,7 +49,7 @@ namespace VE
 			tss = (flecs::system*)&ts;
 			tss->run();
 
-			ts = scene->systemsTable["CanvasSystem"].entity;
+			ts = scene->systemsTable["UICanvasSystem"].entity;
 			tss = (flecs::system*)&ts;
 			tss->run();
 		}

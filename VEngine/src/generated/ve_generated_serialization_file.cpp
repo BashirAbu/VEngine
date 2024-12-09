@@ -4,6 +4,7 @@
 
 using namespace VE;
 using namespace VE::Components;
+using namespace VE::Components::UI;
 using namespace VE::_Components;
 
 
@@ -130,17 +131,17 @@ void Serialize_UICanvasComponent()
 }
 
 
-void Serialize_LabelComponent()
+void Serialize_UILabelComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
-		if(!strcmp(e.name().c_str(), "LabelComponent"))
+		if(!strcmp(e.name().c_str(), "UILabelComponent"))
 			return e;
 		return flecs::entity();	}); 
 	if(compEntity)
 	{
-		flecs::component<VE::Components::UI::LabelComponent>* comp = (flecs::component<VE::Components::UI::LabelComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("origin").member<int32_t>("renderOrder").member<NormalizedColor>("color").member<float>("size").member<float>("spacing"))
-		.serialize([](const flecs::serializer* s, const VE::Components::UI::LabelComponent* data) -> int		{
+		flecs::component<VE::Components::UI::UILabelComponent>* comp = (flecs::component<VE::Components::UI::UILabelComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("origin").member<int32_t>("renderOrder").member<NormalizedColor>("color").member<float>("size"))
+		.serialize([](const flecs::serializer* s, const VE::Components::UI::UILabelComponent* data) -> int		{
 		s->member("fontFilepath");
 		s->value(data->fontFilepath);
 		s->member("text");
@@ -153,10 +154,8 @@ void Serialize_LabelComponent()
 		s->value(data->color);
 		s->member("size");
 		s->value(data->size);
-		s->member("spacing");
-		s->value(data->spacing);
 			 return 0;
-		}).ensure_member([](VE::Components::UI::LabelComponent* data, const char* member) -> void*
+		}).ensure_member([](VE::Components::UI::UILabelComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "fontFilepath")) { return &data->fontFilepath;}
@@ -165,7 +164,90 @@ void Serialize_LabelComponent()
 			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
 			else if (!strcmp(member, "color")) { return &data->color;}
 			else if (!strcmp(member, "size")) { return &data->size;}
-			else if (!strcmp(member, "spacing")) { return &data->spacing;}
+		return nullptr;
+		});
+	}
+}
+
+
+void Serialize_UIImageComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "UIImageComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::UI::UIImageComponent>* comp = (flecs::component<VE::Components::UI::UIImageComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<std::filesystem::path>("imageFilepath").member<glm::vec2>("origin").member<NormalizedColor>("tintColor").member<int32_t>("renderOrder"))
+		.serialize([](const flecs::serializer* s, const VE::Components::UI::UIImageComponent* data) -> int		{
+		s->member("imageFilepath");
+		s->value(data->imageFilepath);
+		s->member("origin");
+		s->value(data->origin);
+		s->member("tintColor");
+		s->value(data->tintColor);
+		s->member("renderOrder");
+		s->value(data->renderOrder);
+			 return 0;
+		}).ensure_member([](VE::Components::UI::UIImageComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "imageFilepath")) { return &data->imageFilepath;}
+			else if (!strcmp(member, "origin")) { return &data->origin;}
+			else if (!strcmp(member, "tintColor")) { return &data->tintColor;}
+			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
+		return nullptr;
+		});
+	}
+}
+
+
+void Serialize_UIButtonComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "UIButtonComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::UI::UIButtonComponent>* comp = (flecs::component<VE::Components::UI::UIButtonComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("textOrigin").member<NormalizedColor>("textColor").member<float>("textSize").member<std::filesystem::path>("imageFilepath").member<glm::vec2>("imageOrigin").member<NormalizedColor>("tintColor").member<NormalizedColor>("pressTintColor").member<int32_t>("imageRenderOrder"))
+		.serialize([](const flecs::serializer* s, const VE::Components::UI::UIButtonComponent* data) -> int		{
+		s->member("fontFilepath");
+		s->value(data->fontFilepath);
+		s->member("text");
+		s->value(data->text);
+		s->member("textOrigin");
+		s->value(data->textOrigin);
+		s->member("textColor");
+		s->value(data->textColor);
+		s->member("textSize");
+		s->value(data->textSize);
+		s->member("imageFilepath");
+		s->value(data->imageFilepath);
+		s->member("imageOrigin");
+		s->value(data->imageOrigin);
+		s->member("tintColor");
+		s->value(data->tintColor);
+		s->member("pressTintColor");
+		s->value(data->pressTintColor);
+		s->member("imageRenderOrder");
+		s->value(data->imageRenderOrder);
+			 return 0;
+		}).ensure_member([](VE::Components::UI::UIButtonComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "fontFilepath")) { return &data->fontFilepath;}
+			else if (!strcmp(member, "text")) { return &data->text;}
+			else if (!strcmp(member, "textOrigin")) { return &data->textOrigin;}
+			else if (!strcmp(member, "textColor")) { return &data->textColor;}
+			else if (!strcmp(member, "textSize")) { return &data->textSize;}
+			else if (!strcmp(member, "imageFilepath")) { return &data->imageFilepath;}
+			else if (!strcmp(member, "imageOrigin")) { return &data->imageOrigin;}
+			else if (!strcmp(member, "tintColor")) { return &data->tintColor;}
+			else if (!strcmp(member, "pressTintColor")) { return &data->pressTintColor;}
+			else if (!strcmp(member, "imageRenderOrder")) { return &data->imageRenderOrder;}
 		return nullptr;
 		});
 	}
@@ -178,7 +260,9 @@ void EngineGeneratedSerialization()
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
 	 Serialize_UICanvasComponent();
-	 Serialize_LabelComponent();
+	 Serialize_UILabelComponent();
+	 Serialize_UIImageComponent();
+	 Serialize_UIButtonComponent();
 }
 
 
@@ -190,6 +274,8 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
-	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::LabelComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UILabelComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UIImageComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UIButtonComponent>();
 	EngineGeneratedSerialization();
 }

@@ -1,4 +1,3 @@
---scene switching & relaoding.
 
 
 -add setting window.

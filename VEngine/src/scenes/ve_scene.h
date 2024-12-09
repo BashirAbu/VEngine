@@ -54,10 +54,10 @@ namespace VE
 		flecs::world GetFlecsWorld() { return world; }
 
 		const std::filesystem::path GetScenePath() { return scenePath; }
-	private:
 		flecs::entity _LookupEntity(std::string name);
 		//You can use int for id.
 		flecs::entity _LookupEntity(flecs::entity id);
+	private:
 
 
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
