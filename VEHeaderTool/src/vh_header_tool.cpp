@@ -90,7 +90,10 @@ namespace VH
 	{
 		std::string filename = "ve_generated_editor_file.cpp";
 
-		std::string cppSourcefile = "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"editor/ve_editor.h\"\n#include <imgui.h>\n#include \"editor/ve_editor_elements.h\"\n\n";
+		std::string cppSourcefile = "#ifdef VE_EDITOR\n";
+
+
+		cppSourcefile += "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"editor/ve_editor.h\"\n#include <imgui.h>\n#include \"editor/ve_editor_elements.h\"\n\n";
 
 		for (const HeaderFile& headerFile : headerFiles)
 		{
@@ -152,6 +155,8 @@ namespace VH
 		}
 
 		cppSourcefile += "\n	ImGui::PopID();\n}\n";
+
+		cppSourcefile += "#endif\n";
 
 
 		std::cout << cppSourcefile << std::endl;

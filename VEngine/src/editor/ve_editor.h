@@ -1,4 +1,5 @@
 #pragma once
+#ifdef VE_EDITOR
 #include "ve_defines.h"
 #include <raylib.h>
 #include "imgui.h"
@@ -82,3 +83,4 @@ namespace VE
 		static Editor* singleton;
 	};
 }
+#endif

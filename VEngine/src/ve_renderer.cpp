@@ -37,6 +37,8 @@ namespace VE
 	void Renderer::RenderScene()
 	{
 		//Editor stuff
+
+#ifdef VE_EDITOR
 		if (Engine::GetSingleton()->GetSceneManager()->GetMode() == SceneMode::Editor)
 		{
 			BeginFrame();
@@ -53,7 +55,7 @@ namespace VE
 			tss = (flecs::system*)&ts;
 			tss->run();
 		}
-
+#endif
 		//render
 		scene->world.set_pipeline(scene->renderPipeline);
 		scene->world.progress();

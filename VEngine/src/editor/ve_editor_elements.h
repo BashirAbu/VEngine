@@ -1,4 +1,5 @@
 #pragma once
+#ifdef VE_EDITOR
 #include "ve_defines.h"
 #include <imgui.h>
 namespace VE 
@@ -27,3 +28,4 @@ namespace VE
 
 }
 
+#endif

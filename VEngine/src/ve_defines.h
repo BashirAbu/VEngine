@@ -53,11 +53,7 @@ namespace VE
 
 #define VE_IMGUI
 
-#define VE_EDITOR
 
-#ifdef VE_EDITOR
-
-#endif
 
 #define VE_STRINGIFY(x) #x
 #ifdef VE_WIN32

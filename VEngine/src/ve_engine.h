@@ -2,15 +2,12 @@
 #include "ve_defines.h"
 #include "scenes/ve_scene_manager.h"
 #include "platform/ve_shared_library.h"
+#ifdef VE_EDITOR
 #include "editor/ve_editor.h"
+#endif
 namespace VE 
 {
 	extern std::vector<std::string>* logs;
-	enum class VE_API RuntimeType
-	{
-		Editor,
-		Game
-	};
 	struct VE_API ProjectDetails
 	{
 		std::string name;
@@ -27,7 +24,6 @@ namespace VE
 	struct VE_API EngineDesc
 	{
 		ProjectDetails projectDetails;
-		RuntimeType runtimeType;
 	};
 
 	typedef VE_API void (*PFN_OnSharedLibraryEntry)(flecs::world& world);
@@ -54,12 +50,13 @@ namespace VE
 
 		SceneManager* GetSceneManager() { return sceneManager; };
 		const EngineDesc* GetDesc() const { return &desc; }
-
+#ifdef VE_EDITOR
 		Editor* GetEditor() { return editor; }
-
+#endif
 	private:
-		
+#ifdef VE_EDITOR
 		Editor* editor;
+#endif
 
 		EngineDesc desc;
 		SceneManager* sceneManager;

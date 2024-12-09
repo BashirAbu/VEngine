@@ -1,6 +1,5 @@
 #include "ve_scene.h"
 #include "ve_engine.h"
-#include "editor/ve_editor_input.h"
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"

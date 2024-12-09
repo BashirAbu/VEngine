@@ -20,12 +20,14 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/raylib/build/raylib/include",
         "%{wks.location}/VEngine/third_party/nlohmann_json/include/",
         "%{wks.location}/VEngine/third_party/glm/",
-        "%{wks.location}/VEngine/third_party/imgui/",
-        "%{wks.location}/VEngine/third_party/rlImGui/",
         "%{wks.location}/VEngine/third_party/flecs/include/",
         "%{wks.location}/VEngine/third_party/freetype/include/",
     }
-    
+
+    libdirs
+    {
+        "%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/"
+    }
     
     links
     {
@@ -59,25 +61,28 @@ project "Fusion"
         }
     
     filter "configurations:Debug"
-        libdirs
+        includedirs
         {
-            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/"
+            "%{wks.location}/VEngine/third_party/rlImGui/",
+            "%{wks.location}/VEngine/third_party/imgui/",
         }
-        defines "VE_DEBUG"
+        defines {"VE_DEBUG", "VE_EDITOR"}
         symbols "On"
 
     filter "configurations:Release"
-        libdirs
+        includedirs
         {
-            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
+            "%{wks.location}/VEngine/third_party/rlImGui/",
+            "%{wks.location}/VEngine/third_party/imgui/",
         }
-        defines "VE_RELEASE"
+        defines {"VE_RELEASE", "VE_EDITOR"}
         optimize "On"
-    filter "configurations:Development"
-        libdirs
-        {
-            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
-        }
+
+    filter "configurations:Game_Debug"
         defines "VE_DEBUG"
         symbols "On"
-        optimize "On" 
+
+    filter "configurations:Game_Release"
+    
+        defines "VE_RELEASE"
+        optimize "On"

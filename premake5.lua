@@ -5,7 +5,8 @@ workspace "VEngine"
     {
         "Debug",
         "Release",
-        "Development"
+        "Game_Debug",
+        "Game_Release"
     }
 
 outputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"

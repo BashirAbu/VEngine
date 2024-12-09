@@ -1,3 +1,4 @@
+#ifdef VE_EDITOR
 #include "ve_defines.h"
 #include "scenes/ve_scene.h"
 #include "editor/ve_editor.h"
@@ -203,3 +204,4 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 	ImGui::PopID();
 }
+#endif

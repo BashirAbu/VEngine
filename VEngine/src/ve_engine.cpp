@@ -79,9 +79,9 @@ namespace VE
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
 		SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
 		
-		
+#ifdef VE_EDITOR
 		editor = new Editor(this);
-
+#endif
 
 		projectSharedLibrary = new SharedLibrary();
 
@@ -98,12 +98,13 @@ namespace VE
 		}
 
 	}
-	typedef VE_PROJECT_API int* (*get_ptr)();
-	get_ptr ptr;
+
 	Engine::~Engine()
 	{
 		ShapingEngine::glyphs.clear();
+#ifdef VE_EDITOR
 		delete editor;
+#endif
 		delete sceneManager;
 		delete projectSharedLibrary;
 		delete AssetsManager::GetSingleton();
@@ -125,7 +126,9 @@ namespace VE
 			BeginDrawing();
 			ClearBackground(BLANK);
 			sceneManager->RunCurrentScene();
+#ifdef VE_EDITOR
 			editor->DrawUI();
+#endif
 			EndDrawing();
 
 			if (sceneManager->reloadCurrentScene)

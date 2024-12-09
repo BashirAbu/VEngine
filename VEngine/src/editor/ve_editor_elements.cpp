@@ -1,3 +1,4 @@
+#ifdef VE_EDITOR
 #include "ve_editor_elements.h"
 #include "platform/ve_platform.h"
 #include "ve_engine.h"
@@ -280,3 +281,4 @@ namespace VE
 
     }
 }
+#endif

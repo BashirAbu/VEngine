@@ -33,13 +33,27 @@ project "VEHeaderTool"
         }
     
     filter "configurations:Debug"
-        defines "VE_DEBUG"
+        defines 
+        {
+            "VE_DEBUG",
+            "VE_EDITOR",
+        }
         symbols "On"
 
     filter "configurations:Release"
+        defines 
+        {
+            "VE_RELEASE",
+            "VE_EDITOR",
+        }
+        optimize "On"
+
+    filter "configurations:Game_Debug"
+
+    defines "VE_DEBUG"
+    symbols "On"
+
+    filter "configurations:Game_Release"
+    
         defines "VE_RELEASE"
         optimize "On"
-    filter "configurations:Development"
-        defines "VE_DEBUG"
-        symbols "On"
-        optimize "On" 

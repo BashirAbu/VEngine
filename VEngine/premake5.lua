@@ -62,13 +62,20 @@ project "ImGui"
         }
 
     filter "configurations:Debug"
-        
-    filter "configurations:Development"
         symbols "On"
-        optimize "On"
+        
     filter "configurations:Release"
         optimize "On"
 
+    filter "configurations:Game_Debug"
+
+        defines "VE_DEBUG"
+        symbols "On"
+
+    filter "configurations:Game_Release"
+    
+        defines "VE_RELEASE"
+        optimize "On"
 
 project "VEngine"
 kind "SharedLib"
@@ -91,12 +98,7 @@ language "c++"
         "%{prj.location}/src",
         "%{prj.location}/third_party/raylib/src/",
         "%{prj.location}/third_party/nlohmann_json/include/",
-        "%{prj.location}/third_party/imgui/",
-        "%{prj.location}/third_party/raygui/src/",
-        "%{prj.location}/third_party/rlImGui/",
         "%{prj.location}/third_party/glm/",
-        "%{prj.location}/third_party/ImGuizmo/",
-        "%{prj.location}/third_party/glfw/include",
         "%{prj.location}/third_party/flecs/include/",
         "%{prj.location}/third_party/freetype/include/",
         "%{prj.location}/third_party/ShapingEngine/",
@@ -129,17 +131,6 @@ language "c++"
             "flecs_EXPORTS"
         }
 
-        libdirs 
-        {
-            "%{wks.location}/bin/" .. outputDir .. "/ImGui/"
-            
-        }
-
-        links
-        { 
-            "ImGui.lib"
-        }
-
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/raylib/",
@@ -159,20 +150,66 @@ language "c++"
 
     
     filter "configurations:Debug"
-       
-        defines "VE_DEBUG"
-        symbols "On"
+        includedirs
+        {
+            "%{prj.location}/third_party/imgui/",
+            "%{prj.location}/third_party/raygui/src/",
+            "%{prj.location}/third_party/rlImGui/",
+            "%{prj.location}/third_party/glfw/include",
+            "%{prj.location}/third_party/ImGuizmo/",
+        }
+        libdirs 
+        {
+            "%{wks.location}/bin/" .. outputDir .. "/ImGui/"
+            
+        }
 
+        links
+        { 
+            "ImGui.lib"
+        }
+        defines 
+        {
+            "VE_DEBUG",
+            "VE_EDITOR",
+        }
+        symbols "On"
+    
     filter "configurations:Release"
-       
-        defines "VE_RELEASE"
+        includedirs
+        {
+            "%{prj.location}/third_party/imgui/",
+            "%{prj.location}/third_party/raygui/src/",
+            "%{prj.location}/third_party/rlImGui/",
+            "%{prj.location}/third_party/glfw/include",
+            "%{prj.location}/third_party/ImGuizmo/",
+        }
+        libdirs 
+        {
+            "%{wks.location}/bin/" .. outputDir .. "/ImGui/"
+            
+        }
+
+        links
+        { 
+            "ImGui.lib"
+        }
+
+        defines 
+        {
+            "VE_RELEASE",
+            "VE_EDITOR",
+        }
         optimize "On"
 
 
-
-    filter "configurations:Development"
-
+    filter "configurations:Game_Debug"
+    
         defines "VE_DEBUG"
         symbols "On"
-        optimize "On" 
+    
 
+    filter "configurations:Game_Release"
+    
+        defines "VE_RELEASE"
+        optimize "On"

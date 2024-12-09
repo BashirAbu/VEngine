@@ -130,15 +130,19 @@ namespace VE
 	{
 		if (currentScene)
 		{
+#ifdef VE_EDITOR
 			if (mode == SceneMode::Game)
 			{
+#endif
 				if (!currentScene->started)
 				{
 					currentScene->Start();
 					currentScene->started = true;
 				}
 				currentScene->Update();
+#ifdef VE_EDITOR
 			}
+#endif
 			currentScene->Render();
 		}
 	}

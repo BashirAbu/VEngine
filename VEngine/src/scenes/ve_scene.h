@@ -47,7 +47,6 @@ namespace VE
 		flecs::entity OnRender;
 		flecs::entity updatePipeline;
 		flecs::entity renderPipeline;
-		Renderer renderer;
 
 		std::string SerializeScene();
 		std::string SerializeEntity(flecs::entity e);
@@ -57,8 +56,10 @@ namespace VE
 		flecs::entity _LookupEntity(std::string name);
 		//You can use int for id.
 		flecs::entity _LookupEntity(flecs::entity id);
-	private:
 
+		RenderTexture GetMainRenderTarget() { return renderer.GetMainRenderTarget(); };
+		Renderer renderer; 
+	private:
 
 		void CloneChildren(flecs::entity entity, flecs::entity cloneParent);
 		std::string GenUniqueName(std::string name);

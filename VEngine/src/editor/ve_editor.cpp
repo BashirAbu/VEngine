@@ -1,5 +1,5 @@
-﻿#include "ve_editor.h"
-#include "ve_editor_input.h"
+﻿#ifdef VE_EDITOR
+#include "ve_editor.h"
 #include "ve_engine.h"
 #include <rlImGui.h>
 #include <imgui.h>
@@ -1018,7 +1018,7 @@ namespace VE
 		{
 			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
 			{
-				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y}, editorCamera);
+				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ ImGui::GetMousePos().x, ImGui::GetMousePos().y}, editorCamera);
 				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
 				{
 					Vector2 delta = GetMouseDelta();
@@ -1034,7 +1034,7 @@ namespace VE
 				}
 				if (wheel)
 				{
-					editorCamera.offset = Vector2{ EditorInput::GetMousePostion().x, EditorInput::GetMousePostion().y };
+					editorCamera.offset = Vector2{ ImGui::GetMousePos().x, ImGui::GetMousePos().y };
 					editorCamera.target = mouseWorldPos;
 					float scaleFactor = 1.0f + (0.25f * fabsf(wheel));
 					if (wheel < 0) scaleFactor = 1.0f / scaleFactor;
@@ -1095,7 +1095,7 @@ namespace VE
 
 				Image pickImage = LoadImageFromTexture(t);
 				float* pickingData = (float*)pickImage.data;
-				glm::vec2 mousePos = EditorInput::GetMousePostion();
+				ImVec2 mousePos = ImGui::GetMousePos();
 				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
 				
 				int id = (int)pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
@@ -1190,3 +1190,6 @@ namespace VE
 		scrollToBottom = true;
 	}
 }
+
+
+#endif
