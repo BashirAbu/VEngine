@@ -7,7 +7,7 @@
 #include <iostream>
 #include "platform/ve_flecs_os_backend.h"
 #include "ShapingEngine.hpp"
-
+#include "utils/ve_utils.h"
 namespace ShapingEngine
 {
 	std::map<int, Glyph> glyphs;
@@ -42,7 +42,9 @@ namespace VE
 		case LOG_FATAL:  msg = "[FATAL]: " + msg; break;
 		default: break;
 		}
+#ifdef VE_EDITOR
 		AddLog(msg);
+#endif
 		printf(msg.c_str());
 		buffer.clear();
 	}
@@ -110,8 +112,10 @@ namespace VE
 		delete AssetsManager::GetSingleton();
 		CloseAudioDevice();
 		CloseWindow();
+#ifdef VE_EDITOR
 		logs->clear();
 		delete logs;
+#endif
 	}
 	Engine* Engine::GetSingleton()
 	{
@@ -128,7 +132,12 @@ namespace VE
 			sceneManager->RunCurrentScene();
 #ifdef VE_EDITOR
 			editor->DrawUI();
+#else
+			//Draw main render target directly to the window.
+			RenderTexture mainTarget = sceneManager->currentScene->GetMainRenderTarget();
+			RaylibDrawTexturTargeteLetterBox(mainTarget, glm::vec2((float)GetScreenWidth(), (float)GetScreenHeight()));
 #endif
+
 			EndDrawing();
 
 			if (sceneManager->reloadCurrentScene)
@@ -136,7 +145,11 @@ namespace VE
 				sceneManager->LoadScene(sceneManager->currentScene->GetScenePath());
 				sceneManager->reloadCurrentScene = false;
 				sceneManager->changeScene = false;
+#ifdef VE_EDITOR
+
 				editor->selectedEntity = flecs::entity();
+#endif
+
 			}
 
 			if (sceneManager->changeScene)
@@ -144,7 +157,11 @@ namespace VE
 				sceneManager->LoadScene(sceneManager->changeScenePath);
 				sceneManager->reloadCurrentScene = false;
 				sceneManager->changeScene = false;
+#ifdef VE_EDITOR
+
 				editor->selectedEntity = flecs::entity();
+#endif
+
 
 			}
 		}
@@ -163,8 +180,10 @@ namespace VE
 
 		OnSharedLibraryEntry = (PFN_OnSharedLibraryEntry)projectSharedLibrary->GetProcAddress("OnSharedLibraryEntry");
 		VE_ASSERT(OnSharedLibraryEntry);
+#ifdef VE_EDITOR
 		ProjectDrawComponentElements = (PFN_ProjectDrawComponentElements)projectSharedLibrary->GetProcAddress("ProjectDrawComponentElements");
 		VE_ASSERT(ProjectDrawComponentElements);
+#endif
 	}
 	void Engine::ReloadProjectSharedLibrary()
 	{

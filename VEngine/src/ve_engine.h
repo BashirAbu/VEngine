@@ -28,10 +28,10 @@ namespace VE
 
 	typedef VE_API void (*PFN_OnSharedLibraryEntry)(flecs::world& world);
 	inline VE_API PFN_OnSharedLibraryEntry OnSharedLibraryEntry;
-
+#ifdef VE_EDITOR
 	typedef VE_API void (*PFN_ProjectDrawComponentElements)(std::string name, flecs::entity entity);
 	inline VE_API PFN_ProjectDrawComponentElements ProjectDrawComponentElements;
-
+#endif
 	class VE_API Engine
 	{
 	public:

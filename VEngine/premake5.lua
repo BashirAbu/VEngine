@@ -42,11 +42,16 @@ project "ImGui"
             "IMGUI_EXPORT"
         }
         
+       
+        postbuildcommands
+        {
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
+        }
+    filter "configurations:Debug"
         libdirs
         {
             "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
         }
-        symbols "On"
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/glfw/",
@@ -55,25 +60,59 @@ project "ImGui"
             "cmake ..",
             "cmake --build . --config %{cfg.buildcfg}"
         }
-       
-        postbuildcommands
-        {
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
-        }
+    
 
-    filter "configurations:Debug"
         symbols "On"
         
     filter "configurations:Release"
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
+        }
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config %{cfg.buildcfg}"
+        }
+    
+
         optimize "On"
 
     filter "configurations:Game_Debug"
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/Debug/"
+        }
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config Debug"
+
+        }
 
         defines "VE_DEBUG"
         symbols "On"
 
     filter "configurations:Game_Release"
-    
+        libdirs
+        {
+            "%{prj.location}/third_party/glfw/build/src/Release/"
+        }
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/glfw/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake ..",
+            "cmake --build . --config Release"
+        }
+
         defines "VE_RELEASE"
         optimize "On"
 
@@ -104,16 +143,7 @@ language "c++"
         "%{prj.location}/third_party/ShapingEngine/",
     }
     
-    libdirs
-    {
-        "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
-        "%{prj.location}/third_party/freetype/build/%{cfg.buildcfg}/"
-    }
-    links
-    {
-        "raylib",
-        "freetype"
-    }
+
 
     vectorextensions "Default"
 
@@ -131,6 +161,46 @@ language "c++"
             "flecs_EXPORTS"
         }
 
+
+
+    
+    filter "configurations:Debug"
+        includedirs
+        {
+            "%{prj.location}/third_party/imgui/",
+            "%{prj.location}/third_party/raygui/src/",
+            "%{prj.location}/third_party/rlImGui/",
+            "%{prj.location}/third_party/glfw/include",
+            "%{prj.location}/third_party/ImGuizmo/",
+        }
+
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
+            "%{prj.location}/third_party/freetype/build/%{cfg.buildcfg}/"
+        }
+        links
+        {
+            "raylib",
+            "freetype"
+        }
+
+        libdirs 
+        {
+            "%{wks.location}/bin/" .. outputDir .. "/ImGui/"
+            
+        }
+
+        links
+        { 
+            "ImGui.lib"
+        }
+        defines 
+        {
+            "VE_DEBUG",
+            "VE_EDITOR",
+        }
+        symbols "On"
         prebuildcommands
         {
             "{CHDIR} %{prj.location}/third_party/raylib/",
@@ -148,33 +218,6 @@ language "c++"
             "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
         }
 
-    
-    filter "configurations:Debug"
-        includedirs
-        {
-            "%{prj.location}/third_party/imgui/",
-            "%{prj.location}/third_party/raygui/src/",
-            "%{prj.location}/third_party/rlImGui/",
-            "%{prj.location}/third_party/glfw/include",
-            "%{prj.location}/third_party/ImGuizmo/",
-        }
-        libdirs 
-        {
-            "%{wks.location}/bin/" .. outputDir .. "/ImGui/"
-            
-        }
-
-        links
-        { 
-            "ImGui.lib"
-        }
-        defines 
-        {
-            "VE_DEBUG",
-            "VE_EDITOR",
-        }
-        symbols "On"
-    
     filter "configurations:Release"
         includedirs
         {
@@ -183,6 +226,16 @@ language "c++"
             "%{prj.location}/third_party/rlImGui/",
             "%{prj.location}/third_party/glfw/include",
             "%{prj.location}/third_party/ImGuizmo/",
+        }
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/%{cfg.buildcfg}/",
+            "%{prj.location}/third_party/freetype/build/%{cfg.buildcfg}/"
+        }
+        links
+        {
+            "raylib",
+            "freetype"
         }
         libdirs 
         {
@@ -201,15 +254,81 @@ language "c++"
             "VE_EDITOR",
         }
         optimize "On"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/raylib/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
+            "cmake --build . --config %{cfg.buildcfg}",
 
+            "{CHDIR} %{prj.location}",
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
+        }
+        postbuildcommands
+        {
+            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
+        }
 
     filter "configurations:Game_Debug"
     
         defines "VE_DEBUG"
         symbols "On"
-    
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/Debug/",
+            "%{prj.location}/third_party/freetype/build/Debug/"
+        }
+        links
+        {
+            "raylib",
+            "freetype"
+        }
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/raylib/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
+            "cmake --build . --config Debug",
+
+            "{CHDIR} %{prj.location}",
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
+        }
+        postbuildcommands
+        {
+            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
+        }
 
     filter "configurations:Game_Release"
     
         defines "VE_RELEASE"
         optimize "On"
+        libdirs
+        {
+            "%{prj.location}/third_party/raylib/build/raylib/Release/",
+            "%{prj.location}/third_party/freetype/build/Release/"
+        }
+        links
+        {
+            "raylib",
+            "freetype"
+        }
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}/third_party/raylib/",
+            "{MKDIR} build",
+            "{CHDIR} build",
+            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
+            "cmake --build . --config Release",
+
+            "{CHDIR} %{prj.location}",
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
+        }
+        postbuildcommands
+        {
+            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
+            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
+        }

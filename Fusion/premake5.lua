@@ -22,6 +22,8 @@ project "Fusion"
         "%{wks.location}/VEngine/third_party/glm/",
         "%{wks.location}/VEngine/third_party/flecs/include/",
         "%{wks.location}/VEngine/third_party/freetype/include/",
+        "%{wks.location}/VEngine/third_party/rlImGui/",
+        "%{wks.location}/VEngine/third_party/imgui/",
     }
 
     libdirs
@@ -61,28 +63,27 @@ project "Fusion"
         }
     
     filter "configurations:Debug"
-        includedirs
-        {
-            "%{wks.location}/VEngine/third_party/rlImGui/",
-            "%{wks.location}/VEngine/third_party/imgui/",
-        }
         defines {"VE_DEBUG", "VE_EDITOR"}
         symbols "On"
 
     filter "configurations:Release"
-        includedirs
-        {
-            "%{wks.location}/VEngine/third_party/rlImGui/",
-            "%{wks.location}/VEngine/third_party/imgui/",
-        }
+
         defines {"VE_RELEASE", "VE_EDITOR"}
         optimize "On"
 
     filter "configurations:Game_Debug"
+        libdirs
+        {
+            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/"
+        }
         defines "VE_DEBUG"
         symbols "On"
 
     filter "configurations:Game_Release"
+        libdirs
+        {
+            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
+        }
     
         defines "VE_RELEASE"
         optimize "On"

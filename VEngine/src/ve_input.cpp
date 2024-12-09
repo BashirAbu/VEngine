@@ -178,8 +178,14 @@ namespace VE
             Rectangle drawAeraRect = { (screenSize.x - (renderTarget.texture.width * scale)) * .5f, (screenSize.y - (renderTarget.texture.height * scale)) * .5f,
                 renderTarget.texture.width * scale, renderTarget.texture.height * scale };
 
-            pos.x = GetMousePosition().x - drawAeraRect.x;
-            pos.x = GetMousePosition().y - drawAeraRect.y;
+            pos.x = ::GetMousePosition().x - drawAeraRect.x;
+            pos.y = ::GetMousePosition().y - drawAeraRect.y;
+
+            pos.x /= drawAeraRect.width;
+            pos.y /= drawAeraRect.height;
+
+            pos.x *= renderTarget.texture.width;
+            pos.y *= renderTarget.texture.height;
 #endif
             return pos;
         }

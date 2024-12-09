@@ -3,7 +3,6 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
-#include <imgui.h>
 #include <thread>
 void EngineGeneratedRegistration();
 
