@@ -4,6 +4,7 @@
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
 #include <thread>
+
 void EngineGeneratedRegistration();
 
 namespace VE 
@@ -13,8 +14,9 @@ namespace VE
 	{
 		singleton = this;
 		sceneType = type;
-
+#ifdef VE_EDITOR
 		VE::Engine::GetSingleton()->LoadProjectSharedLibrary();
+#endif
 
 		//register builtin components.
 		ManualComponentRegisteration();
@@ -82,7 +84,10 @@ namespace VE
 	Scene::~Scene()
 	{
 		world.release();
+#ifdef VE_EDITOR
 		VE::Engine::GetSingleton()->UnloadProjectSharedLibrary();
+#endif
+
 		singleton = nullptr;
 	}
 	void Scene::Start()

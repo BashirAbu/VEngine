@@ -1,6 +1,6 @@
+#ifdef VE_EDITOR
 #include "platform/ve_platform.h"
-#define VE_WIN32
-#ifdef VE_WIN32
+#ifdef VE_WINDOWS
 #include <Windows.h>
 #include <iostream>
 
@@ -66,4 +66,5 @@ namespace VE
     }
 }
 
+#endif
 #endif

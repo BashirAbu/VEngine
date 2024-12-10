@@ -56,25 +56,25 @@ namespace VE
 
 
 #define VE_STRINGIFY(x) #x
+
+
 #ifdef VE_WIN32
-#ifndef VE_STATIC
-#ifdef VE_EXPORT
-#define VE_API __declspec(dllexport)
-#else
-#define VE_API __declspec(dllimport)
-#endif
+	#ifdef VE_EDITOR
+		#ifdef VE_EXPORT
+			#define VE_API __declspec(dllexport)
+		#else
+			#define VE_API __declspec(dllimport)
+		#endif
 
-#ifdef VE_PROJECT_EXPORT 
-#define VE_PROJECT_API __declspec(dllexport)
-#else
-#define VE_PROJECT_API __declspec(dllimport)
-#endif
-#else
-
-#define VE_API
-#define VE_PROJECT_API
-
-#endif
+		#ifdef VE_PROJECT_EXPORT 
+			#define VE_PROJECT_API __declspec(dllexport)
+		#else
+			#define VE_PROJECT_API __declspec(dllimport)
+		#endif
+	#else
+		#define VE_API
+		#define VE_PROJECT_API
+	#endif
 #endif
 
 #ifndef VE_WIN32

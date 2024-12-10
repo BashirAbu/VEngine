@@ -5,6 +5,11 @@
 #ifdef VE_EDITOR
 #include "editor/ve_editor.h"
 #endif
+
+#ifndef VE_EDITOR
+extern "C" void OnSharedLibraryEntry(flecs::world& world);
+extern "C" void ProjectDrawComponentElements(std::string name, flecs::entity entity);
+#endif
 namespace VE 
 {
 	extern std::vector<std::string>* logs;
@@ -26,9 +31,9 @@ namespace VE
 		ProjectDetails projectDetails;
 	};
 
+#ifdef VE_EDITOR
 	typedef VE_API void (*PFN_OnSharedLibraryEntry)(flecs::world& world);
 	inline VE_API PFN_OnSharedLibraryEntry OnSharedLibraryEntry;
-#ifdef VE_EDITOR
 	typedef VE_API void (*PFN_ProjectDrawComponentElements)(std::string name, flecs::entity entity);
 	inline VE_API PFN_ProjectDrawComponentElements ProjectDrawComponentElements;
 #endif
@@ -60,8 +65,9 @@ namespace VE
 
 		EngineDesc desc;
 		SceneManager* sceneManager;
+#ifdef VE_EDITOR
 		VE::SharedLibrary* projectSharedLibrary;
-
+#endif
 		static Engine* singleton;
 		friend class Editor;
 	};

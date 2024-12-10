@@ -115,7 +115,9 @@ namespace VE
 
 	void SceneManager::SaveSceneAs()
 	{
+#ifdef VE_EDITOR
 		currentScene->scenePath = VE::SaveFileDialog(VE_SCENE_FILE_EXTENSION);
+#endif
 		if (currentScene->scenePath.empty())
 			return;
 		if (currentScene->scenePath.extension().string() != ("." + (std::string)VE_SCENE_FILE_EXTENSION))

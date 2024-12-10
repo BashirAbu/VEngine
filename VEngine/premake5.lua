@@ -34,7 +34,6 @@ project "ImGui"
     filter "system:windows"
 
         cppdialect "C++20"
-        staticruntime "off"
         systemversion "latest"
         buildoptions "/utf-8 /MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
         defines
@@ -47,7 +46,8 @@ project "ImGui"
         {
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
         }
-    filter "configurations:Debug"
+        filter "configurations:Debug"
+        symbols "On"
         libdirs
         {
             "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
@@ -62,9 +62,10 @@ project "ImGui"
         }
     
 
-        symbols "On"
         
     filter "configurations:Release"
+    staticruntime "On"
+    optimize "On"
         libdirs
         {
             "%{prj.location}/third_party/glfw/build/src/%{cfg.buildcfg}/"
@@ -79,46 +80,9 @@ project "ImGui"
         }
     
 
-        optimize "On"
-
-    filter "configurations:Game_Debug"
-        libdirs
-        {
-            "%{prj.location}/third_party/glfw/build/src/Debug/"
-        }
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/glfw/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake ..",
-            "cmake --build . --config Debug"
-
-        }
-
-        defines "VE_DEBUG"
-        symbols "On"
-
-    filter "configurations:Game_Release"
-        libdirs
-        {
-            "%{prj.location}/third_party/glfw/build/src/Release/"
-        }
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/glfw/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake ..",
-            "cmake --build . --config Release"
-        }
-
-        defines "VE_RELEASE"
-        optimize "On"
-
 project "VEngine"
-kind "SharedLib"
-language "c++"
+
+    language "c++"
     
     targetdir("%{wks.location}/bin/" .. outputDir .. "/%{prj.name}")
     objdir("%{wks.location}/bin_int/" .. outputDir .. "/%{prj.name}")
@@ -149,22 +113,21 @@ language "c++"
 
     filter "system:windows"
         cppdialect "C++20"
-        staticruntime "off"
         systemversion "latest"
         buildoptions "/utf-8 /MP /nologo /W3 /wd4251 /wd4996 /wd4005 /wd4002"
         defines
         {
-            "VE_WINDOWS",
-            "VE_EXPORT",
-            "USE_LIBTYPE_SHARED",
-            "BUILD_LIBTYPE_SHARED",
-            "flecs_EXPORTS"
+            "VE_WINDOWS"
         }
-
-
-
-    
-    filter "configurations:Debug"
+        prebuildcommands
+        {
+            "{CHDIR} %{prj.location}",
+            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
+        }
+        filter "configurations:Debug"
+        kind "SharedLib"
+        staticruntime "Off"
+        symbols "On"
         includedirs
         {
             "%{prj.location}/third_party/imgui/",
@@ -182,7 +145,7 @@ language "c++"
         links
         {
             "raylib",
-            "freetype"
+            "freetyped",
         }
 
         libdirs 
@@ -195,30 +158,25 @@ language "c++"
         { 
             "ImGui.lib"
         }
+
         defines 
         {
             "VE_DEBUG",
             "VE_EDITOR",
+            "VE_EXPORT",
+            "USE_LIBTYPE_SHARED",
+            "BUILD_LIBTYPE_SHARED",
+            "flecs_EXPORTS",
         }
-        symbols "On"
         prebuildcommands
         {
-            "{CHDIR} %{prj.location}/third_party/raylib/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config %{cfg.buildcfg}",
-
             "{CHDIR} %{prj.location}",
             "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
         }
-        postbuildcommands
-        {
-            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
-            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
-        }
 
     filter "configurations:Release"
+        kind "SharedLib"
+        staticruntime "On"
         includedirs
         {
             "%{prj.location}/third_party/imgui/",
@@ -252,28 +210,22 @@ language "c++"
         {
             "VE_RELEASE",
             "VE_EDITOR",
+            "VE_EXPORT",
+            "USE_LIBTYPE_SHARED",
+            "BUILD_LIBTYPE_SHARED",
+            "flecs_EXPORTS"
         }
         optimize "On"
         prebuildcommands
         {
-            "{CHDIR} %{prj.location}/third_party/raylib/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config %{cfg.buildcfg}",
-
             "{CHDIR} %{prj.location}",
             "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
         }
-        postbuildcommands
-        {
-            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
-            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
-        }
 
     filter "configurations:Game_Debug"
-    
-        defines "VE_DEBUG"
+        kind "StaticLib"
+        staticruntime "Off"
+        defines {"VE_DEBUG", "flecs_STATIC"}
         symbols "On"
         libdirs
         {
@@ -283,28 +235,14 @@ language "c++"
         links
         {
             "raylib",
-            "freetype"
+            "freetyped"
         }
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/raylib/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config Debug",
 
-            "{CHDIR} %{prj.location}",
-            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
-        }
-        postbuildcommands
-        {
-            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
-            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
-        }
 
     filter "configurations:Game_Release"
-    
-        defines "VE_RELEASE"
+        kind "StaticLib"
+        staticruntime "On"
+        defines {"VE_RELEASE", "flecs_STATIC"}
         optimize "On"
         libdirs
         {
@@ -316,19 +254,4 @@ language "c++"
             "raylib",
             "freetype"
         }
-        prebuildcommands
-        {
-            "{CHDIR} %{prj.location}/third_party/raylib/",
-            "{MKDIR} build",
-            "{CHDIR} build",
-            "cmake -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF -DBUILD_TESTING=OFF ..",
-            "cmake --build . --config Release",
 
-            "{CHDIR} %{prj.location}",
-            "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool.exe e  src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
-        }
-        postbuildcommands
-        {
-            "{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion",
-            "{COPY} \"%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/raylib.dll\" ../bin/" .. outputDir .. "/Fusion"
-        }

@@ -1,6 +1,5 @@
 #include <ve_engine.h>
 #include "project_dialog.h"
-
 #ifndef VE_EDITOR
 #include "../../VEngine/third_party/rlImGui/rlImGui.cpp"
 #endif

@@ -1,4 +1,3 @@
-#ifdef VE_EDITOR
 #include "ve_defines.h"
 #include "scenes/ve_scene.h"
 #include "editor/ve_editor.h"
@@ -10,7 +9,6 @@
 using namespace VE;
 using namespace VE::Components;
 using namespace VE::_Components;
-using namespace VE::Components::UI;
 
 
 void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
@@ -204,4 +202,3 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 	ImGui::PopID();
 }
-#endif

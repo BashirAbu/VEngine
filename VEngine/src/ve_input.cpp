@@ -153,7 +153,6 @@ namespace VE
             glm::vec2 pos = {};
 
 #ifdef VE_EDITOR
-
             if (Editor::GetSingleton()->IsGameViewportFocused())
             {
                 glm::vec2 gameViewportPos = Editor::GetSingleton()->GetGameViewportPosition();
@@ -170,7 +169,6 @@ namespace VE
 
             }
 #else
-            //get corner pos.
             glm::vec2 screenSize = { (float)GetScreenWidth(), (float)GetScreenHeight()};
             RenderTexture renderTarget = VE::Scene::GetSingleton()->GetMainRenderTarget();
             float scale = glm::min(screenSize.x / renderTarget.texture.width, screenSize.y / renderTarget.texture.height);

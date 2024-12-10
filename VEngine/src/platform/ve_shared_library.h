@@ -1,3 +1,4 @@
+#ifdef VE_EDITOR
 #pragma once
 #include "ve_defines.h"
 namespace VE
@@ -15,3 +16,4 @@ namespace VE
 		void* platform_data;
 	};
 }
+#endif

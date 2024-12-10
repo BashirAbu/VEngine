@@ -83,9 +83,9 @@ namespace VE
 		
 #ifdef VE_EDITOR
 		editor = new Editor(this);
+		projectSharedLibrary = new SharedLibrary();
 #endif
 
-		projectSharedLibrary = new SharedLibrary();
 
 		sceneManager = new SceneManager();
 		
@@ -108,7 +108,9 @@ namespace VE
 		delete editor;
 #endif
 		delete sceneManager;
+#ifdef VE_EDITOR
 		delete projectSharedLibrary;
+#endif
 		delete AssetsManager::GetSingleton();
 		CloseAudioDevice();
 		CloseWindow();
@@ -167,6 +169,7 @@ namespace VE
 		}
 	}
 	
+#ifdef VE_EDITOR
 	void Engine::LoadProjectSharedLibrary()
 	{
 		std::ifstream srcSharedLib(desc.projectDetails.path.parent_path().string() + "/bin/" + "project" + ".dll", std::ios::binary);
@@ -180,10 +183,8 @@ namespace VE
 
 		OnSharedLibraryEntry = (PFN_OnSharedLibraryEntry)projectSharedLibrary->GetProcAddress("OnSharedLibraryEntry");
 		VE_ASSERT(OnSharedLibraryEntry);
-#ifdef VE_EDITOR
 		ProjectDrawComponentElements = (PFN_ProjectDrawComponentElements)projectSharedLibrary->GetProcAddress("ProjectDrawComponentElements");
 		VE_ASSERT(ProjectDrawComponentElements);
-#endif
 	}
 	void Engine::ReloadProjectSharedLibrary()
 	{
@@ -195,5 +196,6 @@ namespace VE
 		projectSharedLibrary->Unload();
 		OnSharedLibraryEntry = nullptr;
 	}
+#endif
 
 }

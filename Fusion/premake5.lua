@@ -40,7 +40,7 @@ project "Fusion"
     
     filter "system:windows"
         cppdialect "C++20"
-        staticruntime "off"
+        
         systemversion "latest"
         buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005"
         defines
@@ -63,27 +63,11 @@ project "Fusion"
         }
     
     filter "configurations:Debug"
+        staticruntime "off"
         defines {"VE_DEBUG", "VE_EDITOR"}
         symbols "On"
 
     filter "configurations:Release"
-
+        staticruntime "On"
         defines {"VE_RELEASE", "VE_EDITOR"}
-        optimize "On"
-
-    filter "configurations:Game_Debug"
-        libdirs
-        {
-            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Debug/"
-        }
-        defines "VE_DEBUG"
-        symbols "On"
-
-    filter "configurations:Game_Release"
-        libdirs
-        {
-            "%{wks.location}/VEngine/third_party/raylib/build/raylib/Release/"
-        }
-    
-        defines "VE_RELEASE"
         optimize "On"

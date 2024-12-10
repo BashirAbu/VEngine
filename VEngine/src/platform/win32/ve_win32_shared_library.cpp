@@ -1,5 +1,6 @@
+#ifdef VE_EDITOR
 #include "platform/ve_shared_library.h"
-#ifdef VE_WIN32
+#ifdef VE_WINDOWS
 #include <Windows.h>
 
 namespace VE 
@@ -33,4 +34,5 @@ namespace VE
 		return ::GetProcAddress((HMODULE)platform_data, name.c_str());;
 	}
 }
+#endif
 #endif
