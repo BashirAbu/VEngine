@@ -22,7 +22,10 @@ project "VEngine"
         "{CHDIR} %{prj.location}",
         "%{wks.location}/bin/" .. outputDir .. "/VEHeaderTool/VEHeaderTool e src/generated/ src/components/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
     }
-
+    postbuildcommands
+    {
+        ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputDir .. "/Fusion")
+    }
     defines 
     {
         editor_engine_defines,
