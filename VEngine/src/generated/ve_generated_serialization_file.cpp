@@ -4,6 +4,7 @@
 
 using namespace VE;
 using namespace VE::Components;
+using namespace VE::Components::UI;
 using namespace VE::_Components;
 
 

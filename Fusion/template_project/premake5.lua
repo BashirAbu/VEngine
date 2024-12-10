@@ -1,80 +1,143 @@
+local ve_engine_path = os.getenv("VENGINE_DIR")
+local build_globals = path.join(ve_engine_path, "build_globals.lua")
+
+include(build_globals)
+
 workspace "Project"
     architecture "x64"
 
     configurations
     {
         "Debug",
-        "Release"
+        "Release",
+        "Game_Debug",
+        "Game_Release"
     }
-outputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
+
 project "project"
-    kind "SharedLib"
-    language "c++"
-
-    targetdir("bin/")
-    objdir("bin/bin_int")
-
-    files
-    {
-        "%{prj.location}/src/**.h",     
-        "%{prj.location}/src/**.hpp",      
-        "%{prj.location}/src/**.cpp",      
-        "%{prj.location}/src/**.c"    
-    }
-
-    includedirs
-    {
-        os.getenv("VENGINE_DIR") .. "/src",
-        os.getenv("VENGINE_DIR") .. "/VEngine/src/",
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/raylib/build/raylib/include",
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/nlohmann_json/include/",
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/glm/",
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/imgui/",
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/rlImGui/",
-    }
     
-    libdirs
+    language "c++"
+    cppdialect "C++20"
+
+    prebuildcommands
     {
-        os.getenv("VENGINE_DIR") .. "/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/"
-    }
-    links
-    {
-        "raylib"
+        "{CHDIR} %{prj.location}",
+        os.getenv("VENGINE_DIR") .. "/bin/Debug_windows_x86_64//VEHeaderTool/VEHeaderTool.exe p src/generated/ src/ -c VE_CLASS -e VE_ENUM -f VE_FUNCTION -p VE_PROPERTY"
     }
 
     filter "system:windows"
-        cppdialect "C++20"
-        staticruntime "off"
         systemversion "latest"
-        buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005"
+        
+        buildoptions {windows_build_options}
+        links
+        {
+            windows_link_libs
+        }
         defines
         {
-            "VE_WINDOWS",
-            "VE_PROJECT_EXPORT"
+            windows_defines
         }
 
+        
+    filter "configurations:Debug or configurations:Release"
+        defines 
+        {
+            "VE_PROJECT_EXPORT",
+            "USE_LIBTYPE_SHARED",
+            "VE_EDITOR"
+        }
+        debugargs
+        {
+            "-p %{prj.location}"
+        }
+        debugdir (os.getenv("VENGINE_DIR") .. "/Fusion")
+
+        debugcommand (os.getenv("VENGINE_DIR") .. "/bin/" .. outputDir .. "/Fusion/Fusion")
+        
+        files
+        {
+            "%{prj.location}/src/**.h",     
+            "%{prj.location}/src/**.hpp",      
+            "%{prj.location}/src/**.cpp",      
+            "%{prj.location}/src/**.c"    
+        }
+
+        includedirs
+        {
+            "src/",
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", base_engine_include_dirs),
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", editor_engine_include_dirs)
+        }
         libdirs 
         {
-            os.getenv("VENGINE_DIR") .. "/bin/" .. outputDir .. "/ImGui/",
             os.getenv("VENGINE_DIR") .. "/bin/" .. outputDir .. "/VEngine/"
-            
         }
 
         links
         {
-            "ImGui.lib",
-            "VEngine.lib"
+            "VEngine"
         }
-    
+        kind "SharedLib"
+        staticruntime "Off"
+        targetdir("bin/")
+        objdir("bin/bin_int")
+
+
     filter "configurations:Debug"
-        defines "VE_DEBUG"
         symbols "On"
         local currentTime = os.date("%Y%m%d%H%M%S")
         linkoptions 
         {
             "/PDB:bin\\%{prj.name}_" .. currentTime .. ".pdb"
         }
-
+        defines 
+        {
+            "VE_DEBUG",
+        }
+    
     filter "configurations:Release"
-        defines "VE_RELEASE"
+        optimize "On"
+        defines 
+        {
+            "VE_RELEASE",
+        }
+    filter "configurations:Game_Debug or configurations:Game_Release"
+        files
+        {
+            "%{prj.location}/src/**.h",     
+            "%{prj.location}/src/**.hpp",      
+            "%{prj.location}/src/**.cpp",      
+            "%{prj.location}/src/**.c",
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", base_engine_src_files),
+        }
+
+        includedirs
+        {
+            "src/",
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", base_engine_include_dirs)
+        }
+
+        kind "ConsoleApp"
+
+        defines 
+        {   
+            base_dist_engine_defines
+        }
+        targetdir("dist/" .. outputDir .. "/bin")
+        objdir("dist/" .. outputDir .. "/bin_int/")
+
+    filter "configurations:Game_Debug"
+        defines 
+        {
+            debug_dist_engine_defines
+        }
+        staticruntime "Off"
+        symbols "On"
+        
+    filter "configurations:Game_Release"
+        defines 
+        {
+            release_dist_engine_defines
+        }
+        staticruntime "On"
         optimize "On"

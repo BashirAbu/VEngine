@@ -43,19 +43,18 @@ release_editor_defines = {}
 
 base_dist_engine_defines = 
 {
-    base_engine_defines
+    base_engine_defines,
+    "flecs_STATIC"
 }
 
 debug_dist_engine_defines = 
 {
     debug_engine_defines,
-    "flecs_STATIC"
 }
 
 release_dist_engine_defines = 
 {
     release_engine_defines,
-    "flecs_STATIC"
 }
 
 --raylib include dirs
