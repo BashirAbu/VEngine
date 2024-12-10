@@ -1,4 +1,5 @@
 project "Fusion"
+    cppdialect "C++20"
     kind "ConsoleApp"
     language "c++"
 
@@ -15,59 +16,43 @@ project "Fusion"
 
     includedirs
     {
-        "%{prj.location}/src",
-        "%{wks.location}/VEngine/src/",
-        "%{wks.location}/VEngine/third_party/raylib/build/raylib/include",
-        "%{wks.location}/VEngine/third_party/nlohmann_json/include/",
-        "%{wks.location}/VEngine/third_party/glm/",
-        "%{wks.location}/VEngine/third_party/flecs/include/",
-        "%{wks.location}/VEngine/third_party/freetype/include/",
-        "%{wks.location}/VEngine/third_party/rlImGui/",
-        "%{wks.location}/VEngine/third_party/imgui/",
-    }
-
-    libdirs
-    {
-        "%{wks.location}/VEngine/third_party/raylib/build/raylib/%{cfg.buildcfg}/"
+        "src/",
+        prefixPaths("../", base_engine_include_dirs),
+        prefixPaths("../", editor_engine_include_dirs)
     }
     
+    libdirs 
+    {
+        "%{wks.location}/bin/" .. outputDir .. "/VEngine/"   
+    }
+
     links
     {
-        "raylib"
+        "VEngine.lib"
     }
     
-    vectorextensions "Default"
-    
     filter "system:windows"
-        cppdialect "C++20"
         
         systemversion "latest"
-        buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005"
-        defines
-        {
-            "VE_WINDOWS",
-            "USE_LIBTYPE_SHARED"
-        }
+        buildoptions { windows_build_options }
+        defines { windows_defines }
 
-        libdirs 
-        {
-            "%{wks.location}/bin/" .. outputDir .. "/ImGui/",
-            "%{wks.location}/bin/" .. outputDir .. "/VEngine/"
-            
-        }
-
-        links
-        {
-            "ImGui.lib",
-            "VEngine.lib"
-        }
     
     filter "configurations:Debug"
         staticruntime "off"
-        defines {"VE_DEBUG", "VE_EDITOR"}
+        defines 
+        {   "VE_DEBUG",
+            "VE_EDITOR",
+            "USE_LIBTYPE_SHARED"             
+        }
         symbols "On"
 
     filter "configurations:Release"
         staticruntime "On"
-        defines {"VE_RELEASE", "VE_EDITOR"}
+        defines 
+        {
+            "VE_RELEASE",
+            "VE_EDITOR",
+            "USE_LIBTYPE_SHARED"             
+        }
         optimize "On"

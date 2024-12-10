@@ -1,15 +1,15 @@
+include "build_globals.lua"
+
 workspace "VEngine"
     architecture "x64"
 
     configurations
     {
         "Debug",
-        "Release",
-        "Game_Debug",
-        "Game_Release"
+        "Release"
     }
 
-outputDir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
+
 
 
 include "Fusion/premake5.lua"
