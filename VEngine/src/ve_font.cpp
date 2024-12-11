@@ -38,6 +38,7 @@ namespace VE
 		if (fontsCount == 0)
 		{
 			FT_Done_FreeType(freetype);
+			freetype = nullptr;
 		}
 
 		for (auto& glyph : glyphs)

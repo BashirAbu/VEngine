@@ -41,7 +41,7 @@ namespace VE
 		{
 			AssetHeader header = {};
 			fread(&header, sizeof(header), 1, dataFile);
-			if (strstr(relativePath.c_str(), header.name))
+			if (strstr(header.name, relativePath.c_str()))
 			{
 				data.data = (uint8_t*) malloc(header.size + 1);
 				data.data[header.size] = '\0';
