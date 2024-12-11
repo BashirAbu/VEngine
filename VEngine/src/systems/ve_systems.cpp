@@ -250,7 +250,6 @@ namespace VE::Systems
 					mousePos.y / VE::Scene::GetSingleton()->renderer.GetMainRenderTarget().texture.height);
 				vMousePos = glm::vec2(vMousePos.x * canvas->canvasSize.x, vMousePos.y * canvas->canvasSize.y);
 
-				TraceLog(LOG_DEBUG, "Mouse x: %f, y: %f\tvMouse x: %f, y: %f", mousePos.x, mousePos.y, vMousePos.x, vMousePos.y);
 				if (button.imgTexture) 
 				{
 					Rectangle rect = {};

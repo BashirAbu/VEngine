@@ -10,6 +10,7 @@
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
 #include "components/ve_components.h"
+#include "ve_assets_manager.h"
 namespace VE
 {
 	SceneManager::SceneManager() : currentScene(nullptr), mode(SceneMode::Editor)
@@ -34,10 +35,16 @@ namespace VE
 
 		currentScene = new Scene(SceneType::Scene2D);
 		currentScene->scenePath = scenePath;
-		std::fstream sceneFile(GetFullPath(scenePath));
-
 		nlohmann::ordered_json sceneJson;
+
+#ifdef VE_EDITOR
+		std::fstream sceneFile(GetFullPath(scenePath));
 		sceneFile >> sceneJson;
+#else
+		std::string sceneRawJson = VE::AssetsManager::GetSingleton()->LoadScene(scenePath);
+		sceneJson = nlohmann::ordered_json::parse(sceneRawJson);
+#endif
+
 		nlohmann::ordered_json sceneSystemsJson = sceneJson["scene_systems"];
 		
 		std::vector<std::string> enabledSystems;

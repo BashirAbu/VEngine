@@ -21,7 +21,7 @@ namespace VE
 	{
 	public:
 		Font() : fontSize(48){}
-		Font(std::filesystem::path filepath, int32_t fontSize);
+		Font(uint8_t* data, size_t dataSize, int32_t fontSize);
 		~Font();
 
 		bool LoadGlyph(FT_UInt character);
@@ -30,7 +30,7 @@ namespace VE
 		int32_t GetFontSize() { return fontSize; }
 		FT_Face GetFreeTypeFace() { return face; }
 	private:
-
+		uint8_t* fontData;
 		int32_t fontSize;
 
 		FT_Face face;

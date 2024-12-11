@@ -4,27 +4,59 @@
 #include <vector>
 #include <string.h>
 #include <cassert>
-struct AssetHeader 
-{
-    char name[256] = {};
-    uint64_t size = 0;
-    uint64_t offset = 0;
-};
+#include "ve_assets_packager.h"
 
 
-struct HeaderDesc 
-{
-    std::vector<AssetHeader> headers;
-};
 
 int main(int argc, char** argv)
 {
-    std::filesystem::path assetsPath = argv[1];
+    std::filesystem::path projectPath = "D:/VEProjects/testPrj/";//argv[1];
     HeaderDesc headerDesc = {};
     
     int64_t offset = 0;
     std::vector<std::filesystem::path> assetsFullPath;
-    for (auto file : std::filesystem::recursive_directory_iterator(assetsPath))
+
+    for (auto file : std::filesystem::recursive_directory_iterator(projectPath))
+    {
+        if (file.is_regular_file())
+        {
+            if (file.path().extension().string() == (std::string)".VEProject")
+            {
+                FILE* assetFile = fopen(file.path().generic_string().c_str(), "rb");
+                if (!assetFile)
+                {
+                    std::cerr << "Failed to open file: " << file.path().generic_string() << std::endl;
+                }
+
+                if (fseek(assetFile, 0, SEEK_END) != 0)
+                {
+                    std::cerr << "Failed to read size of file: " << file.path().generic_string() << std::endl;
+                }
+
+
+                size_t fileSize = ftell(assetFile);
+                fclose(assetFile);
+
+
+                AssetHeader header = {};
+                std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), projectPath.generic_string());
+                assert(relativePath.generic_string().size() < sizeof(header.name));
+                strcpy(header.name, relativePath.generic_string().c_str());
+                header.size = fileSize;
+                header.offset = offset;
+                headerDesc.headers.push_back(header);
+
+                std::cout << file.path().filename() << std::endl;
+                offset += fileSize;
+                assetsFullPath.push_back(file.path());
+
+                break;
+            }
+        }
+    }
+
+
+    for (auto file : std::filesystem::recursive_directory_iterator((projectPath / "assets")))
     {
         if (file.is_regular_file())
         {
@@ -45,7 +77,7 @@ int main(int argc, char** argv)
 
 
             AssetHeader header = {};
-            std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), assetsPath.generic_string());
+            std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), (projectPath / "assets").generic_string());
             assert(relativePath.generic_string().size() < sizeof(header.name));
             strcpy(header.name, relativePath.generic_string().c_str());
             header.size = fileSize;

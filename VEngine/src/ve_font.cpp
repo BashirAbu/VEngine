@@ -5,8 +5,10 @@ namespace VE
 	FT_Library freetype = nullptr;
 	size_t Font::fontsCount = 0;
 
-	VE::Font::Font(std::filesystem::path filepath, int32_t fontSize) : fontSize(fontSize)
+	VE::Font::Font(uint8_t* data, size_t dataSize, int32_t fontSize) : fontSize(fontSize)
 	{
+		
+		fontData = data;
 		if (!freetype)
 		{
 			if (FT_Init_FreeType(&freetype)) 
@@ -16,10 +18,10 @@ namespace VE
 			}
 		}
 
-		FT_Error error = FT_New_Face(freetype, filepath.generic_string().c_str(), 0, &face);
+		FT_Error error = FT_New_Memory_Face(freetype, fontData, (FT_Long)dataSize, 0, &face);
 		if (error)
 		{
-			TraceLog(LOG_ERROR, "Failed to open font file : %s", filepath.generic_string().c_str());
+			TraceLog(LOG_ERROR, "Failed to load font file");
 			return;
 		}
 
@@ -42,6 +44,7 @@ namespace VE
 			UnloadTexture(glyph.second.texture);
 			delete[] glyph.second.img.data;
 		}
+		free(fontData);
 	}
 	bool Font::LoadGlyph(FT_UInt character)
 	{

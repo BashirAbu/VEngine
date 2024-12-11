@@ -76,6 +76,8 @@ glfw_include_dirs = {"VEngine/third_party/glfw/include"}
 flecs_include_dirs = {"VEngine/third_party/flecs/include/"}
 --shaping engine include dirs
 shaping_engine_include_dirs = {"VEngine/third_party/ShapingEngine/"}
+--AssetsPackager include dirs
+assets_packager_include_dir = {"VEAssetsPackager/src/"}
 --Base VE_Engine include dirs.
 base_engine_include_dirs = 
 {

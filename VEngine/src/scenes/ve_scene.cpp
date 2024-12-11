@@ -426,16 +426,19 @@ namespace VE
 
 	flecs::entity Scene::AddConstruct(std::filesystem::path constructFilePath)
 	{
+		std::string constructJsonString = "";
+#ifdef VE_EDITOR
 		std::fstream constructFile(GetFullPath(constructFilePath));
 		std::stringstream ss;
 		ss << constructFile.rdbuf();
-		std::string constructJsonString = ss.str();
+		constructJsonString = ss.str();
+#else
+		constructJsonString = VE::AssetsManager::GetSingleton()->LoadConstruct(constructFilePath);
+#endif
 
 		nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJsonString);
 		std::string rootName = constJson["root"];
-			
-
-			
+				
 		//Check if entity with same name as construct exist.
 		flecs::entity root = _LookupEntity(rootName);
 		
@@ -574,6 +577,10 @@ namespace VE
 			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
 				{
 					UnloadTexture(lb.texture);
+				});
+			world.component<Components::UI::UIButtonComponent>().on_remove([](flecs::entity e, Components::UI::UIButtonComponent& btn)
+				{
+					UnloadTexture(btn.textTexture);
 				});
 
 		world.component<_Components::SceneEntityTag>();

@@ -56,8 +56,14 @@ namespace VE
 		stdcpp_set_os_api();
 		singleton = this;
 		//Parse project file.
+		nlohmann::json projectJson;
+#ifdef VE_EDITOR
 		std::ifstream projectFile(engineDesc.projectDetails.path);
-		nlohmann::json projectJson = nlohmann::json::parse(projectFile);
+		projectJson = nlohmann::json::parse(projectFile);
+#else
+		std::string rawJson = VE::AssetsManager::GetSingleton()->LoadProject(engineDesc.projectDetails.path);
+		projectJson = nlohmann::json::parse(rawJson);
+#endif
 		engineDesc.projectDetails.name = projectJson["project_name"];
 		engineDesc.projectDetails.title = projectJson["title"];
 		engineDesc.projectDetails.width = projectJson["width"];

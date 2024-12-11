@@ -1,4 +1,4 @@
-project "VEAssetsManager"
+project "VEAssetsPackager"
     kind "ConsoleApp"
     language "c++"
     cppdialect "C++20"
