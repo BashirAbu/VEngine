@@ -27,7 +27,6 @@ editor_engine_defines =
     "flecs_EXPORTS",
     "IMGUI_EXPORT",
 }
---project "USE_LIBTYPE_SHARED"
 --VE_Engine debug defines.
 debug_engine_defines = 
 {

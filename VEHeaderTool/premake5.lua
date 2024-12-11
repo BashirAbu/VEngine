@@ -1,6 +1,8 @@
 project "VEHeaderTool"
     kind "ConsoleApp"
     language "c++"
+    cppdialect "C++20"
+    staticruntime "off"
 
     targetdir("%{wks.location}/bin/" .. outputDir .. "/%{prj.name}")
     objdir("%{wks.location}/bin_int/" .. outputDir .. "/%{prj.name}")
@@ -23,37 +25,11 @@ project "VEHeaderTool"
     vectorextensions "Default"
     
     filter "system:windows"
-        cppdialect "C++20"
-        staticruntime "off"
         systemversion "latest"
         buildoptions "/MP /nologo /W3 /wd4251 /wd4996 /wd4005"
-        defines
-        {
-            "VE_WINDOWS"
-        }
     
     filter "configurations:Debug"
-        defines 
-        {
-            "VE_DEBUG",
-            "VE_EDITOR",
-        }
         symbols "On"
 
     filter "configurations:Release"
-        defines 
-        {
-            "VE_RELEASE",
-            "VE_EDITOR",
-        }
-        optimize "On"
-
-    filter "configurations:Game_Debug"
-
-    defines "VE_DEBUG"
-    symbols "On"
-
-    filter "configurations:Game_Release"
-    
-        defines "VE_RELEASE"
         optimize "On"

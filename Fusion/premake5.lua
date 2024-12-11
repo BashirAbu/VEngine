@@ -2,7 +2,7 @@ project "Fusion"
     cppdialect "C++20"
     kind "ConsoleApp"
     language "c++"
-
+    dependson { "VEngine" }
     targetdir("%{wks.location}/bin/" .. outputDir .. "/%{prj.name}")
     objdir("%{wks.location}/bin_int/" .. outputDir .. "/%{prj.name}")
 
