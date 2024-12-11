@@ -75,7 +75,8 @@ namespace VE
 			VE_ASSERT(data.size);
 			Image img = ::LoadImageFromMemory(filetype.c_str(), data.data, (int)data.size);
 			textures[filepath.string()] = ::LoadTextureFromImage(img);
-			::UnloadImage(img);
+			free(data.data);
+			free(img.data);
 #endif
 			//This to avoid distortion while rotating or scaling.
 			SetTextureFilter(textures[filepath.string()], TEXTURE_FILTER_BILINEAR);
@@ -105,6 +106,8 @@ namespace VE
 			AssetData data = GetAssetData(filepath.generic_string());
 			VE_ASSERT(data.size);
 			images[filepath.string()] = ::LoadImageFromMemory(filetype.c_str(), data.data, (int)data.size);
+			//load image from memory copys the buffer.
+			free(data.data);
 #endif
 			return &images[filepath.string()];
 		}
@@ -129,6 +132,7 @@ namespace VE
 			Wave wave = ::LoadWaveFromMemory(filetype.c_str(), data.data, (int)data.size);
 			sounds[filepath.string()] = ::LoadSoundFromWave(wave);
 			::UnloadWave(wave);
+			free(data.data);
 #endif
 
 			return &sounds[filepath.string()];
@@ -155,6 +159,7 @@ namespace VE
 			VE_ASSERT(fread(buffer, fileSize, 1, fontFile));
 			fclose(fontFile);
 			fonts[filepath.string()] = new Font(buffer, fileSize, fontSize);
+			free(buffer);
 
 #else
 			AssetData data = GetAssetData(filepath.generic_string());
@@ -249,7 +254,6 @@ namespace VE
 			delete font.second;
 		}
 		fonts.clear();
-
 
 		scenes.clear();
 		constructs.clear();

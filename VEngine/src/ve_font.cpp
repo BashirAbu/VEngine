@@ -32,12 +32,13 @@ namespace VE
 
 	Font::~Font()
 	{
+
+		FT_Done_Face(face);
+		fontsCount--;
 		if (fontsCount == 0)
 		{
 			FT_Done_FreeType(freetype);
 		}
-
-		FT_Done_Face(face);
 
 		for (auto& glyph : glyphs)
 		{

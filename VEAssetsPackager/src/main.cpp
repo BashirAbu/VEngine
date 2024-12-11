@@ -10,7 +10,7 @@
 
 int main(int argc, char** argv)
 {
-    std::filesystem::path projectPath = "D:/VEProjects/testPrj/";//argv[1];
+    std::filesystem::path projectPath = argv[1];
     HeaderDesc headerDesc = {};
     
     int64_t offset = 0;

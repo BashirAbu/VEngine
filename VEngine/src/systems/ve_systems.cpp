@@ -287,10 +287,6 @@ namespace VE::Systems
 			}
 		}
 
-		
-
-
-
 		Components::UI::UIImageComponent img;
 
 		img.imageFilepath = button.imageFilepath;
