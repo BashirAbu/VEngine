@@ -1,4 +1,4 @@
-premake\premake5.exe vs2022
+%VENGINE_DIR%/premake\premake5.exe vs2022
 
 call vcvarsall.bat x64
 

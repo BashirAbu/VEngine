@@ -93,7 +93,7 @@ namespace VH
 		std::string cppSourcefile = "#ifdef VE_EDITOR\n";
 
 
-		cppSourcefile += "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"editor/ve_editor.h\"\n#include <imgui.h>\n#include \"editor/ve_editor_elements.h\"\n\n";
+		cppSourcefile += "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"editor/ve_editor.h\"\n#include <imgui.h>\n#include \"editor/ve_editor_elements.h\"\n#include \"components/ve_components.h\"\n\n";
 
 		for (const HeaderFile& headerFile : headerFiles)
 		{
@@ -173,7 +173,7 @@ namespace VH
 	{
 		std::string filename = "ve_generated_serialization_file.cpp";
 
-		std::string cppSourcefile= "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n";
+		std::string cppSourcefile= "#include \"ve_defines.h\"\n#include \"scenes/ve_scene.h\"\n#include \"components/ve_components.h\"\n\n";
 		
 		for (const HeaderFile& headerFile : headerFiles)
 		{

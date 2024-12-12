@@ -4,6 +4,7 @@
 #include "editor/ve_editor.h"
 #include <imgui.h>
 #include "editor/ve_editor_elements.h"
+#include "components/ve_components.h"
 
 #include "components/ve_components.h"
 
