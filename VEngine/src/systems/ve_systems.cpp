@@ -173,6 +173,11 @@ namespace VE::Systems
 	{
 		if (label.fontFilepath != label.oldFontFilepath)
 		{
+			if (label.font)
+			{
+				delete label.font;
+				label.font = nullptr;
+			}
 			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, (int32_t)label.size);
 			//Render
 			UnloadTexture(label.texture);
@@ -304,47 +309,6 @@ namespace VE::Systems
 
 		UIImageRenderSystem(e, tc, img);
 		button.oldImageFilepath = button.imageFilepath;
-
-		Components::UI::UILabelComponent text;
-		text.color = button.textColor;
-		text.fontFilepath = button.fontFilepath;
-		text.oldFontFilepath = button.oldFontFilepath;
-		text.oldText = button.oldText;
-		text.origin = button.textOrigin;
-		text.renderOrder = button.imageRenderOrder + 1;
-		text.size = button.textSize;
-		text.text = button.text;
-
-		if (button.fontFilepath != button.oldFontFilepath)
-		{
-			button.font = AssetsManager::GetSingleton()->LoadFont(button.fontFilepath, (int32_t)button.textSize);
-			//Render
-			UnloadTexture(text.texture);
-
-			if (button.font->GetFontSize() != button.textSize)
-				button.font->SetFontSize((int32_t)button.textSize);
-
-			button.textTexture = RaylibGetTextureFromText_UTF8(button.font, button.text);
-		}
-		if (button.oldText != button.text || (button.oldTextSize!= button.textSize && button.textSize > 0))
-		{
-			UnloadTexture(button.textTexture);
-
-			if (button.font->GetFontSize() != button.textSize)
-				button.font->SetFontSize((int32_t)button.textSize);
-
-			button.textTexture = RaylibGetTextureFromText_UTF8(button.font, button.text);
-
-		}
-
-		text.font = button.font;
-		text.texture = button.textTexture;
-		text.size = button.textSize;
-		text.oldTextSize = button.oldTextSize;
-		UILabelRenderSystem(e, tc, text);
-		button.oldFontFilepath = button.fontFilepath;
-		button.oldText = button.text;
-		button.oldTextSize = button.textSize;
 	}
 	
 

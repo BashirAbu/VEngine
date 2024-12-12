@@ -32,8 +32,11 @@ namespace VE
 
 	Font::~Font()
 	{
-
-		FT_Done_Face(face);
+		if (face)
+		{
+			FT_Done_Face(face);
+			face = nullptr;
+		}
 		fontsCount--;
 		if (fontsCount == 0)
 		{
@@ -44,7 +47,7 @@ namespace VE
 		for (auto& glyph : glyphs)
 		{
 			UnloadTexture(glyph.second.texture);
-			delete[] glyph.second.img.data;
+			free(glyph.second.img.data);
 		}
 		free(fontData);
 	}
@@ -57,7 +60,8 @@ namespace VE
 		}
 
 		//rgba
-		uint8_t* buffer = new uint8_t[face->glyph->bitmap.width * face->glyph->bitmap.rows * sizeof(uint8_t) * 4]{};
+		uint8_t* buffer = (uint8_t*)malloc(face->glyph->bitmap.width * face->glyph->bitmap.rows * sizeof(uint8_t) * 4);
+		memset(buffer, 0, face->glyph->bitmap.width * face->glyph->bitmap.rows * sizeof(uint8_t) * 4);
 
 		struct Col 
 		{
@@ -105,7 +109,7 @@ namespace VE
 			for (auto& glyph : glyphs)
 			{
 				UnloadTexture(glyph.second.texture);
-				delete[] glyph.second.img.data;
+				free(glyph.second.img.data);
 			}
 
 			glyphs.clear();

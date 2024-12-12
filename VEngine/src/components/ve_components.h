@@ -238,23 +238,6 @@ namespace VE
 			VE_CLASS(Component)
 			struct UIButtonComponent
 			{
-				//Text
-				class VE::Font* font = nullptr;
-				VE_PROPERTY(Editor)
-				std::filesystem::path fontFilepath = "";
-				std::filesystem::path oldFontFilepath = "";
-				VE_PROPERTY(Editor)
-				std::string text = "";
-				VE_PROPERTY(Editor);
-				glm::vec2 textOrigin = {};
-				VE_PROPERTY(Editor)
-				NormalizedColor textColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-				VE_PROPERTY(Editor)
-				float textSize = 12;
-				float oldTextSize = 12;
-				std::string oldText = "";
-				Texture2D textTexture = {};
-
 				//Image
 				VE_PROPERTY(Editor)
 				std::filesystem::path imageFilepath = "";

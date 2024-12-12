@@ -8,6 +8,9 @@
 #include "platform/ve_flecs_os_backend.h"
 #include "ShapingEngine.hpp"
 #include "utils/ve_utils.h"
+
+
+
 namespace ShapingEngine
 {
 	std::map<int, Glyph> glyphs;
@@ -45,7 +48,7 @@ namespace VE
 #ifdef VE_EDITOR
 		AddLog(msg);
 #endif
-		printf(msg.c_str());
+		printf("%s", msg.c_str());
 		buffer.clear();
 	}
 	Engine* Engine::singleton = nullptr;
@@ -137,8 +140,11 @@ namespace VE
 
 	void Engine::Run()
 	{
+#ifndef __EMSCRIPTEN__
 		while (!WindowShouldClose())
 		{
+#endif
+
 			BeginDrawing();
 			ClearBackground(BLANK);
 			sceneManager->RunCurrentScene();
@@ -174,9 +180,12 @@ namespace VE
 				editor->selectedEntity = flecs::entity();
 #endif
 
-
 			}
+
+#ifndef __EMSCRIPTEN__
 		}
+#endif
+
 	}
 	
 #ifdef VE_EDITOR

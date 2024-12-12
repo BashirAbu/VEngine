@@ -33,7 +33,7 @@ namespace VE
 
 
 		world.system<Components::UI::UICanvasComponent>("UICanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::UICanvasSystem);
-		world.system<Components::TransformComponent, Components::UI::UILabelComponent>("UILabelRenderSystem").multi_threaded().kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UILabelRenderSystem);
+		world.system<Components::TransformComponent, Components::UI::UILabelComponent>("UILabelRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UILabelRenderSystem);
 		world.system<Components::TransformComponent, Components::UI::UIImageComponent>("UIImageRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UIImageRenderSystem);
 		world.system<Components::TransformComponent, Components::UI::UIButtonComponent>("UIButtonSystem ").kind(OnRender).without<_Components::Disabled>().each(Systems::UIButtonSystem);
 
@@ -577,10 +577,19 @@ namespace VE
 			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
 				{
 					UnloadTexture(lb.texture);
+					if (lb.font)
+					{
+						delete lb.font;
+						lb.font = nullptr;
+					}
 				});
-			world.component<Components::UI::UIButtonComponent>().on_remove([](flecs::entity e, Components::UI::UIButtonComponent& btn)
+			world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)
 				{
-					UnloadTexture(btn.textTexture);
+					lb.texture = {};
+					lb.font = nullptr;
+					lb.oldFontFilepath = "";
+					lb.oldText = "";
+					lb.oldTextSize = 0;
 				});
 
 		world.component<_Components::SceneEntityTag>();

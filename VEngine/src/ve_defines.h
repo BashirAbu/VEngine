@@ -10,10 +10,12 @@
 #include <flecs/addons/meta.h>
 #include <flecs/addons/json.h>
 #include <nlohmann/json.hpp>
+#ifndef __EMSCRIPTEN__
 #define GLM_FORCE_SSE2
 #define GLM_FORCE_AVX
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_ENABLE_EXPERIMENTAL
+#endif
+#define GLM_ENABLE_EXPERIMENTAL 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -85,10 +87,10 @@ namespace VE
 
 
 //Header tool macros.
-#define VE_CLASS()
-#define VE_PROPERTY()
-#define VE_ENUM()
-#define VE_FUNCTION()
+#define VE_CLASS(...)
+#define VE_PROPERTY(...)
+#define VE_ENUM(...)
+#define VE_FUNCTION(...)
 
 
 #define VE_PROJECT_FILE_EXTENSION "VEProject"

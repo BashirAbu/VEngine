@@ -4,6 +4,7 @@
 #include <codecvt>
 #include <locale>
 #include "ShapingEngine.hpp"
+#include "utf8.h"
 namespace VE 
 {
 
@@ -33,15 +34,11 @@ namespace VE
     {
         Texture result = {};
 
-		
-
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-
-		std::wstring wideString = converter.from_bytes(text);
-
+		std::wstring wideString;
+		utf8::utf8to16(text.begin(), text.end(), std::back_inserter(wideString));
 		std::string processedString = ShapingEngine::render(wideString, true, true);
-
-		wideString = converter.from_bytes(processedString);
+		wideString = L"";
+		utf8::utf8to16(processedString.begin(), processedString.end(), std::back_inserter(wideString));
 
 		
 
@@ -62,7 +59,8 @@ namespace VE
 		imageHeight += baseline;
 
 		
-		std::vector<uint32_t> imgBuffer(imageWidth * imageHeight);
+		uint32_t* imgBuffer = (uint32_t*)malloc(imageWidth * imageHeight * sizeof(uint32_t));
+		memset(imgBuffer, 0, imageWidth * imageHeight * sizeof(uint32_t));
 		int32_t xOffset = 0;
 		for (int32_t i = 0; i < glyphs.size(); i++)
 		{
@@ -85,12 +83,14 @@ namespace VE
 		}
 
 		Image textImage = {};
-		textImage.data = imgBuffer.data();
+		textImage.data = imgBuffer;
 		textImage.width = imageWidth;
 		textImage.height = imageHeight;
 		textImage.mipmaps = 1;
 		textImage.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+
 		result = LoadTextureFromImage(textImage);
+		free(imgBuffer);
 		SetTextureFilter(result, TEXTURE_FILTER_BILINEAR);
 		SetTextureWrap(result, TEXTURE_WRAP_CLAMP);
 

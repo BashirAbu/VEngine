@@ -37,7 +37,10 @@ project "VEngine"
         systemversion "latest"
         buildoptions { windows_build_options }
         defines { windows_defines }
-
+        files
+        {
+            prefixPaths("../", glfw_src_files),
+        }
     filter "configurations:Debug"
         kind "SharedLib"
         staticruntime "Off"

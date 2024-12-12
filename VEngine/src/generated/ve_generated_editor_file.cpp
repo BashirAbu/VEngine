@@ -178,16 +178,6 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 		{
 			
 			VE::Components::UI::UIButtonComponent* UIButtonComponent_ = entity.get_mut<VE::Components::UI::UIButtonComponent>();
-			EditorElement::FileSystem(UIButtonComponent_->fontFilepath, "Font Filepath");
-
-			EditorElement::String(UIButtonComponent_->text, "Text");
-
-			EditorElement::Vec2(UIButtonComponent_->textOrigin, "Text Origin");
-
-			EditorElement::Color(UIButtonComponent_->textColor, "Text Color");
-
-			EditorElement::Float(UIButtonComponent_->textSize, "Text Size");
-
 			EditorElement::FileSystem(UIButtonComponent_->imageFilepath, "Image Filepath");
 
 			EditorElement::Vec2(UIButtonComponent_->imageOrigin, "Image Origin");

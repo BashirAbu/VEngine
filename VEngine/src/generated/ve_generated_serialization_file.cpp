@@ -212,18 +212,8 @@ void Serialize_UIButtonComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::UI::UIButtonComponent>* comp = (flecs::component<VE::Components::UI::UIButtonComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("fontFilepath").member<std::string>("text").member<glm::vec2>("textOrigin").member<NormalizedColor>("textColor").member<float>("textSize").member<std::filesystem::path>("imageFilepath").member<glm::vec2>("imageOrigin").member<NormalizedColor>("tintColor").member<NormalizedColor>("pressTintColor").member<int32_t>("imageRenderOrder"))
+		comp->opaque(comp->world().component().member<std::filesystem::path>("imageFilepath").member<glm::vec2>("imageOrigin").member<NormalizedColor>("tintColor").member<NormalizedColor>("pressTintColor").member<int32_t>("imageRenderOrder"))
 		.serialize([](const flecs::serializer* s, const VE::Components::UI::UIButtonComponent* data) -> int		{
-		s->member("fontFilepath");
-		s->value(data->fontFilepath);
-		s->member("text");
-		s->value(data->text);
-		s->member("textOrigin");
-		s->value(data->textOrigin);
-		s->member("textColor");
-		s->value(data->textColor);
-		s->member("textSize");
-		s->value(data->textSize);
 		s->member("imageFilepath");
 		s->value(data->imageFilepath);
 		s->member("imageOrigin");
@@ -238,11 +228,6 @@ void Serialize_UIButtonComponent()
 		}).ensure_member([](VE::Components::UI::UIButtonComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
-			else if (!strcmp(member, "fontFilepath")) { return &data->fontFilepath;}
-			else if (!strcmp(member, "text")) { return &data->text;}
-			else if (!strcmp(member, "textOrigin")) { return &data->textOrigin;}
-			else if (!strcmp(member, "textColor")) { return &data->textColor;}
-			else if (!strcmp(member, "textSize")) { return &data->textSize;}
 			else if (!strcmp(member, "imageFilepath")) { return &data->imageFilepath;}
 			else if (!strcmp(member, "imageOrigin")) { return &data->imageOrigin;}
 			else if (!strcmp(member, "tintColor")) { return &data->tintColor;}

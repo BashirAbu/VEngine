@@ -22,6 +22,9 @@ namespace VE
 		void DrawSceneViewport();
 		void DrawGameViewport();
 
+
+		glm::vec2 SceneViewportMousePos();
+
 		class ConsoleWindow 
 		{
 		public:

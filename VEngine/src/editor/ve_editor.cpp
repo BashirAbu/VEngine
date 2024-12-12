@@ -1012,6 +1012,14 @@ namespace VE
 		ImGui::GetStyle().WindowPadding = oldPadding;
 	}
 
+	glm::vec2 Editor::SceneViewportMousePos()
+	{
+		ImVec2 pos = ImGui::GetMousePos();
+		glm::vec2 mousePos(pos.x, pos.y);
+		mousePos = mousePos - sceneViewportPosition;
+		return mousePos;
+	}
+
 	void Editor::UpdateEditor(float deltaTime)
 	{
 		if (isSceneViewHovered)
@@ -1095,7 +1103,8 @@ namespace VE
 
 				Image pickImage = LoadImageFromTexture(t);
 				float* pickingData = (float*)pickImage.data;
-				ImVec2 mousePos = ImGui::GetMousePos();
+				glm::vec2 mousePos = SceneViewportMousePos();
+				TraceLog(LOG_DEBUG, "X: %f, Y: %f", mousePos.x, mousePos.y);
 				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
 				
 				int id = (int)pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
@@ -1138,10 +1147,10 @@ namespace VE
 		ImGui::PushFont(VE::Engine::GetSingleton()->editor->consoleFont);
 		for (const auto log : *logs)
 		{
-			ImColor color = ImColor(0.1f, 0.1f, 0.1f, 1.0f);
+			ImColor color = ImColor(0.4f, 0.4f, 0.4f, 1.0f);
 			if (log.find("[INFO]") != std::string::npos)
 			{
-				color = ImColor(0.1f, 0.1f, 0.1f, 1.0f);
+				color = ImColor(0.4f, 0.4f, 0.4f, 1.0f);
 			}
 			else if (log.find("[ERROR]") != std::string::npos)
 			{

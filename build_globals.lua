@@ -12,7 +12,7 @@ windows_build_options = {
     "/wd4002"
 }
 --windows defines
-windows_defines = {"VE_WINDOWS", "_GLFW_WIN32", "PLATFORM_DESKTOP"}
+windows_defines = {"VE_WINDOWS", "_GLFW_WIN32", "PLATFORM_DESKTOP", "PLATFORM_DESKTOP_GLFW", "GRAPHICS_API_OPENGL_43", "RLGL_ENABLE_OPENGL_DEBUG_CONTEXT"}
 windows_link_libs = {"Winmm.lib"}
 --base defines.
 base_engine_defines = 
@@ -56,6 +56,8 @@ release_dist_engine_defines =
     release_engine_defines,
 }
 
+--utfcpp include dirs
+utfcpp_include_dirs = {"VEngine/third_party/utfcpp/source/"}
 --raylib include dirs
 raylib_include_dirs = {"VEngine/third_party/raylib/src/"}
 --glm include dirs.
@@ -89,6 +91,7 @@ base_engine_include_dirs =
     glfw_include_dirs,
     flecs_include_dirs,
     shaping_engine_include_dirs,
+    utfcpp_include_dirs
 }
 --Editor VE_Engine include dirs.
 editor_engine_include_dirs = 
@@ -213,7 +216,6 @@ base_engine_src_files =
     "VEngine/src/**.c",
     raylib_src_files,
     flecs_src_files,
-    glfw_src_files,
     freetype_src_files,
 }
 --Editor VE_Engine source files.

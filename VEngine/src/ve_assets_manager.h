@@ -48,7 +48,6 @@ namespace VE
 		std::mutex imagesMutex;
 		std::unordered_map<std::string, Sound> sounds;
 		std::mutex soundsMutex;
-		std::unordered_map<std::string, Font*> fonts;
 		std::mutex fontsMutex;
 
 		std::unordered_map<std::string, std::string> scenes;

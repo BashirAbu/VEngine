@@ -7,7 +7,7 @@
 #include <wchar.h>
 #include <stdio.h>
 #include <codecvt>
-
+#include <utf8.h>
 /*
 * 
 * Unicode Spaces and character information
@@ -70,16 +70,15 @@ namespace ShapingEngine {
 
         inline std::wstring widen(const std::string& utf8)
         {
-            std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-            std::u16string utf16 = convert.from_bytes(utf8);
-            std::wstring wstr(utf16.begin(), utf16.end());
+            std::wstring wstr;
+            utf8::utf8to16(utf8.begin(), utf8.end(), std::back_inserter(wstr));
             return wstr;
         }
 
         inline std::string narrow(const std::wstring& utf16) {
             std::u16string u16str(utf16.begin(), utf16.end());
-            std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-            std::string utf8 = convert.to_bytes(u16str);
+            std::string utf8;
+            utf8::utf16to8(u16str.begin(), u16str.end(), std::back_inserter(utf8));
             return utf8;
         }
 

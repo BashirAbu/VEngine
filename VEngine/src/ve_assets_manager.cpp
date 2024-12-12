@@ -142,33 +142,21 @@ namespace VE
 	{
 		std::lock_guard<std::mutex> lock(fontsMutex);
 
-		if (fonts.find(filepath.string()) != fonts.end())
-		{
-			return fonts[filepath.string()];
-		}
-		else
-		{
-
 #ifdef VE_EDITOR 
-			std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
-			FILE* fontFile = fopen(fullpath.generic_string().c_str(), "rb");
-			fseek(fontFile, 0, SEEK_END);
-			size_t fileSize = ftell(fontFile);
-			rewind(fontFile); 
-			uint8_t* buffer = (uint8_t*)malloc(fileSize);
-			VE_ASSERT(fread(buffer, fileSize, 1, fontFile));
-			fclose(fontFile);
-			fonts[filepath.string()] = new Font(buffer, fileSize, fontSize);
-			free(buffer);
-
+		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+		FILE* fontFile = fopen(fullpath.generic_string().c_str(), "rb");
+		fseek(fontFile, 0, SEEK_END);
+		size_t fileSize = ftell(fontFile);
+		rewind(fontFile); 
+		uint8_t* buffer = (uint8_t*)malloc(fileSize);
+		VE_ASSERT(fread(buffer, fileSize, 1, fontFile));
+		fclose(fontFile);
+		return new Font(buffer, fileSize, fontSize);
 #else
-			AssetData data = GetAssetData(filepath.generic_string());
-			VE_ASSERT(data.size);
-			fonts[filepath.string()] = new Font(data.data, data.size, fontSize);
+		AssetData data = GetAssetData(filepath.generic_string());
+		VE_ASSERT(data.size);
+		return new Font(data.data, data.size, fontSize);
 #endif
-
-			return fonts[filepath.string()];
-		}
 	}
 	const std::string& AssetsManager::LoadScene(std::filesystem::path filepath)
 	{
@@ -249,11 +237,7 @@ namespace VE
 			UnloadSound(sound.second);
 		}
 		sounds.clear();
-		for (auto font : fonts)
-		{
-			delete font.second;
-		}
-		fonts.clear();
+
 
 		scenes.clear();
 		constructs.clear();

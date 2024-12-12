@@ -1,7 +1,6 @@
 #pragma once
 #include "ve_defines.h"
 #include <raylib.h>
-#include <concurrent_vector.h>
 #include <mutex>
 #include <thread>
 #include "ve_font.h"
