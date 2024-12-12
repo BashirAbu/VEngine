@@ -1,11 +1,12 @@
+include (os.getenv("VENGINE_DIR") .. "/premake/premake-emscripten/emscripten.lua")
+include (os.getenv("VENGINE_DIR") .. "/premake/premake-cmake/cmake.lua")
+
 local ve_engine_path = os.getenv("VENGINE_DIR")
 local build_globals = path.join(ve_engine_path, "build_globals.lua")
-
+local targetName = "SpaceShooter"
 include(build_globals)
 
 workspace "Project"
-    architecture "x64"
-
     configurations
     {
         "Debug",
@@ -26,8 +27,8 @@ project "project"
     }
 
     filter "system:windows"
+        architecture "x64"
         systemversion "latest"
-        
         buildoptions {windows_build_options}
         links
         {
@@ -37,9 +38,65 @@ project "project"
         {
             windows_defines
         }
+        files
+        {
+            "resource.rc",
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", glfw_src_files),
+        }
+    filter {"configurations:Debug", "system:windows"}
+        local currentTime = os.date("%Y%m%d%H%M%S")
+        linkoptions 
+        {
+            "/PDB:bin\\%{prj.name}_" .. currentTime .. ".pdb"
+        }
+    filter {"configurations:Game_Debug or configurations:Game_Release", "system:windows"}
+    postbuildcommands
+        {
+            "{COPY} icon.png %{cfg.buildtarget.directory}",
+        }
+    filter {"configurations:Game_Debug or configurations:Game_Release", "system:windows"}
+        prebuildcommands
+        {
+            "{CHDIR} %{cfg.buildtarget.directory}",
+            os.getenv("VENGINE_DIR") .. "/bin/Release_windows_x86_64/VEAssetsPackager/VEAssetsPackager %{prj.location}",
+        }
+    filter "system:emscripten"
+        architecture "wasm32" 
+        system "emscripten"
+        buildoptions 
+        {   
+            "-sUSE_PTHREADS=1",
+            "-msimd128",
+        }
+        linkoptions
+        {
+            "-o %{cfg.buildtarget.directory}/" .. targetName .. ".html",
+            "-sWASM=1",
+            "-sUSE_GLFW=3",
+            "--preload-file %{cfg.buildtarget.directory}/data.VEData@./data.VEData",
+            "-s STACK_SIZE=4194304",
+            "-sALLOW_MEMORY_GROWTH"
+        }
+        defines
+        {
+            "GRAPHICS_API_OPENGL_ES2",
+            "VE_WEB",
+            "PLATFORM_WEB",
+        }
+    filter {"files:*.c", "system:emscripten"}
+        buildoptions 
+        {  
+            "--std:c++20"
+        }
 
         
+    
     filter "configurations:Debug or configurations:Release"
+
+        prebuildcommands
+        {
+            "{DELETE} %{prj.location}/bin/*.pdb",
+        }
         defines 
         {
             "VE_PROJECT_EXPORT",
@@ -83,25 +140,26 @@ project "project"
         objdir("bin/bin_int")
 
 
-    filter "configurations:Debug"
-        symbols "On"
-        local currentTime = os.date("%Y%m%d%H%M%S")
-        linkoptions 
-        {
-            "/PDB:bin\\%{prj.name}_" .. currentTime .. ".pdb"
-        }
-        defines 
-        {
-            "VE_DEBUG",
-        }
+        filter "configurations:Debug"
+            symbols "On"
+            defines 
+            {
+                "VE_DEBUG",
+            }
     
-    filter "configurations:Release"
-        optimize "On"
-        defines 
-        {
-            "VE_RELEASE",
-        }
+        filter "configurations:Release"
+            optimize "On"
+            defines 
+            {
+                "VE_RELEASE",
+            }
+    
     filter "configurations:Game_Debug or configurations:Game_Release"
+        
+        targetname (targetName)
+        debugdir ("%{cfg.buildtarget.directory}")
+        
+
         files
         {
             "%{prj.location}/src/**.h",     
@@ -114,7 +172,8 @@ project "project"
         includedirs
         {
             "src/",
-            prefixPaths(os.getenv("VENGINE_DIR") .. "/", base_engine_include_dirs)
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", base_engine_include_dirs),
+            prefixPaths(os.getenv("VENGINE_DIR") .. "/", assets_packager_include_dir), 
         }
 
         kind "ConsoleApp"

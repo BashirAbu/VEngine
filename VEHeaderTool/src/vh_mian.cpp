@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
                 std::string arguments = headerFilepath.generic_string() + " " + passedArgs;
 
-                std::string command = "header-parser.exe " + arguments;
+                std::string command = "%VENGINE_DIR%\\VEHeaderTool\\header-parser.exe " + arguments;
                 FILE* jsonHeaderFile = _popen(command.c_str(), "r");
                 fseek(jsonHeaderFile, 0L, SEEK_END);
                 size_t jsonHeaderSize = (size_t)ftell(jsonHeaderFile);

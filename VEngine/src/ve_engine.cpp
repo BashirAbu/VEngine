@@ -94,9 +94,11 @@ namespace VE
 		editor = new Editor(this);
 		projectSharedLibrary = new SharedLibrary();
 #else
+#ifdef VE_WINDOWS
 		Image icon = LoadImage("icon.png");
 		SetWindowIcon(icon);
 		UnloadImage(icon);
+#endif
 #endif
 
 
