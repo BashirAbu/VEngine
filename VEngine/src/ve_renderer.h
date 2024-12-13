@@ -12,7 +12,8 @@ namespace VE
 	public:
 		Renderer(class Scene* scene);
 		~Renderer();
-		void RenderQueued();
+		void RenderQueued2D();
+		void RenderQueued3D();
 		void RenderUIQueued();
 		void RenderScene();
 		struct Tex2D

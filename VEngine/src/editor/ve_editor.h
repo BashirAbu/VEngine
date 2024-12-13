@@ -53,7 +53,7 @@ namespace VE
 		std::string tempSelecetedEntity;
 		std::filesystem::path reloadScenePath;
 
-		std::vector<char> entityName;
+		std::string entityName;
 		bool saveName = false;
 		flecs::entity selectedEntity;
 
@@ -72,7 +72,19 @@ namespace VE
 		std::queue<flecs::entity> removeEntities;
 		std::queue<flecs::entity> addChildQueue;
 
-		Camera2D editorCamera;
+		enum class CameraMode 
+		{
+			CAMERA2D,
+			CAMERA3D
+		};
+		CameraMode cameraMode = CameraMode::CAMERA3D;
+		::Camera2D editorCamera2D;
+		::Camera editorCamera3D;
+		float editorCameraMoveSpeed = 10.0f;
+		float editorCameraSensitiviy = 0.003f;
+		float editorCameraZoom = 20.0f;
+
+
 		glm::vec2 oldRenderTargetSize;
 		RenderTexture editorCameraRenderTarget;
 

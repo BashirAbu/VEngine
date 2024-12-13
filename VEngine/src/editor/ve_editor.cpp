@@ -221,11 +221,15 @@ namespace VE
 		io.Fonts->Build();
 		ImGui_ImplRaylib_BuildFontAtlas();
 
-		editorCamera = {};
-		editorCamera.zoom = 1.0f;
+		editorCamera2D = {};
+		editorCamera2D.zoom = 1.0f;
 
-		entityName.resize(255);
-		memset(entityName.data(), 0, entityName.size());
+		editorCamera3D = {};
+		editorCamera3D.fovy = 45.0f;
+		editorCamera3D.position = Vector3{0.0f, 10.0f, 10.0f};
+		editorCamera3D.projection = CAMERA_PERSPECTIVE;
+		editorCamera3D.target = {};
+		editorCamera3D.up = { 0.0f, 1.0f, 0.0f };
 
 		editorCameraRenderTarget = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 		colorPickingBuffer = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R32);
@@ -708,7 +712,17 @@ namespace VE
 		{
 			ImGui::Text("Name");
 			ImGui::SameLine();
-			ImGui::InputText("##Name", entityName.data(), entityName.size());
+			ImGui::InputText(((std::string)"##" + "Name").c_str(), entityName.data(), entityName.size() + 1,
+				ImGuiInputTextFlags_CallbackResize, [](ImGuiInputTextCallbackData* data) -> int
+				{
+					if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+					{
+						auto* str = static_cast<std::string*>(data->UserData);
+						str->resize(data->BufTextLen);
+						data->Buf = str->data();
+					}
+					return 0;
+				}, &entityName);
 			if (ImGui::IsItemActivated())
 			{
 				saveName = true;
@@ -717,13 +731,13 @@ namespace VE
 			{
 				if (!engine->sceneManager->currentScene->_LookupEntity(entityName.data()) && saveName)
 				{
-					selectedEntity.set_name(entityName.data());
+					selectedEntity.set_name(entityName.c_str());
 					saveName = false;
 				}
 			}
 			else 
 			{
-				strcpy(entityName.data(), selectedEntity.name().c_str());
+				entityName = selectedEntity.name().c_str();
 			}
 			
 			ImGui::Separator();
@@ -829,102 +843,138 @@ namespace VE
 			editorCameraRenderTarget = LoadRenderTexture((int)sceneViewportSize.x, (int)sceneViewportSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 			SetTextureFilter(editorCameraRenderTarget.texture, TEXTURE_FILTER_BILINEAR);
 		}
+		if (cameraMode == CameraMode::CAMERA2D)
+		{
 
-		BeginTextureMode(editorCameraRenderTarget);
-		BeginMode2D(editorCamera);
+			BeginTextureMode(editorCameraRenderTarget);
+			BeginMode2D(editorCamera2D);
 
-		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent, Components::TransformComponent>();
-		Components::Camera2DComponent* c2dc = nullptr;
-		Components::TransformComponent* tc = nullptr;
+			flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent, Components::TransformComponent>();
+			Components::Camera2DComponent* c2dc = nullptr;
+			Components::TransformComponent* tc = nullptr;
 
-		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc, Components::TransformComponent& _tc)
-			{
-				if (cc.isMain)
+			cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc, Components::TransformComponent& _tc)
 				{
-					c2dc = &cc;
-					tc = &_tc;
-				}
-			});
-		if (c2dc)
-		{
-			ClearBackground(GLMVec4ToRayColor(c2dc->backgroundColor));
-		}
-		else 
-		{
-			ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		}
-
-		engine->sceneManager->currentScene->renderer.RenderQueued();
-		engine->sceneManager->currentScene->renderer.RenderUIQueued();
-		
-
-		//Draw Camrea rectangle
-		if (c2dc)
-		{
-			std::vector<glm::vec2> vertices = {
-									{0.0f                                        , c2dc->renderTarget.texture.height}, // Bottom-left
-									{c2dc->renderTarget.texture.width            , c2dc->renderTarget.texture.height}, // Bottom-right
-									{c2dc->renderTarget.texture.width, 0.0f}     , // Top-right
-									{0.0f,                                         0.0f}  // Top-left
-			};
-
-			glm::mat4 transform =
-				glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
-				* glm::rotate(glm::mat4(1.0f), -glm::radians(c2dc->camera.rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-				* glm::scale(glm::mat4(1.0f), glm::vec3((1.0f / c2dc->camera.zoom), (1.0f / c2dc->camera.zoom), 1.0f))
-				* glm::translate(glm::mat4(1.0f), -glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
-				* glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f));
-
-			std::vector<glm::vec2> transformedVertices;
-			for (const auto& vertex : vertices) {
-				glm::vec4 transformedVertex = transform * glm::vec4(vertex, 0.0f, 1.0f);
-				transformedVertices.push_back(glm::vec2(transformedVertex));
+					if (cc.isMain)
+					{
+						c2dc = &cc;
+						tc = &_tc;
+					}
+				});
+			if (c2dc)
+			{
+				ClearBackground(GLMVec4ToRayColor(c2dc->backgroundColor));
+			}
+			else
+			{
+				ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 			}
 
-			DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, GRAY);
-			DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, GRAY);
-			DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, GRAY);
-			DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, GRAY);
-		}
-		//Render Canvas Rectangle
-		flecs::query UICanvases = engine->sceneManager->currentScene->world.query<Components::UI::UICanvasComponent, Components::TransformComponent>();
-		Components::UI::UICanvasComponent* canvas = nullptr;
-		tc = nullptr;
+			engine->sceneManager->currentScene->renderer.RenderQueued2D();
+			engine->sceneManager->currentScene->renderer.RenderUIQueued();
 
-		UICanvases.each([&](flecs::entity e, Components::UI::UICanvasComponent& c, Components::TransformComponent& _tc)
+
+			//Draw Camrea rectangle
+			if (c2dc)
 			{
-				if (c.isMain)
-				{
-					canvas = &c;
-					tc = &_tc;
+				std::vector<glm::vec2> vertices = {
+										{0.0f                                        , c2dc->renderTarget.texture.height}, // Bottom-left
+										{c2dc->renderTarget.texture.width            , c2dc->renderTarget.texture.height}, // Bottom-right
+										{c2dc->renderTarget.texture.width, 0.0f}     , // Top-right
+										{0.0f,                                         0.0f}  // Top-left
+				};
+
+				glm::mat4 transform =
+					glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
+					* glm::rotate(glm::mat4(1.0f), -glm::radians(c2dc->camera.rotation), glm::vec3(0.0f, 0.0f, 1.0f))
+					* glm::scale(glm::mat4(1.0f), glm::vec3((1.0f / c2dc->camera.zoom), (1.0f / c2dc->camera.zoom), 1.0f))
+					* glm::translate(glm::mat4(1.0f), -glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f))
+					* glm::translate(glm::mat4(1.0f), glm::vec3(tc->GetWorldPosition().x + c2dc->camera.offset.x, tc->GetWorldPosition().y + c2dc->camera.offset.y, 0.0f));
+
+				std::vector<glm::vec2> transformedVertices;
+				for (const auto& vertex : vertices) {
+					glm::vec4 transformedVertex = transform * glm::vec4(vertex, 0.0f, 1.0f);
+					transformedVertices.push_back(glm::vec2(transformedVertex));
 				}
-			});
 
-		//Draw Camrea rectangle
-		if (canvas)
-		{
-			std::vector<glm::vec2> vertices = {
-									{0.0f                                        , canvas->canvasRenderTarget.texture.height}, // Bottom-left
-									{canvas->canvasRenderTarget.texture.width            , canvas->canvasRenderTarget.texture.height}, // Bottom-right
-									{canvas->canvasRenderTarget.texture.width, 0.0f}     , // Top-right
-									{0.0f,                                         0.0f}  // Top-left
-			};
+				DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, GRAY);
+				DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, GRAY);
+				DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, GRAY);
+				DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, GRAY);
+			}
+			//Render Canvas Rectangle
+			flecs::query UICanvases = engine->sceneManager->currentScene->world.query<Components::UI::UICanvasComponent, Components::TransformComponent>();
+			Components::UI::UICanvasComponent* canvas = nullptr;
+			tc = nullptr;
+
+			UICanvases.each([&](flecs::entity e, Components::UI::UICanvasComponent& c, Components::TransformComponent& _tc)
+				{
+					if (c.isMain)
+					{
+						canvas = &c;
+						tc = &_tc;
+					}
+				});
+
+			//Draw Camrea rectangle
+			if (canvas)
+			{
+				std::vector<glm::vec2> vertices = {
+										{0.0f                                        , canvas->canvasRenderTarget.texture.height}, // Bottom-left
+										{canvas->canvasRenderTarget.texture.width            , canvas->canvasRenderTarget.texture.height}, // Bottom-right
+										{canvas->canvasRenderTarget.texture.width, 0.0f}     , // Top-right
+										{0.0f,                                         0.0f}  // Top-left
+				};
 
 
-			std::vector<glm::vec2> transformedVertices = vertices;
+				std::vector<glm::vec2> transformedVertices = vertices;
 
-			DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, BROWN);
-			DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, BROWN);
-			DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, BROWN);
-			DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, BROWN);
+				DrawLine((int)transformedVertices[0].x, (int)transformedVertices[0].y, (int)transformedVertices[1].x, (int)transformedVertices[1].y, BROWN);
+				DrawLine((int)transformedVertices[1].x, (int)transformedVertices[1].y, (int)transformedVertices[2].x, (int)transformedVertices[2].y, BROWN);
+				DrawLine((int)transformedVertices[2].x, (int)transformedVertices[2].y, (int)transformedVertices[3].x, (int)transformedVertices[3].y, BROWN);
+				DrawLine((int)transformedVertices[3].x, (int)transformedVertices[3].y, (int)transformedVertices[0].x, (int)transformedVertices[0].y, BROWN);
+			}
+
+
+
+			EndMode2D();
+			EndTextureMode();
+
 		}
+		else if (cameraMode == CameraMode::CAMERA3D)
+		{
+			// render scene.
+			BeginTextureMode(editorCameraRenderTarget);
+			BeginMode3D(editorCamera3D);
+
+			flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera3DComponent, Components::TransformComponent>();
+			Components::Camera3DComponent* c3dc = nullptr;
+			Components::TransformComponent* tc = nullptr;
+
+			cameras.each([&](flecs::entity e, Components::Camera3DComponent& cc, Components::TransformComponent& _tc)
+				{
+					if (cc.isMain)
+					{
+						c3dc = &cc;
+						tc = &_tc;
+					}
+				});
+			if (c3dc)
+			{
+				ClearBackground(GLMVec4ToRayColor(c3dc->backgroundColor));
+			}
+			else
+			{
+				ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+			}
+
+			engine->sceneManager->currentScene->renderer.RenderQueued3D();
+			DrawGrid(10, 1.0f);
 
 
-
-		EndMode2D();
-		EndTextureMode();
-
-
+			EndMode3D();
+			EndTextureMode();
+		}
 
 
 		rlImGuiImageRenderTextureFit(&editorCameraRenderTarget.texture, false);
@@ -936,7 +986,14 @@ namespace VE
 			Components::TransformComponent* tc = selectedEntity.get_mut<Components::TransformComponent>();
 			if (tc) 
 			{
-				ImGuizmo::SetOrthographic(true);
+				if (cameraMode == CameraMode::CAMERA2D)
+				{
+					ImGuizmo::SetOrthographic(true);
+				}
+				else if (cameraMode == CameraMode::CAMERA3D)
+				{
+					ImGuizmo::SetOrthographic(false);
+				}
 				ImGuizmo::SetDrawlist();
 
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
@@ -944,7 +1001,14 @@ namespace VE
 
 				glm::mat4 transformMatrix = tc->__worldMatrix;
 				Matrix cameraViewMatrix;
-				cameraViewMatrix = GetCameraMatrix2D(editorCamera);
+				if (cameraMode == CameraMode::CAMERA2D)
+				{
+					cameraViewMatrix = GetCameraMatrix2D(editorCamera2D);
+				}
+				else if (cameraMode == CameraMode::CAMERA3D)
+				{
+					cameraViewMatrix = GetCameraMatrix(editorCamera3D);
+				}
 				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
 
 				if (ImGuizmo::IsUsing())
@@ -956,7 +1020,6 @@ namespace VE
 					glm::vec4 pres;
 					glm::quat rot;
 
-					std::string parentName = selectedEntity.parent() ? selectedEntity.parent().name().c_str() : "no";
 
 					glm::decompose(selectedEntity.parent()? glm::inverse(selectedEntity.parent().get_mut<Components::TransformComponent>()->__worldMatrix) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
 					glm::vec3 eulerAngles = glm::eulerAngles(rot);
@@ -1024,32 +1087,97 @@ namespace VE
 	{
 		if (isSceneViewHovered)
 		{
-			if (SceneType::Scene2D == engine->sceneManager->currentScene->sceneType)
+			if (cameraMode == CameraMode::CAMERA2D)
 			{
-				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ ImGui::GetMousePos().x, ImGui::GetMousePos().y}, editorCamera);
+				glm::vec2 sceneViewportMousePos = SceneViewportMousePos();
+				Vector2 mouseWorldPos = GetScreenToWorld2D(Vector2{ sceneViewportMousePos.x, sceneViewportMousePos.y }, editorCamera2D);
 				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
 				{
 					Vector2 delta = GetMouseDelta();
-					delta.x *= -1.0f / editorCamera.zoom;
-					delta.y *= -1.0f / editorCamera.zoom;
-					editorCamera.target.x = editorCamera.target.x + delta.x;
-					editorCamera.target.y = editorCamera.target.y + delta.y;
+					delta.x *= -1.0f / editorCamera2D.zoom;
+					delta.y *= -1.0f / editorCamera2D.zoom;
+					editorCamera2D.target.x = editorCamera2D.target.x + delta.x;
+					editorCamera2D.target.y = editorCamera2D.target.y + delta.y;
 				}
-				float wheel = 0;
-				if (isSceneViewHovered)
-				{
-					wheel = GetMouseWheelMove();
-				}
+				float wheel =  GetMouseWheelMove();
+				
 				if (wheel)
 				{
-					editorCamera.offset = Vector2{ ImGui::GetMousePos().x, ImGui::GetMousePos().y };
-					editorCamera.target = mouseWorldPos;
+					editorCamera2D.offset = Vector2{ sceneViewportMousePos.x, sceneViewportMousePos.y };
+					editorCamera2D.target = mouseWorldPos;
 					float scaleFactor = 1.0f + (0.25f * fabsf(wheel));
 					if (wheel < 0) scaleFactor = 1.0f / scaleFactor;
-					editorCamera.zoom = glm::clamp(editorCamera.zoom * scaleFactor, 0.005f, 64.0f);
+					editorCamera2D.zoom = glm::clamp(editorCamera2D.zoom * scaleFactor, 0.005f, 64.0f);
 				}
 			}
+			else if (cameraMode == CameraMode::CAMERA3D) 
+			{
+				float mouseWheelDelta = GetMouseWheelMove();
 
+				Vector3 forward = Vector3Subtract(editorCamera3D.target, editorCamera3D.position);
+				forward = Vector3Normalize(forward);
+
+
+				editorCamera3D.position = Vector3Add(editorCamera3D.position, Vector3Scale(forward, mouseWheelDelta * editorCameraZoom * deltaTime));
+				editorCamera3D.target = Vector3Add(editorCamera3D.target, Vector3Scale(forward, mouseWheelDelta * editorCameraZoom * deltaTime));
+
+
+				Vector3 right = Vector3CrossProduct(forward, editorCamera3D.up);
+				right = Vector3Normalize(right);
+
+				if(ImGui::IsKeyDown(ImGuiKey_W))
+				{
+					
+					editorCamera3D.position = Vector3Add(editorCamera3D.position, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
+					editorCamera3D.target = Vector3Add(editorCamera3D.target, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
+				}
+				if (ImGui::IsKeyDown(ImGuiKey_S))
+				{
+
+					editorCamera3D.position = Vector3Subtract(editorCamera3D.position, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
+					editorCamera3D.target = Vector3Subtract(editorCamera3D.target, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
+				}
+				if (ImGui::IsKeyDown(ImGuiKey_A))
+				{
+
+					editorCamera3D.position = Vector3Subtract(editorCamera3D.position, Vector3Scale(right, editorCameraMoveSpeed * deltaTime));
+					editorCamera3D.target = Vector3Subtract(editorCamera3D.target, Vector3Scale(right, editorCameraMoveSpeed * deltaTime));
+				}
+				if (ImGui::IsKeyDown(ImGuiKey_D))
+				{
+
+					editorCamera3D.position = Vector3Add(editorCamera3D.position, Vector3Scale(right, editorCameraMoveSpeed * deltaTime));
+					editorCamera3D.target = Vector3Add(editorCamera3D.target, Vector3Scale(right, editorCameraMoveSpeed * deltaTime));
+				}
+
+				if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+				{
+					Vector2 mouseDelta = GetMouseDelta();
+
+					editorCamera3D.position = Vector3Subtract(editorCamera3D.position, Vector3Scale(right, mouseDelta.x  * deltaTime));
+					editorCamera3D.target = Vector3Subtract(editorCamera3D.target, Vector3Scale(right, mouseDelta.x * deltaTime));
+				}
+
+				if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+				{
+					Vector2 mouseDelta = GetMouseDelta();
+					float sensitivity = editorCameraSensitiviy;
+
+					float yaw = mouseDelta.x * sensitivity;
+					float pitch = -mouseDelta.y * sensitivity;
+
+					Matrix rotationYaw = MatrixRotate(editorCamera3D.up, -yaw);
+					forward = Vector3Transform(forward, rotationYaw);
+
+					Vector3 rightAxis = Vector3CrossProduct(forward, editorCamera3D.up);
+					rightAxis = Vector3Normalize(rightAxis);
+
+					Matrix rotationPitch = MatrixRotate(rightAxis, pitch);
+					forward = Vector3Transform(forward, rotationPitch);
+
+					editorCamera3D.target = Vector3Add(editorCamera3D.position, forward);
+				}
+			}
 		}
 
 		if (isSceneViewHovered)
@@ -1064,41 +1192,47 @@ namespace VE
 					SetTextureFilter(colorPickingBuffer.texture, TEXTURE_FILTER_POINT);
 				}
 
-
-				BeginTextureMode(colorPickingBuffer);
-				BeginMode2D(editorCamera);
-				ClearBackground(BLANK);
-				BeginShaderMode(colorPickingShader);
-				int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
-				EndShaderMode();
-				//Draw Scene
-				for(const auto& tex2d : engine->sceneManager->currentScene->renderer.texture2DRenderQueue)
+				if (cameraMode == CameraMode::CAMERA2D)
 				{
-					if (tex2d.entity)
+					BeginTextureMode(colorPickingBuffer);
+					BeginMode2D(editorCamera2D);
+					ClearBackground(BLANK);
+					BeginShaderMode(colorPickingShader);
+					int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
+					EndShaderMode();
+					//Draw Scene
+					for (const auto& tex2d : engine->sceneManager->currentScene->renderer.texture2DRenderQueue)
 					{
-						BeginShaderMode(colorPickingShader);
-						float id = (float)((int)tex2d.entity);
-						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-						DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
-						EndShaderMode();
+						if (tex2d.entity)
+						{
+							BeginShaderMode(colorPickingShader);
+							float id = (float)((int)tex2d.entity);
+							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
+							DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+							EndShaderMode();
+						}
 					}
+					//Draw UI
+					for (const auto& tex2d : engine->sceneManager->currentScene->renderer.UIRenderQueue)
+					{
+						if (tex2d.entity)
+						{
+							BeginShaderMode(colorPickingShader);
+							float id = (float)((int)tex2d.entity);
+							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
+							DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+							EndShaderMode();
+						}
+					}
+
+					EndMode2D();
+					EndTextureMode();
 				}
-				//Draw UI
-				for (const auto& tex2d : engine->sceneManager->currentScene->renderer.UIRenderQueue)
+				else if (cameraMode == CameraMode::CAMERA3D)
 				{
-					if (tex2d.entity)
-					{
-						BeginShaderMode(colorPickingShader);
-						float id = (float)((int)tex2d.entity);
-						SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-						DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
-						EndShaderMode();
-					}
+
+
 				}
-
-				EndMode2D();
-				EndTextureMode();
-
 				Texture t = colorPickingBuffer.texture;
 
 				Image pickImage = LoadImageFromTexture(t);
@@ -1147,10 +1281,10 @@ namespace VE
 		ImGui::PushFont(VE::Engine::GetSingleton()->editor->consoleFont);
 		for (const auto log : *logs)
 		{
-			ImColor color = ImColor(0.4f, 0.4f, 0.4f, 1.0f);
+			ImColor color = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
 			if (log.find("[INFO]") != std::string::npos)
 			{
-				color = ImColor(0.4f, 0.4f, 0.4f, 1.0f);
+				color = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if (log.find("[ERROR]") != std::string::npos)
 			{

@@ -106,6 +106,39 @@ void Serialize_Camera2DComponent()
 }
 
 
+void Serialize_Camera3DComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "Camera3DComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::Camera3DComponent>* comp = (flecs::component<VE::Components::Camera3DComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<glm::vec2>("renderTargetSize").member<NormalizedColor>("backgroundColor").member<float>("zoom").member<bool>("isMain"))
+		.serialize([](const flecs::serializer* s, const VE::Components::Camera3DComponent* data) -> int		{
+		s->member("renderTargetSize");
+		s->value(data->renderTargetSize);
+		s->member("backgroundColor");
+		s->value(data->backgroundColor);
+		s->member("zoom");
+		s->value(data->zoom);
+		s->member("isMain");
+		s->value(data->isMain);
+			 return 0;
+		}).ensure_member([](VE::Components::Camera3DComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "renderTargetSize")) { return &data->renderTargetSize;}
+			else if (!strcmp(member, "backgroundColor")) { return &data->backgroundColor;}
+			else if (!strcmp(member, "zoom")) { return &data->zoom;}
+			else if (!strcmp(member, "isMain")) { return &data->isMain;}
+		return nullptr;
+		});
+	}
+}
+
+
 void Serialize_UICanvasComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -246,6 +279,7 @@ void EngineGeneratedSerialization()
 	 Serialize_TransformComponent();
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
+	 Serialize_Camera3DComponent();
 	 Serialize_UICanvasComponent();
 	 Serialize_UILabelComponent();
 	 Serialize_UIImageComponent();
@@ -260,6 +294,7 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::TransformComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera3DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UILabelComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UIImageComponent>();

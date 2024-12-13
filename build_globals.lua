@@ -12,7 +12,7 @@ windows_build_options = {
     "/wd4002"
 }
 --windows defines
-windows_defines = {"VE_WINDOWS", "_GLFW_WIN32", "PLATFORM_DESKTOP", "PLATFORM_DESKTOP_GLFW", "GRAPHICS_API_OPENGL_43", "RLGL_ENABLE_OPENGL_DEBUG_CONTEXT"}
+windows_defines = {"VE_WINDOWS", "_GLFW_WIN32", "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_43"}
 windows_link_libs = {"Winmm.lib"}
 --base defines.
 base_engine_defines = 
@@ -26,6 +26,7 @@ editor_engine_defines =
     "BUILD_LIBTYPE_SHARED", 
     "flecs_EXPORTS",
     "IMGUI_EXPORT",
+    "RLGL_ENABLE_OPENGL_DEBUG_CONTEXT",
 }
 --VE_Engine debug defines.
 debug_engine_defines = 

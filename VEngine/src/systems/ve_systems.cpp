@@ -72,6 +72,22 @@ namespace VE::Systems
 			SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 		}
 	}
+	void Camera3DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera3DComponent& c3dc)
+	{
+		c3dc.camera.position = {transform.GetWorldPosition().x, transform.GetWorldPosition().y, transform.GetWorldPosition().z};
+
+		if (c3dc.isMain)
+		{
+			VE::Scene::GetSingleton()->SetMainCamera(e);
+		}
+
+		if (glm::vec2(c3dc.renderTarget.texture.width, c3dc.renderTarget.texture.height) != c3dc.renderTargetSize)
+		{
+			UnloadRenderTexture(c3dc.renderTarget);
+			c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+			SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+		}
+	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{
 		if (sc.texturePath != sc.oldTexturePath)

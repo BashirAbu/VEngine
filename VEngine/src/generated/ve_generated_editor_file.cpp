@@ -86,6 +86,32 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			ImGui::TreePop();
 		}
 	}
+	if (name == "Camera3DComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::Camera3DComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::Camera3DComponent* Camera3DComponent_ = entity.get_mut<VE::Components::Camera3DComponent>();
+			EditorElement::Vec2(Camera3DComponent_->renderTargetSize, "Render Target Size");
+
+			EditorElement::Color(Camera3DComponent_->backgroundColor, "Background Color");
+
+			EditorElement::Float(Camera3DComponent_->zoom, "Zoom");
+
+			EditorElement::Checkbox(Camera3DComponent_->isMain, "Is Main");
+
+			ImGui::TreePop();
+		}
+	}
 	if (name == "UICanvasComponent")
 	{
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());

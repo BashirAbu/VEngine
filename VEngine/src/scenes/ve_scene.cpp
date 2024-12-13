@@ -29,6 +29,7 @@ namespace VE
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
+		world.system<Components::TransformComponent, Components::Camera3DComponent>("Camera3DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera3DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);
 
 
@@ -126,17 +127,43 @@ namespace VE
 	}
 	void Scene::SetMainCamera(flecs::entity entity)
 	{
-		flecs::query cameras = world.query<Components::Camera2DComponent>();
+		flecs::query cameras = world.query_builder().with<Components::Camera2DComponent>().optional().with<Components::Camera3DComponent>().optional().build();
 
-		cameras.each([&](flecs::entity e, Components::Camera2DComponent& cc)
+		cameras.each([&](flecs::entity e)
 			{
+				Components::Camera2DComponent* camera2D = nullptr;
+				Components::Camera3DComponent* camera3D = nullptr;
+
+				if (e.has<Components::Camera2DComponent>())
+				{
+					camera2D = e.get_mut<Components::Camera2DComponent>();
+				}
+				else if (e.has<Components::Camera3DComponent>()) 
+				{
+					camera3D = e.get_mut<Components::Camera3DComponent>();
+				}
+
 				if (e == entity)
 				{
-					cc.isMain = true;
+					if (camera2D)
+					{
+						camera2D->isMain = true;
+					}
+					else if (camera3D)
+					{
+						camera3D->isMain = true;
+					}
 				}
 				else 
 				{
-					cc.isMain = false;
+					if (camera2D)
+					{
+						camera2D->isMain = false;
+					}
+					else if (camera3D)
+					{
+						camera3D->isMain = false;
+					}
 				}
 			});
 	}
@@ -144,11 +171,30 @@ namespace VE
 	{
 		flecs::entity mainCamera = flecs::entity();
 
-		flecs::query cameras = world.query<Components::Camera2DComponent>();
+		flecs::query cameras = world.query_builder().with<Components::Camera2DComponent>().oper(flecs::Or).with<Components::Camera3DComponent>().build();
 
-		mainCamera =  cameras.find([&](flecs::entity e, Components::Camera2DComponent& cc)
+		mainCamera =  cameras.find([&](flecs::entity e)
 			{
-				return cc.isMain;
+				Components::Camera2DComponent* camera2D = nullptr;
+				Components::Camera3DComponent* camera3D = nullptr;
+
+				if (e.has<Components::Camera2DComponent>())
+				{
+					camera2D = e.get_mut<Components::Camera2DComponent>();
+				}
+				else if (e.has<Components::Camera3DComponent>())
+				{
+					camera3D = e.get_mut<Components::Camera3DComponent>();
+				}
+
+				if (camera2D)
+				{
+					return camera2D->isMain && !e.has<_Components::Disabled>();
+				}
+				else
+				{
+					return camera3D->isMain && !e.has<_Components::Disabled>();
+				}
 			});
 
 		return mainCamera;
@@ -573,6 +619,21 @@ namespace VE
 				{
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
+		world.component<Components::Camera3DComponent>().on_add([](flecs::entity e, Components::Camera3DComponent& c3dc)
+			{
+				c3dc.camera.fovy = 45.0f;
+				c3dc.camera.projection = CAMERA_PERSPECTIVE;
+				c3dc.camera.target = {};
+				c3dc.camera.up = { 0.0f, 1.0f, 1.0f };
+
+				e.add<Components::TransformComponent>();
+				c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+				SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+
+			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
+				{
+					UnloadRenderTexture(c3dc.renderTarget);
+			});
 
 			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
 				{

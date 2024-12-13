@@ -18,12 +18,16 @@ namespace VE
 		UnloadRenderTexture(mainRenderTarget);
 	}
 
-	void Renderer::RenderQueued()
+	void Renderer::RenderQueued2D()
 	{
 		for (const auto& t2d : texture2DRenderQueue)
 		{
 			DrawTexturePro(t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
 		}
+	}
+
+	void Renderer::RenderQueued3D()
+	{
 	}
 
 	void Renderer::RenderUIQueued()
@@ -75,13 +79,32 @@ namespace VE
 					BeginMode2D(cc.camera);
 					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
 
-					RenderQueued();
+					RenderQueued2D();
 
 					EndMode2D();
 					EndTextureMode();
 				}
 
 			});
+
+		flecs::query cameras3D = scene->world.query<Components::Camera3DComponent>();
+
+		cameras3D.each([&](flecs::entity e, Components::Camera3DComponent& cc)
+			{
+				if (!e.has<_Components::Disabled>())
+				{
+					BeginTextureMode(cc.renderTarget);
+					BeginMode3D(cc.camera);
+					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
+
+					RenderQueued3D();
+
+					EndMode3D();
+					EndTextureMode();
+				}
+
+			});
+
 
 		flecs::query uiCanvas = scene->world.query<Components::UI::UICanvasComponent>();
 
@@ -111,18 +134,20 @@ namespace VE
 		BeginTextureMode(mainRenderTarget);
 		ClearBackground(BLANK);
 
-		flecs::entity mainCameraEntity = scene->world.query<Components::Camera2DComponent>().find([](flecs::entity e, Components::Camera2DComponent& camera)
-			{
-				return camera.isMain && !e.has<_Components::Disabled>() ? e : flecs::entity();
-			});
+		
 
+		flecs::entity mainCameraEntity = scene->GetMainCamera();
 		if (mainCameraEntity)
 		{
-			Components::Camera2DComponent* mainCamera = mainCameraEntity.get_mut<Components::Camera2DComponent>();
-			if (mainCamera)
+			Components::Camera2DComponent* mainCamera2D = mainCameraEntity.get_mut<Components::Camera2DComponent>();
+			Components::Camera3DComponent* mainCamera3D = mainCameraEntity.get_mut<Components::Camera3DComponent>();
+			if (mainCamera2D)
 			{
-				RaylibDrawTexturTargeteLetterBox(mainCamera->renderTarget, { (float)mainRenderTarget.texture.width, (float)mainRenderTarget.texture.height });
-
+				RaylibDrawTexturTargeteLetterBox(mainCamera2D->renderTarget, { (float)mainRenderTarget.texture.width, (float)mainRenderTarget.texture.height });
+			}
+			else if (mainCamera3D)
+			{
+				RaylibDrawTexturTargeteLetterBox(mainCamera3D->renderTarget, { (float)mainRenderTarget.texture.width, (float)mainRenderTarget.texture.height });
 			}
 		}
 

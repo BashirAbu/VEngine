@@ -11,7 +11,8 @@ project "Fusion"
         "%{prj.location}/src/**.h",     
         "%{prj.location}/src/**.hpp",      
         "%{prj.location}/src/**.cpp",      
-        "%{prj.location}/src/**.c"    
+        "%{prj.location}/src/**.c",
+        "%{prj.location}/resource.rc"
     }
 
     includedirs

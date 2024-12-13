@@ -183,6 +183,22 @@ namespace VE
 			bool isMain = false;
 		};
 
+		VE_CLASS(Component)
+			struct Camera3DComponent
+		{
+			Camera camera = {};
+			RenderTexture renderTarget = {};
+			VE_PROPERTY(Editor)
+			glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+											  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+			VE_PROPERTY(Editor)
+			NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			float zoom = 1.0f;
+			VE_PROPERTY(Editor)
+			bool isMain = false;
+		};
+
 
 		namespace UI
 		{
