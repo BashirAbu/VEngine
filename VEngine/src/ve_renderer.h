@@ -31,7 +31,6 @@ namespace VE
 		struct Model3D
 		{
 			Model model;
-			Vector3 postion;
 			flecs::entity entity;
 		};
 

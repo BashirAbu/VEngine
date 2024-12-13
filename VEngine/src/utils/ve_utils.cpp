@@ -12,6 +12,28 @@ namespace VE
     {
         return Color{ uint8_t(color.r * 255.0f), uint8_t(color.g * 255.0f), uint8_t(color.b * 255.0f), uint8_t(color.a * 255.0f) };
     }
+
+
+	Matrix GlmMat4ToRaylibMatrix(const glm::mat4& glmMatrix) {
+		Matrix raylibMatrix = {
+			glmMatrix[0][0], glmMatrix[1][0], glmMatrix[2][0], glmMatrix[3][0], // First column
+			glmMatrix[0][1], glmMatrix[1][1], glmMatrix[2][1], glmMatrix[3][1], // Second column
+			glmMatrix[0][2], glmMatrix[1][2], glmMatrix[2][2], glmMatrix[3][2], // Third column
+			glmMatrix[0][3], glmMatrix[1][3], glmMatrix[2][3], glmMatrix[3][3]  // Fourth column
+		};
+		return raylibMatrix;
+	}
+
+	VE_API glm::mat4 RaylibMatrixToGlmMat4(const Matrix& raylibMatrix)
+	{
+		return glm::mat4(
+			raylibMatrix.m0, raylibMatrix.m4, raylibMatrix.m8, raylibMatrix.m12,  // First column
+			raylibMatrix.m1, raylibMatrix.m5, raylibMatrix.m9, raylibMatrix.m13,  // Second column
+			raylibMatrix.m2, raylibMatrix.m6, raylibMatrix.m10, raylibMatrix.m14, // Third column
+			raylibMatrix.m3, raylibMatrix.m7, raylibMatrix.m11, raylibMatrix.m15  // Fourth column
+		);
+	}
+
     
     std::filesystem::path GetRelativePath(std::filesystem::path path)
     {

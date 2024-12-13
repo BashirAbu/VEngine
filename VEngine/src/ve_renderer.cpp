@@ -30,7 +30,7 @@ namespace VE
 	{
 		for (const auto& m3d : model3DRenderQueue)
 		{
-			DrawModel(m3d.model, m3d.postion, 1.0f, WHITE);
+			DrawModel(m3d.model, {}, 1.0f, WHITE);
 		}
 	}
 
@@ -60,6 +60,10 @@ namespace VE
 			tss->run();
 
 			ts = scene->systemsTable["UICanvasSystem"].entity;
+			tss = (flecs::system*)&ts;
+			tss->run();
+
+			ts = scene->systemsTable["Camera3DSystem"].entity;
 			tss = (flecs::system*)&ts;
 			tss->run();
 		}

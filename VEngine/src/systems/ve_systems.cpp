@@ -74,7 +74,24 @@ namespace VE::Systems
 	}
 	void Camera3DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera3DComponent& c3dc)
 	{
-		c3dc.camera.position = {transform.GetWorldPosition().x, transform.GetWorldPosition().y, transform.GetWorldPosition().z};
+		Matrix transformMatrix = GlmMat4ToRaylibMatrix(transform.__worldMatrix);
+		c3dc.camera.position.x = transformMatrix.m12;
+		c3dc.camera.position.y = transformMatrix.m13;
+		c3dc.camera.position.z = transformMatrix.m14;
+
+		Vector3 forward =
+		{
+			-transformMatrix.m8,
+			-transformMatrix.m9,
+			-transformMatrix.m10
+		};
+		
+		c3dc.camera.target = Vector3Add(c3dc.camera.position, forward);
+
+		c3dc.camera.up.x = transformMatrix.m4;
+		c3dc.camera.up.y = transformMatrix.m5;
+		c3dc.camera.up.z = transformMatrix.m6;
+
 
 		if (c3dc.isMain)
 		{
@@ -131,6 +148,9 @@ namespace VE::Systems
 			sc.oldTexturePath = sc.texturePath;
 		}
 	}
+
+	
+
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
 	{
 		if (model.modelFilepath != model.oldModelFilepath)
@@ -143,14 +163,10 @@ namespace VE::Systems
 		}
 		if (model.model)
 		{
-			glm::mat4 worldMatrix = tc.__worldMatrix;
-
-			model.model->transform = *(Matrix*)&worldMatrix;
+			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
 			VE::Renderer::Model3D m3d = {};
 			m3d.model = *model.model;
-			glm::vec3 pos = tc.GetWorldPosition();
-			m3d.postion = { pos.x, pos.y, pos.z };
 			m3d.entity = e;
 			VE::Scene::GetSingleton()->renderer.Submit(m3d);
 

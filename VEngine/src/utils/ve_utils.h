@@ -6,6 +6,9 @@ namespace VE
 {
 	VE_API Color GLMVec4ToRayColor(glm::vec4 color);
 
+	VE_API Matrix GlmMat4ToRaylibMatrix(const glm::mat4& glmMatrix);
+	VE_API glm::mat4 RaylibMatrixToGlmMat4(const Matrix& raylibMatrix);
+
 	VE_API std::filesystem::path GetRelativePath(std::filesystem::path path);
 	VE_API std::filesystem::path GetFullPath(std::filesystem::path path);
 

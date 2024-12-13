@@ -291,6 +291,13 @@ namespace VE
 		}
 		sounds.clear();
 
+		for (auto model : models)
+		{
+			UnloadModel(model.second);
+		}
+		models.clear();
+
+
 
 		scenes.clear();
 		constructs.clear();

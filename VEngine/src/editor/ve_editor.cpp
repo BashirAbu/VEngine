@@ -999,19 +999,29 @@ namespace VE
 				ImGuizmo::SetDrawlist();
 
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
-				glm::mat4 projectionMatrix = glm::ortho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f);
+				
 
 				glm::mat4 transformMatrix = tc->__worldMatrix;
 				Matrix cameraViewMatrix;
+				Matrix projectionMatrix;
 				if (cameraMode == CameraMode::CAMERA2D)
 				{
 					cameraViewMatrix = GetCameraMatrix2D(editorCamera2D);
+					
+					projectionMatrix = MatrixOrtho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f, 0.1, 100.0f);
 				}
 				else if (cameraMode == CameraMode::CAMERA3D)
 				{
-					cameraViewMatrix = GetCameraMatrix(editorCamera3D);
+					glm::mat4 lookAt(1.0f);
+					glm::vec3 eye = { editorCamera3D.position.x, editorCamera3D.position.y, editorCamera3D.position.z };
+					glm::vec3 center = { editorCamera3D.target.x, editorCamera3D.target.y, editorCamera3D.target.z };
+					glm::vec3 up = { editorCamera3D.up.x, editorCamera3D.up.y, editorCamera3D.up.z };
+					lookAt = glm::lookAt(eye, center, up);
+					cameraViewMatrix = GlmMat4ToRaylibMatrix(lookAt);
+					
+					projectionMatrix = MatrixPerspective(editorCamera3D.fovy * DEG2RAD, sceneViewportSize.x / sceneViewportSize.y, 0.1f, 100.0f);
 				}
-				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), glm::value_ptr(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
+				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), MatrixToFloat(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
 
 				if (ImGuizmo::IsUsing())
 				{
@@ -1250,7 +1260,7 @@ namespace VE
 						
 							float id = (float)((int)m3d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawModel(m3d.model, m3d.postion, 1.0f, WHITE);
+							DrawModel(m3d.model, {}, 1.0f, WHITE);
 
 							for (size_t i = 0; i < m3d.model.materialCount; i++)
 							{
