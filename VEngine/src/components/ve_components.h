@@ -184,7 +184,7 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
-			struct Camera3DComponent
+		struct Camera3DComponent
 		{
 			Camera camera = {};
 			RenderTexture renderTarget = {};
@@ -197,6 +197,22 @@ namespace VE
 			float zoom = 1.0f;
 			VE_PROPERTY(Editor)
 			bool isMain = false;
+		};
+
+		VE_CLASS(Component)
+		struct Model3DComponent
+		{
+			Model* model = nullptr;
+			VE_PROPERTY(Editor)
+			std::filesystem::path modelFilepath = "";
+			std::filesystem::path oldModelFilepath = "";
+
+			Texture* diffuseTextureMap = nullptr;
+			VE_PROPERTY(Editor)
+			std::filesystem::path diffuseTextureMapFilepath = "";
+			std::filesystem::path oldDiffuseTextureMapFilepath = "";
+
+
 		};
 
 

@@ -21,6 +21,9 @@ namespace VE
 		void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc);
 
 
+		void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model
+);
+
 
 
 		void UICanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas);

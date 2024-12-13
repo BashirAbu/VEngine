@@ -22,19 +22,23 @@ namespace VE
 	{
 		for (const auto& t2d : texture2DRenderQueue)
 		{
-			DrawTexturePro(t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
+			DrawTexturePro(t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
 		}
 	}
 
 	void Renderer::RenderQueued3D()
 	{
+		for (const auto& m3d : model3DRenderQueue)
+		{
+			DrawModel(m3d.model, m3d.postion, 1.0f, WHITE);
+		}
 	}
 
 	void Renderer::RenderUIQueued()
 	{
 		for (const auto& t2d : UIRenderQueue)
 		{
-			DrawTexturePro(t2d.texture.texture, t2d.texture.source, t2d.texture.dest, t2d.texture.origin, t2d.texture.rotation, t2d.texture.tint);
+			DrawTexturePro(t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
 		}
 	}
 
@@ -66,7 +70,7 @@ namespace VE
 
 		flecs::query cameras2D = scene->world.query<Components::Camera2DComponent>();
 
-		std::sort(texture2DRenderQueue.begin(), texture2DRenderQueue.end(), [](FullTex2D& a, FullTex2D& b) 
+		std::sort(texture2DRenderQueue.begin(), texture2DRenderQueue.end(), [](Tex2D& a, Tex2D& b) 
 			{
 				return b.renderOrder > a.renderOrder;
 			});
@@ -109,7 +113,7 @@ namespace VE
 		flecs::query uiCanvas = scene->world.query<Components::UI::UICanvasComponent>();
 
 
-		std::sort(UIRenderQueue.begin(), UIRenderQueue.end(), [](FullTex2D& a, FullTex2D& b)
+		std::sort(UIRenderQueue.begin(), UIRenderQueue.end(), [](Tex2D& a, Tex2D& b)
 			{
 				return b.renderOrder > a.renderOrder;
 			});
@@ -167,28 +171,27 @@ namespace VE
 		EndTextureMode();
 
 	}
-	void Renderer::Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e)
+	void Renderer::Submit(Tex2D& texture2D)
 	{
-		FullTex2D t2d;
-		t2d.entity = e;
-		t2d.renderOrder = renderOrder;
-		t2d.texture = texture2D;
 		std::lock_guard<std::mutex> lock(texture2DRenderQueueMutex);
-		texture2DRenderQueue.push_back(t2d);
+		texture2DRenderQueue.push_back(texture2D);
 	}
-	void Renderer::SubmitUI(Tex2D& UITexture, int32_t renderOrder, flecs::entity e)
+	void Renderer::SubmitUI(Tex2D& UITexture)
 	{
-		FullTex2D l2d;
-		l2d.entity = e;
-		l2d.texture = UITexture;
-		l2d.renderOrder = renderOrder;
 		std::lock_guard<std::mutex> lock(UIRenderQueueMutex);
-		UIRenderQueue.push_back(l2d);
+		UIRenderQueue.push_back(UITexture);
+	}
+
+	void Renderer::Submit(Model3D& model)
+	{
+		std::lock_guard<std::mutex> lock(model3DRenderQueueMutex);
+		model3DRenderQueue.push_back(model);
 	}
 
 	void Renderer::BeginFrame()
 	{
 		texture2DRenderQueue.clear();
 		UIRenderQueue.clear();
+		model3DRenderQueue.clear();
 	}
 }

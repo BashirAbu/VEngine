@@ -112,6 +112,28 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			ImGui::TreePop();
 		}
 	}
+	if (name == "Model3DComponent")
+	{
+		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
+		if (ImGui::BeginPopupContextItem(0, 1))
+		{
+			if(ImGui::MenuItem("Remove"))
+			{
+				entity.remove<VE::Components::Model3DComponent>();
+			}
+			ImGui::EndPopup();
+		}
+		if (open)
+		{
+			
+			VE::Components::Model3DComponent* Model3DComponent_ = entity.get_mut<VE::Components::Model3DComponent>();
+			EditorElement::FileSystem(Model3DComponent_->modelFilepath, "Model Filepath");
+
+			EditorElement::FileSystem(Model3DComponent_->diffuseTextureMapFilepath, "Diffuse Texture Map Filepath");
+
+			ImGui::TreePop();
+		}
+	}
 	if (name == "UICanvasComponent")
 	{
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());

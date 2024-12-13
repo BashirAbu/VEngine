@@ -139,6 +139,33 @@ void Serialize_Camera3DComponent()
 }
 
 
+void Serialize_Model3DComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "Model3DComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::Model3DComponent>* comp = (flecs::component<VE::Components::Model3DComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<std::filesystem::path>("modelFilepath").member<std::filesystem::path>("diffuseTextureMapFilepath"))
+		.serialize([](const flecs::serializer* s, const VE::Components::Model3DComponent* data) -> int		{
+		s->member("modelFilepath");
+		s->value(data->modelFilepath);
+		s->member("diffuseTextureMapFilepath");
+		s->value(data->diffuseTextureMapFilepath);
+			 return 0;
+		}).ensure_member([](VE::Components::Model3DComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "modelFilepath")) { return &data->modelFilepath;}
+			else if (!strcmp(member, "diffuseTextureMapFilepath")) { return &data->diffuseTextureMapFilepath;}
+		return nullptr;
+		});
+	}
+}
+
+
 void Serialize_UICanvasComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -280,6 +307,7 @@ void EngineGeneratedSerialization()
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
 	 Serialize_Camera3DComponent();
+	 Serialize_Model3DComponent();
 	 Serialize_UICanvasComponent();
 	 Serialize_UILabelComponent();
 	 Serialize_UIImageComponent();
@@ -295,6 +323,7 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera3DComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Model3DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UILabelComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UIImageComponent>();

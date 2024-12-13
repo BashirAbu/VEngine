@@ -4,6 +4,8 @@
 #ifndef VE_EDITOR
 #include "ve_assets_packager.h"
 #endif
+#include <cgltf.h>
+
 namespace VE 
 {
 	
@@ -157,6 +159,57 @@ namespace VE
 		VE_ASSERT(data.size);
 		return new Font(data.data, data.size, fontSize);
 #endif
+	}
+	Model* AssetsManager::LoadModel(std::filesystem::path filepath)
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex);
+
+		if (models.find(filepath.string()) != models.end())
+		{
+			return &models[filepath.string()];
+		}
+		else
+		{
+#ifdef VE_EDITOR 
+			std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+			models[filepath.string()] = ::LoadModel(fullpath.string().c_str());	
+#else
+			std::string filetype = filepath.extension().string();
+
+			if (filetype == ".gltf" || filetype == ".glb")
+			{
+				void* buf; /* Pointer to glb or gltf file data */
+				size_t size; /* Size of the file data */
+
+				cgltf_options options = {};
+				cgltf_data* data = NULL;
+				cgltf_result result = cgltf_parse(&options, buf, size, &data);
+				if (result == cgltf_result_success)
+				{
+					cgltf_free(data);
+				}
+			}
+			else if (filetype == ".obj") 
+			{
+			
+			}
+			else 
+			{
+			
+			}
+
+			AssetData data = GetAssetData(filepath.generic_string());
+			VE_ASSERT(data.size);
+
+			Wave wave = ::LoadWaveFromMemory(filetype.c_str(), data.data, (int)data.size);
+			sounds[filepath.string()] = ::LoadSoundFromWave(wave);
+			::UnloadWave(wave);
+			free(data.data);
+			
+#endif
+
+			return &models[filepath.string()];
+		}
 	}
 	const std::string& AssetsManager::LoadScene(std::filesystem::path filepath)
 	{

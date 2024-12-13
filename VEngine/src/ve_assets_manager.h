@@ -18,6 +18,9 @@ namespace VE
 		Image* LoadImage(std::filesystem::path filepath);
 		Sound* LoadSound(std::filesystem::path filepath);
 		Font* LoadFont(std::filesystem::path filepath, int32_t fontSize);
+		Model* LoadModel(std::filesystem::path filepath);
+
+
 		const std::string& LoadScene(std::filesystem::path filepath);
 		const std::string& LoadConstruct(std::filesystem::path filepath);
 		const std::string& LoadProject(std::filesystem::path filepath);
@@ -49,6 +52,11 @@ namespace VE
 		std::unordered_map<std::string, Sound> sounds;
 		std::mutex soundsMutex;
 		std::mutex fontsMutex;
+
+		std::unordered_map<std::string, Model> models;
+		std::mutex modelsMutex;
+
+
 
 		std::unordered_map<std::string, std::string> scenes;
 		std::mutex scenesMutex;

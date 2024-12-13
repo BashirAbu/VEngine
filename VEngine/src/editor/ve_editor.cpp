@@ -192,6 +192,8 @@ namespace VE
 	}
 
 	Editor* Editor::singleton = nullptr;
+
+
 	Editor::Editor(class Engine* engine) : engine(engine)
 	{
 		singleton = this;
@@ -275,11 +277,11 @@ namespace VE
 		consoleWindow.Draw();
 
 
-		//ImGui::Begin("Pick");
+		ImGui::Begin("Pick");
 
-		//rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
+		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
 
-		//ImGui::End();
+		ImGui::End();
 
 		ImGui::PopFont();
 		rlImGuiEnd();
@@ -1208,7 +1210,7 @@ namespace VE
 							BeginShaderMode(colorPickingShader);
 							float id = (float)((int)tex2d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+							DrawTexturePro(tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
 							EndShaderMode();
 						}
 					}
@@ -1220,7 +1222,7 @@ namespace VE
 							BeginShaderMode(colorPickingShader);
 							float id = (float)((int)tex2d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawTexturePro(tex2d.texture.texture, tex2d.texture.source, tex2d.texture.dest, tex2d.texture.origin, tex2d.texture.rotation, tex2d.texture.tint);
+							DrawTexturePro(tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
 							EndShaderMode();
 						}
 					}
@@ -1230,7 +1232,34 @@ namespace VE
 				}
 				else if (cameraMode == CameraMode::CAMERA3D)
 				{
+					BeginTextureMode(colorPickingBuffer);
+					BeginMode3D(editorCamera3D);
+					ClearBackground(BLANK);
+					int idUniformLoc = GetShaderLocation(colorPickingShader, "id");
+					//Draw Scene
+					for (const auto& m3d : engine->sceneManager->currentScene->renderer.model3DRenderQueue)
+					{
+						if (m3d.entity)
+						{
+							std::vector<Shader> oldShaders;
+							for (size_t i = 0; i < m3d.model.materialCount; i++)
+							{
+								oldShaders.push_back(m3d.model.materials[i].shader);
+								m3d.model.materials[i].shader = colorPickingShader;
+							}
+						
+							float id = (float)((int)m3d.entity);
+							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
+							DrawModel(m3d.model, m3d.postion, 1.0f, WHITE);
 
+							for (size_t i = 0; i < m3d.model.materialCount; i++)
+							{
+								m3d.model.materials[i].shader = oldShaders[i];
+							}
+						}
+					}
+					EndMode3D();
+					EndTextureMode();
 
 				}
 				Texture t = colorPickingBuffer.texture;
@@ -1238,17 +1267,16 @@ namespace VE
 				Image pickImage = LoadImageFromTexture(t);
 				float* pickingData = (float*)pickImage.data;
 				glm::vec2 mousePos = SceneViewportMousePos();
-				TraceLog(LOG_DEBUG, "X: %f, Y: %f", mousePos.x, mousePos.y);
 				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
-				
-				int id = (int)pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
+				float id = pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
+				TraceLog(LOG_DEBUG, "X: %f, Y: %f, ID: %f", mousePos.x, mousePos.y, id);
 				if (usingImGuizmo)
 				{
 					//do nothing brother.	
 				}
-				else if (id)
+				else if ((int)id)
 				{
-					selectedEntity = engine->sceneManager->currentScene->_LookupEntity((flecs::entity)id);
+					selectedEntity = engine->sceneManager->currentScene->_LookupEntity((flecs::entity)(int)id);
 				}
 				else 
 				{

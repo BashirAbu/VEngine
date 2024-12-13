@@ -24,25 +24,34 @@ namespace VE
 			Vector2 origin;
 			float rotation;
 			Color tint;
+			flecs::entity entity;
+			int32_t renderOrder;
 		};
-		void Submit(Tex2D& texture2D, int32_t renderOrder, flecs::entity e);
-		void SubmitUI(Tex2D& UITexture, int32_t renderOrder, flecs::entity e);
+
+		struct Model3D
+		{
+			Model model;
+			Vector3 postion;
+			flecs::entity entity;
+		};
+
+		void Submit(Tex2D& texture2D);
+		void SubmitUI(Tex2D& UITexture);
+
+		void Submit(Model3D& model);
 		
 		void BeginFrame();
 		RenderTexture GetMainRenderTarget() { return mainRenderTarget; }
 	private:
 		RenderTexture mainRenderTarget;
-		struct FullTex2D 
-		{
-			Tex2D texture;
-			flecs::entity entity;
-			int32_t renderOrder;
-		};
-		std::vector<FullTex2D> texture2DRenderQueue;
+		std::vector<Tex2D> texture2DRenderQueue;
 		std::mutex texture2DRenderQueueMutex;
 
-		std::vector<FullTex2D> UIRenderQueue;
+		std::vector<Tex2D> UIRenderQueue;
 		std::mutex UIRenderQueueMutex;
+
+		std::vector<Model3D> model3DRenderQueue;
+		std::mutex model3DRenderQueueMutex;
 		class Scene* scene;
 		friend class Editor;
 	};

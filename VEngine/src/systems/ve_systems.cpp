@@ -116,12 +116,49 @@ namespace VE::Systems
 			dest.height = glm::abs(sc.texture->height * tc.GetWorldScale().y);
 
 			Vector2 org = { dest.width * sc.origin.x, dest.height * sc.origin.y };
-			
 
-			VE::Renderer::Tex2D tex = { *sc.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(sc.tintColor) };
-			VE::Scene::GetSingleton()->renderer.Submit(tex, sc.renderOrder, e);
+
+			VE::Renderer::Tex2D tex = {};
+			tex.texture = *sc.texture;
+			tex.source = src;
+			tex.dest = dest;
+			tex.origin = org;
+			tex.rotation = tc.GetWorldRotation().z;
+			tex.tint = GLMVec4ToRayColor(sc.tintColor);
+			tex.renderOrder = sc.renderOrder;
+			tex.entity = e;
+			VE::Scene::GetSingleton()->renderer.Submit(tex);
 			sc.oldTexturePath = sc.texturePath;
 		}
+	}
+	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
+	{
+		if (model.modelFilepath != model.oldModelFilepath)
+		{
+			model.model = AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
+		}
+		if (model.diffuseTextureMapFilepath != model.oldDiffuseTextureMapFilepath)
+		{
+			model.diffuseTextureMap = AssetsManager::GetSingleton()->LoadTexture(model.diffuseTextureMapFilepath);
+		}
+		if (model.model)
+		{
+			glm::mat4 worldMatrix = tc.__worldMatrix;
+
+			model.model->transform = *(Matrix*)&worldMatrix;
+
+			VE::Renderer::Model3D m3d = {};
+			m3d.model = *model.model;
+			glm::vec3 pos = tc.GetWorldPosition();
+			m3d.postion = { pos.x, pos.y, pos.z };
+			m3d.entity = e;
+			VE::Scene::GetSingleton()->renderer.Submit(m3d);
+
+			model.oldModelFilepath = model.modelFilepath;
+			model.oldDiffuseTextureMapFilepath = model.diffuseTextureMapFilepath;
+		}
+
+
 	}
 	void UICanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
 	{
@@ -179,8 +216,17 @@ namespace VE::Systems
 			Vector2 org = { dest.width * img.origin.x, dest.height * img.origin.y };
 
 
-			VE::Renderer::Tex2D tex = { *img.texture, src, dest, org, tc.GetWorldRotation().z, GLMVec4ToRayColor(img.tintColor) };
-			VE::Scene::GetSingleton()->renderer.SubmitUI(tex, img.renderOrder, e);
+			VE::Renderer::Tex2D tex = {};
+			tex.texture = *img.texture;
+			tex.source = src;
+			tex.dest = dest;
+			tex.origin = org;
+			tex.rotation = tc.GetWorldRotation().z;
+			tex.tint = GLMVec4ToRayColor(img.tintColor);
+			tex.renderOrder = img.renderOrder;
+			tex.entity = e;
+
+			VE::Scene::GetSingleton()->renderer.SubmitUI(tex);
 			img.oldImageFilepath = img.imageFilepath;
 		}
 	}
@@ -242,10 +288,12 @@ namespace VE::Systems
 			l2d.texture = label.texture;
 			l2d.rotation = tc.GetWorldRotation().z;
 			l2d.tint = GLMVec4ToRayColor(label.color);
+			l2d.entity = e;
+			l2d.renderOrder = label.renderOrder;
 			label.oldText = label.text;
 			label.oldFontFilepath = label.fontFilepath;
 			label.oldTextSize = label.size;
-			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d, label.renderOrder, e);
+			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d);
 		}
 	}
 
