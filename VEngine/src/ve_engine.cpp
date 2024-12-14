@@ -86,7 +86,7 @@ namespace VE
 		SetTraceLogLevel(LOG_DEBUG);
 		SetTraceLogCallback(CustomLogCallback);
 		InitAudioDevice();
-		SetConfigFlags(configFlags);
+		SetConfigFlags(configFlags | FLAG_MSAA_4X_HINT);
 		InitWindow(engineDesc.projectDetails.width, engineDesc.projectDetails.height, engineDesc.projectDetails.title.c_str());
 		SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
 		

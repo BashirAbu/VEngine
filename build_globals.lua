@@ -61,7 +61,6 @@ release_dist_engine_defines =
 utfcpp_include_dirs = {"VEngine/third_party/utfcpp/source/"}
 --raylib include dirs
 raylib_include_dirs = {"VEngine/third_party/raylib/src/"}
-raylib_external_include_dirs = {"VEngine/third_party/raylib/src/external/"}
 --glm include dirs.
 glm_include_dirs = {"VEngine/third_party/glm/"}
 --freetype include files.
@@ -94,7 +93,6 @@ base_engine_include_dirs =
     flecs_include_dirs,
     shaping_engine_include_dirs,
     utfcpp_include_dirs,
-    raylib_external_include_dirs,
 }
 --Editor VE_Engine include dirs.
 editor_engine_include_dirs = 

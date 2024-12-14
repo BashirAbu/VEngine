@@ -25,7 +25,6 @@ namespace VE
 		const std::string& LoadConstruct(std::filesystem::path filepath);
 		const std::string& LoadProject(std::filesystem::path filepath);
 
-	private:
 #ifndef VE_EDITOR
 		FILE* dataFile = NULL;
 		int64_t dataFileHeadersDescSize = 0;
@@ -41,6 +40,7 @@ namespace VE
 		AssetData GetAssetData(std::string relativePath);
 
 #endif
+	private:
 		AssetsManager();
 		void Clear();
 

@@ -4,7 +4,24 @@
 #ifndef VE_EDITOR
 #include "ve_assets_packager.h"
 #endif
-#include <cgltf.h>
+
+
+
+extern "C"
+{
+	void CAssetsManager(const char* filepath, unsigned char** outData, int* outSize, char* fileExtension)
+	{
+#ifndef VE_EDITOR
+		VE::AssetsManager::AssetData data = VE::AssetsManager::GetSingleton()->GetAssetData(filepath);
+
+		*outData = data.data;
+		*outSize = data.size;
+		std::filesystem::path path = filepath;
+		strcpy(fileExtension, path.extension().string().c_str());
+#endif
+	}
+}
+
 
 namespace VE 
 {
@@ -174,37 +191,11 @@ namespace VE
 			std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 			models[filepath.string()] = ::LoadModel(fullpath.string().c_str());	
 #else
-			std::string filetype = filepath.extension().string();
-
-			if (filetype == ".gltf" || filetype == ".glb")
-			{
-				void* buf; /* Pointer to glb or gltf file data */
-				size_t size; /* Size of the file data */
-
-				cgltf_options options = {};
-				cgltf_data* data = NULL;
-				cgltf_result result = cgltf_parse(&options, buf, size, &data);
-				if (result == cgltf_result_success)
-				{
-					cgltf_free(data);
-				}
-			}
-			else if (filetype == ".obj") 
-			{
-			
-			}
-			else 
-			{
-			
-			}
-
+			std::string fileName = filepath.filename().string();
 			AssetData data = GetAssetData(filepath.generic_string());
 			VE_ASSERT(data.size);
-
-			Wave wave = ::LoadWaveFromMemory(filetype.c_str(), data.data, (int)data.size);
-			sounds[filepath.string()] = ::LoadSoundFromWave(wave);
-			::UnloadWave(wave);
-			free(data.data);
+			models[filepath.string()] = LoadModelFromMemory(data.data, data.size, fileName.c_str());
+			//free(data.data);
 			
 #endif
 
