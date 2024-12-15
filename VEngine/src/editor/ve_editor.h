@@ -74,7 +74,7 @@ namespace VE
 
 		enum class CameraMode 
 		{
-			CAMERA2D,
+			CAMERA2D = 0,
 			CAMERA3D
 		};
 		CameraMode cameraMode = CameraMode::CAMERA2D;

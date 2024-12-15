@@ -170,7 +170,7 @@ namespace VE
 		size_t fileSize = ftell(fontFile);
 		rewind(fontFile); 
 		uint8_t* buffer = (uint8_t*)malloc(fileSize);
-		VE_ASSERT(fread(buffer, fileSize, 1, fontFile));
+		fread(buffer, fileSize, 1, fontFile);
 		fclose(fontFile);
 		return new Font(buffer, fileSize, fontSize);
 #else
@@ -257,62 +257,99 @@ namespace VE
 					}
 				}
 			}
-			switch (rlGetVersion())
-			{
-			case RL_OPENGL_11: {}break;
-			case RL_OPENGL_21: {}break;
-			case RL_OPENGL_33: {}break;
-			case RL_OPENGL_43: {}break;
-			case RL_OPENGL_ES_20: {}break;
-			case RL_OPENGL_ES_30: {}break;
-			}
-			std::filesystem::path generatedFragmentFilePath = fullpath.parent_path().generic_string() + "/__" + fullpath.stem().string() + ".frag";
-			std::filesystem::path generatedVertexFilePath = fullpath.parent_path().generic_string() + "/__" + fullpath.stem().string() + ".vert";
-			FILE* fragmentShaderFile = fopen(generatedFragmentFilePath.generic_string().c_str(), "w");
-			FILE* vertexShaderFile = fopen(generatedVertexFilePath.generic_string().c_str(), "w");
-
-			fwrite(fragmentShader.c_str(), fragmentShader.size() + 1, 1, fragmentShaderFile);
-			fwrite(vertexShader.c_str(), vertexShader.size() + 1, 1, vertexShaderFile);
-
-			fclose(fragmentShaderFile);
-			fclose(vertexShaderFile);
-
-			std::filesystem::path fragmentSpirvPath = generatedFragmentFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_frag.spv";
-			std::string command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedFragmentFilePath.generic_string() +
-				" -o " + fragmentSpirvPath.generic_string();
-			system(command.c_str());
 			
-			std::filesystem::path vertexSpirvPath = generatedVertexFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_vert.spv";
-			command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedVertexFilePath.generic_string() +
-				" -o " + vertexSpirvPath.generic_string();
-			system(command.c_str());
+			std::function <void(std::vector<uint32_t>&, std::string&)> SpirvToGLSL = [&](std::vector<uint32_t>& spirvBinary, std::string& glslSource)
+				{
+					spirv_cross::CompilerGLSL glsl(std::move(spirvBinary));
 
-			std::remove(generatedFragmentFilePath.generic_string().c_str());
-			std::remove(generatedVertexFilePath.generic_string().c_str());
+					spirv_cross::CompilerGLSL::Options options;
 
-			FILE* fragmentSpirvFile = fopen(fragmentSpirvPath.generic_string().c_str(), "rb");
-			fseek(fragmentSpirvFile, 0, SEEK_END);
-			size_t fragmentSpirvFileSize = ftell(fragmentSpirvFile);
 
-			rewind(fragmentSpirvFile);
+					switch (rlGetVersion())
+					{
+					case RL_OPENGL_21:
+					{
+						options.version = 120;
+						options.es = false;
+					}break;
+					case RL_OPENGL_33:
+					{
+						options.version = 330;
+						options.es = false;
+					}break;
+					case RL_OPENGL_43:
+					{
+						options.version = 330;
+						options.es = false;
+					}break;
+					case RL_OPENGL_ES_20:
+					{
+						options.version = 100;
+						options.es = true;
+					}break;
+					case RL_OPENGL_ES_30:
+					{
+						options.version = 300;
+						options.es = true;
+					}break;
+					default:
+					{
+						options = {};
+						TraceLog(LOG_ERROR, "OpenGl version is not supported!");
+					}break;
+					}
 
-			std::vector<uint32_t> fragmentSpirvBinary(fragmentSpirvFileSize / sizeof(uint32_t));
 
-			fread(fragmentSpirvBinary.data(), fragmentSpirvFileSize, 1, fragmentSpirvFile);
-			fclose(fragmentSpirvFile);
+					glsl.set_common_options(options);
 
-			spirv_cross::CompilerGLSL glsl(std::move(fragmentSpirvBinary));
+					glslSource = glsl.compile();
+				};
+			std::function <void(std::string&, ShaderType)> crossPlatformShader = [&](std::string& shaderSource, ShaderType shaderType)
+				{
+					if (!shaderSource.empty())
+					{
+						std::string type = "";
+						switch (shaderType)
+						{
+						case VE::ShaderType::Fragment:
+							type = "frag";
+							break;
+						case VE::ShaderType::Vertex:
+							type = "vert";
+							break;
+						default:
+							break;
+						}
 
-			spirv_cross::CompilerGLSL::Options options;
-			options.version = 330;
-			options.es = false;
-			glsl.set_common_options(options);
+						std::filesystem::path generatedFilePath = fullpath.parent_path().generic_string() + "/__" + fullpath.stem().string() + "." + type;
+						FILE* generatedShaderFile = fopen(generatedFilePath.generic_string().c_str(), "w");
+						fwrite(shaderSource.c_str(), shaderSource.size() + 1, 1, generatedShaderFile);
+						fclose(generatedShaderFile);
+						std::filesystem::path spirvPath = generatedFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_" + type + ".spv";
+						std::string command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedFilePath.generic_string() +
+							" -o " + spirvPath.generic_string();
+						system(command.c_str());
 
-			// Compile to GLSL, ready to give to GL driver.
-			fragmentShader  = glsl.compile();
-			std::ofstream frg(vertexSpirvPath.parent_path() / "gene.txt", std::ios::out);
-			frg << fragmentShader;
-			frg.close();
+						std::remove(generatedFilePath.generic_string().c_str());
+
+
+						FILE* spirvFile = fopen(spirvPath.generic_string().c_str(), "rb");
+						fseek(spirvFile, 0, SEEK_END);
+						size_t spirvFileSize = ftell(spirvFile);
+
+						rewind(spirvFile);
+
+						std::vector<uint32_t> spirvBinary(spirvFileSize / sizeof(uint32_t));
+
+						fread(spirvBinary.data(), spirvFileSize, 1, spirvFile);
+						fclose(spirvFile);
+
+						SpirvToGLSL(spirvBinary, shaderSource);
+					}
+				};
+
+			crossPlatformShader(fragmentShader, ShaderType::Fragment);
+			crossPlatformShader(vertexShader, ShaderType::Vertex);
 
 			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty()? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
 #else

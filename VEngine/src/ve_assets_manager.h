@@ -5,6 +5,12 @@
 #include <stdio.h>
 namespace VE 
 {
+	enum class ShaderType 
+	{
+		Fragment = 0,
+		Vertex
+	};
+
 	class Font;
 
 	class VE_API AssetsManager 

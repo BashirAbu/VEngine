@@ -831,7 +831,16 @@ namespace VE
 
 	void Editor::DrawSceneViewport()
 	{
+
 		ImGui::Begin("SceneViewport");
+		//Tools bar
+		ImGui::Columns(4, 0, false);
+		const char* items[] = {"2D", "3D"};
+		ImGui::Text("View");
+		ImGui::SameLine();
+		ImGui::Combo("##View", (int*)&cameraMode, items, IM_ARRAYSIZE(items));
+		ImGui::Columns(1);
+
 		sceneViewportFocused = ImGui::IsWindowFocused();
 		isSceneViewHovered = ImGui::IsWindowHovered();
 		ImVec2 vec2 = ImGui::GetContentRegionAvail();
