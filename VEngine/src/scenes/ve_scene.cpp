@@ -24,11 +24,10 @@ namespace VE
 		OnRender = world.entity("OnRender").add(flecs::PostUpdate);
 
 		EngineGeneratedRegistration();
-
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Sprite2DRenderSystem);
-		world.system<Components::TransformComponent, Components::Model3DComponent>("Mesh3DRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Mesh3DRenderSystem);
+		world.system<Components::TransformComponent, Components::Model3DComponent>("Mesh3DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Mesh3DRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent, Components::Camera3DComponent>("Camera3DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera3DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);

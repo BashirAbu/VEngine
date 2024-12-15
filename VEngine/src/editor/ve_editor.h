@@ -77,7 +77,7 @@ namespace VE
 			CAMERA2D,
 			CAMERA3D
 		};
-		CameraMode cameraMode = CameraMode::CAMERA3D;
+		CameraMode cameraMode = CameraMode::CAMERA2D;
 		::Camera2D editorCamera2D;
 		::Camera editorCamera3D;
 		float editorCameraMoveSpeed = 10.0f;

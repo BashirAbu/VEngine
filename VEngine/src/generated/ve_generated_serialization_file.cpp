@@ -49,7 +49,7 @@ void Serialize_SpriteComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::SpriteComponent>* comp = (flecs::component<VE::Components::SpriteComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("texturePath").member<glm::vec2>("origin").member<NormalizedColor>("tintColor").member<int32_t>("renderOrder"))
+		comp->opaque(comp->world().component().member<std::filesystem::path>("texturePath").member<glm::vec2>("origin").member<NormalizedColor>("tintColor").member<int32_t>("renderOrder").member<std::filesystem::path>("shaderPath"))
 		.serialize([](const flecs::serializer* s, const VE::Components::SpriteComponent* data) -> int		{
 		s->member("texturePath");
 		s->value(data->texturePath);
@@ -59,6 +59,8 @@ void Serialize_SpriteComponent()
 		s->value(data->tintColor);
 		s->member("renderOrder");
 		s->value(data->renderOrder);
+		s->member("shaderPath");
+		s->value(data->shaderPath);
 			 return 0;
 		}).ensure_member([](VE::Components::SpriteComponent* data, const char* member) -> void*
 		{
@@ -67,6 +69,7 @@ void Serialize_SpriteComponent()
 			else if (!strcmp(member, "origin")) { return &data->origin;}
 			else if (!strcmp(member, "tintColor")) { return &data->tintColor;}
 			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
+			else if (!strcmp(member, "shaderPath")) { return &data->shaderPath;}
 		return nullptr;
 		});
 	}

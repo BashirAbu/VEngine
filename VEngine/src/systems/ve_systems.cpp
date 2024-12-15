@@ -111,6 +111,12 @@ namespace VE::Systems
 		{
 			sc.texture = AssetsManager::GetSingleton()->LoadTexture(sc.texturePath);
 		}
+
+		if (sc.shaderPath != sc.oldShaderPath)
+		{
+			sc.shader = AssetsManager::GetSingleton()->LoadShader(sc.shaderPath);
+		}
+
 		if (sc.texture)
 		{
 			Rectangle src, dest;
@@ -144,6 +150,7 @@ namespace VE::Systems
 			tex.tint = GLMVec4ToRayColor(sc.tintColor);
 			tex.renderOrder = sc.renderOrder;
 			tex.entity = e;
+			tex.shader = sc.shader ? *sc.shader : Shader();
 			VE::Scene::GetSingleton()->renderer.Submit(tex);
 			sc.oldTexturePath = sc.texturePath;
 		}

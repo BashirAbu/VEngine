@@ -164,6 +164,12 @@ namespace VE
 			VE_PROPERTY(Editor)
 			int32_t renderOrder = 0;
 			Texture* texture = nullptr;
+
+
+			VE_PROPERTY(Editor)
+			std::filesystem::path shaderPath = "";
+			std::filesystem::path oldShaderPath = "";
+			Shader* shader = nullptr;
 		};
 
 

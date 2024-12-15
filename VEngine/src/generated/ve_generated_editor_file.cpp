@@ -57,6 +57,8 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 			EditorElement::Int(SpriteComponent_->renderOrder, "Render Order");
 
+			EditorElement::FileSystem(SpriteComponent_->shaderPath, "Shader Path");
+
 			ImGui::TreePop();
 		}
 	}

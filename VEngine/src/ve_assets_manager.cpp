@@ -1,6 +1,9 @@
 #include "ve_assets_manager.h"
 #include "ve_engine.h"
 #include "ve_font.h"
+#include <rlgl.h>
+#include "spirv_glsl.hpp"
+
 #ifndef VE_EDITOR
 #include "ve_assets_packager.h"
 #endif
@@ -160,7 +163,6 @@ namespace VE
 	Font* AssetsManager::LoadFont(std::filesystem::path filepath, int32_t fontSize)
 	{
 		std::lock_guard<std::mutex> lock(fontsMutex);
-
 #ifdef VE_EDITOR 
 		std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 		FILE* fontFile = fopen(fullpath.generic_string().c_str(), "rb");
@@ -196,12 +198,130 @@ namespace VE
 			VE_ASSERT(data.size);
 			models[filepath.string()] = LoadModelFromMemory(data.data, data.size, fileName.c_str());
 			//free(data.data);
-			
 #endif
 
 			return &models[filepath.string()];
 		}
 	}
+	Shader* AssetsManager::LoadShader(std::filesystem::path filepath)
+	{
+		std::lock_guard<std::mutex> lock(shadersMutex);
+
+		if (shaders.find(filepath.string()) != shaders.end())
+		{
+			return &shaders[filepath.string()];
+		}
+		else
+		{
+#ifdef VE_EDITOR
+			std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
+			FILE* shaderFile = fopen(fullpath.generic_string().c_str(), "r");
+			VE_ASSERT(shaderFile);
+			fseek(shaderFile, 0, SEEK_END);
+			size_t fileSize = ftell(shaderFile);
+			rewind(shaderFile);
+			std::string buffer(fileSize, '\0');
+			fread(buffer.data(), fileSize, 1, shaderFile);
+			fclose(shaderFile);
+
+			std::string fragmentShader = "", vertexShader = "";
+
+			std::stringstream stream(buffer);
+			std::string line;
+			std::string type = "non";
+			while (std::getline(stream, line))
+			{
+				if (line.find("#shader") != std::string::npos) 
+				{ // Check for #shader directive
+					if (line.find("vertex") != std::string::npos) 
+					{
+						type = "vertex";
+					}
+					else if (line.find("fragment") != std::string::npos) 
+					{
+						type = "fragment";
+					}
+				}
+				else 
+				{
+					if (type != "non")
+					{
+						if (type == "fragment")
+						{
+							fragmentShader += line + "\n";
+						}
+						else if (type == "vertex")
+						{
+							vertexShader += line + "\n";
+						}
+					}
+				}
+			}
+			switch (rlGetVersion())
+			{
+			case RL_OPENGL_11: {}break;
+			case RL_OPENGL_21: {}break;
+			case RL_OPENGL_33: {}break;
+			case RL_OPENGL_43: {}break;
+			case RL_OPENGL_ES_20: {}break;
+			case RL_OPENGL_ES_30: {}break;
+			}
+			std::filesystem::path generatedFragmentFilePath = fullpath.parent_path().generic_string() + "/__" + fullpath.stem().string() + ".frag";
+			std::filesystem::path generatedVertexFilePath = fullpath.parent_path().generic_string() + "/__" + fullpath.stem().string() + ".vert";
+			FILE* fragmentShaderFile = fopen(generatedFragmentFilePath.generic_string().c_str(), "w");
+			FILE* vertexShaderFile = fopen(generatedVertexFilePath.generic_string().c_str(), "w");
+
+			fwrite(fragmentShader.c_str(), fragmentShader.size() + 1, 1, fragmentShaderFile);
+			fwrite(vertexShader.c_str(), vertexShader.size() + 1, 1, vertexShaderFile);
+
+			fclose(fragmentShaderFile);
+			fclose(vertexShaderFile);
+
+			std::filesystem::path fragmentSpirvPath = generatedFragmentFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_frag.spv";
+			std::string command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedFragmentFilePath.generic_string() +
+				" -o " + fragmentSpirvPath.generic_string();
+			system(command.c_str());
+			
+			std::filesystem::path vertexSpirvPath = generatedVertexFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_vert.spv";
+			command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedVertexFilePath.generic_string() +
+				" -o " + vertexSpirvPath.generic_string();
+			system(command.c_str());
+
+			std::remove(generatedFragmentFilePath.generic_string().c_str());
+			std::remove(generatedVertexFilePath.generic_string().c_str());
+
+			FILE* fragmentSpirvFile = fopen(fragmentSpirvPath.generic_string().c_str(), "rb");
+			fseek(fragmentSpirvFile, 0, SEEK_END);
+			size_t fragmentSpirvFileSize = ftell(fragmentSpirvFile);
+
+			rewind(fragmentSpirvFile);
+
+			std::vector<uint32_t> fragmentSpirvBinary(fragmentSpirvFileSize / sizeof(uint32_t));
+
+			fread(fragmentSpirvBinary.data(), fragmentSpirvFileSize, 1, fragmentSpirvFile);
+			fclose(fragmentSpirvFile);
+
+			spirv_cross::CompilerGLSL glsl(std::move(fragmentSpirvBinary));
+
+			spirv_cross::CompilerGLSL::Options options;
+			options.version = 330;
+			options.es = false;
+			glsl.set_common_options(options);
+
+			// Compile to GLSL, ready to give to GL driver.
+			fragmentShader  = glsl.compile();
+			std::ofstream frg(vertexSpirvPath.parent_path() / "gene.txt", std::ios::out);
+			frg << fragmentShader;
+			frg.close();
+
+			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty()? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
+#else
+#endif
+
+			return &shaders[filepath.string()];
+		}
+	}
+
 	const std::string& AssetsManager::LoadScene(std::filesystem::path filepath)
 	{
 		std::lock_guard<std::mutex> lock(scenesMutex);

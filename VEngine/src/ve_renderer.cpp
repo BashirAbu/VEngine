@@ -2,6 +2,8 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include <scenes/ve_scene.h>
+
+
 namespace VE 
 {
 	Renderer::Renderer(Scene* scene) : scene(scene)
@@ -22,7 +24,15 @@ namespace VE
 	{
 		for (const auto& t2d : texture2DRenderQueue)
 		{
+			if (t2d.shader.id > 0)
+			{
+				BeginShaderMode(t2d.shader);
+			}
 			DrawTexturePro(t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
+			if (t2d.shader.id > 0)
+			{
+				EndShaderMode();
+			}
 		}
 	}
 

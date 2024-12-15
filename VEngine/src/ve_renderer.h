@@ -5,6 +5,7 @@
 #include <thread>
 #include "ve_font.h"
 
+
 namespace VE 
 {
 	class VE_API Renderer 
@@ -18,14 +19,15 @@ namespace VE
 		void RenderScene();
 		struct Tex2D
 		{
-			Texture2D texture;
-			Rectangle source;
-			Rectangle dest;
-			Vector2 origin;
-			float rotation;
-			Color tint;
+			Texture2D texture = {};
+			Rectangle source = {};
+			Rectangle dest = {};
+			Vector2 origin = {};
+			float rotation = 0;
+			Color tint = {};
+			Shader shader = {};
 			flecs::entity entity;
-			int32_t renderOrder;
+			int32_t renderOrder = 0;
 		};
 
 		struct Model3D

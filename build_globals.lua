@@ -17,7 +17,10 @@ windows_link_libs = {"Winmm.lib"}
 --base defines.
 base_engine_defines = 
 {
-    "FT2_BUILD_LIBRARY"
+    "FT2_BUILD_LIBRARY",
+    "SPIRV_CROSS_ENABLE_GLSL",
+    "SPIRV_CROSS_ENABLE_C_API",
+    "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS",
 }
 --editor defines
 editor_engine_defines = 
@@ -81,6 +84,12 @@ flecs_include_dirs = {"VEngine/third_party/flecs/include/"}
 shaping_engine_include_dirs = {"VEngine/third_party/ShapingEngine/"}
 --AssetsPackager include dirs
 assets_packager_include_dir = {"VEAssetsPackager/src/"}
+--spirv-cross include dirs
+spirv_cross_include_dirs = 
+{
+    "VEngine/third_party/SPIRV-Cross/",
+    "VEngine/third_party/SPIRV-Cross/include/",
+}
 --Base VE_Engine include dirs.
 base_engine_include_dirs = 
 {
@@ -93,6 +102,7 @@ base_engine_include_dirs =
     flecs_include_dirs,
     shaping_engine_include_dirs,
     utfcpp_include_dirs,
+    spirv_cross_include_dirs,
 }
 --Editor VE_Engine include dirs.
 editor_engine_include_dirs = 
@@ -208,6 +218,12 @@ freetype_src_files =
     "VEngine/third_party/freetype/src/type42/type42.c",
     "VEngine/third_party/freetype/src/winfonts/winfnt.c",
 }
+--spirv_cross src files
+spirv_cross_src_files = 
+{
+    "VEngine/third_party/SPIRV-Cross/*.cpp",
+    "VEngine/third_party/SPIRV-Cross/*.c",
+}
 --Base VE_Engine source files.
 base_engine_src_files = 
 {
@@ -218,6 +234,7 @@ base_engine_src_files =
     raylib_src_files,
     flecs_src_files,
     freetype_src_files,
+    spirv_cross_src_files,
 }
 --Editor VE_Engine source files.
 editor_engine_src_files = 

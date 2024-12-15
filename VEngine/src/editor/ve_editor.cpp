@@ -277,11 +277,11 @@ namespace VE
 		consoleWindow.Draw();
 
 
-		ImGui::Begin("Pick");
+		//ImGui::Begin("Pick");
 
-		rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
+		//rlImGuiImageRenderTextureFit(&colorPickingBuffer.texture, true);
 
-		ImGui::End();
+		//ImGui::End();
 
 		ImGui::PopFont();
 		rlImGuiEnd();
