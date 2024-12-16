@@ -25,7 +25,7 @@ namespace VE
 			Vector2 origin = {};
 			float rotation = 0;
 			Color tint = {};
-			Shader shader = {};
+			Shader** shader;
 			flecs::entity entity;
 			int32_t renderOrder = 0;
 		};

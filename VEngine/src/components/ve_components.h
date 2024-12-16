@@ -154,9 +154,8 @@ namespace VE
 		VE_CLASS(Component)
 		struct SpriteComponent
 		{
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = SpriteComponentTextureOnChange)
 			std::filesystem::path texturePath = "";
-			std::filesystem::path oldTexturePath = "";
 			VE_PROPERTY(Editor)
 			glm::vec2 origin = {};
 			VE_PROPERTY(Editor)
@@ -166,12 +165,35 @@ namespace VE
 			Texture* texture = nullptr;
 
 
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = SpriteComponentShaderOnChange)
 			std::filesystem::path shaderPath = "";
-			std::filesystem::path oldShaderPath = "";
 			Shader* shader = nullptr;
 		};
 
+		VE_FUNCTION(Callback);
+		inline void SpriteComponentTextureOnChange(void* data) 
+		{
+			SpriteComponent* sc = (SpriteComponent*)data;
+
+			if (sc)
+			{
+				if (!sc->texturePath.empty())
+				{
+					sc->texture = AssetsManager::GetSingleton()->LoadTexture(sc->texturePath);
+				}
+			}
+		}
+
+		VE_FUNCTION(Callback);
+		inline void SpriteComponentShaderOnChange(void* data)
+		{
+			SpriteComponent* sc = (SpriteComponent*)data;
+
+			if (!sc->shaderPath.empty())
+			{
+				sc->shader = AssetsManager::GetSingleton()->LoadShader(sc->shaderPath);
+			}
+		}
 
 		VE_CLASS(Component)
 		struct Camera2DComponent

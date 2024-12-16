@@ -604,9 +604,18 @@ namespace VE
 				e.add<Components::TransformComponent>();
 			})
 			.on_set([](flecs::entity e, Components::SpriteComponent& sc)
+			{
+				sc.texture = nullptr;
+				if (!sc.texturePath.empty())
 				{
-					e.add<Components::TransformComponent>();					
-				});
+					sc.texture = AssetsManager::GetSingleton()->LoadTexture(sc.texturePath);
+				}
+				sc.shader = nullptr;
+				if (!sc.shaderPath.empty())
+				{
+					sc.shader = AssetsManager::GetSingleton()->LoadShader(sc.shaderPath);
+				}
+			});
 
 		world.component<Components::Camera2DComponent>().on_add([](flecs::entity e, Components::Camera2DComponent& c2dc)
 			{

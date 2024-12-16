@@ -24,12 +24,12 @@ namespace VE
 	{
 		for (const auto& t2d : texture2DRenderQueue)
 		{
-			if (t2d.shader.id > 0)
+			if (t2d.shader)
 			{
-				BeginShaderMode(t2d.shader);
+				BeginShaderMode(**t2d.shader);
 			}
 			DrawTexturePro(**t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
-			if (t2d.shader.id > 0)
+			if (t2d.shader)
 			{
 				EndShaderMode();
 			}

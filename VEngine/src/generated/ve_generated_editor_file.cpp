@@ -52,7 +52,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 		{
 			
 			VE::Components::SpriteComponent* SpriteComponent_ = entity.get_mut<VE::Components::SpriteComponent>();
-			EditorElement::FileSystem(SpriteComponent_->texturePath, "Texture Path");
+			EditorElement::FileSystem(SpriteComponent_->texturePath, "Texture Path", SpriteComponent_, VE::Components::SpriteComponentTextureOnChange);
 
 
 			EditorElement::Vec2(SpriteComponent_->origin, "Origin");
@@ -64,7 +64,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			EditorElement::Int(SpriteComponent_->renderOrder, "Render Order");
 
 
-			EditorElement::FileSystem(SpriteComponent_->shaderPath, "Shader Path");
+			EditorElement::FileSystem(SpriteComponent_->shaderPath, "Shader Path", SpriteComponent_, VE::Components::SpriteComponentShaderOnChange);
 
 
 			ImGui::TreePop();
