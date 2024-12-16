@@ -2,7 +2,7 @@
 #include "components/ve_components.h"
 #include "systems/ve_systems.h"
 #include <scenes/ve_scene.h>
-
+#include <rlgl.h>
 
 namespace VE 
 {
@@ -114,7 +114,14 @@ namespace VE
 					BeginTextureMode(cc.renderTarget);
 					BeginMode3D(cc.camera);
 					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
-
+					if (cc.skyboxTexture)
+					{
+						rlDisableBackfaceCulling();
+						rlDisableDepthMask();
+						DrawModel(cc.skyboxModel, { 0, 0, 0 }, 1.0f, WHITE);
+						rlEnableBackfaceCulling();
+						rlEnableDepthMask();
+					}
 					RenderQueued3D();
 
 					EndMode3D();

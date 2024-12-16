@@ -13,7 +13,28 @@ namespace VH
 	{
 		nlohmann::ordered_json fileJson = nlohmann::ordered_json::parse(json);
 
-		
+		std::function <void(nlohmann::ordered_json& enumJson, Enum& _enum)> enumDetails = [&](nlohmann::ordered_json& enumJson, Enum& _enum)
+			{
+				_enum.name = enumJson["name"];
+
+				for (auto itr = enumJson["meta"].begin(); itr != enumJson["meta"].end(); itr++)
+				{
+					Meta meta = {};
+					meta.key = itr.key();
+					if (!itr.value().is_null())
+					{
+						meta.value = itr.value();
+					}
+					_enum.meta.push_back(meta);
+				}
+
+				//items
+				for (auto member : enumJson["members"])
+				{
+					_enum.items.push_back(member["key"]);
+				}
+
+			};
 
 		std::function <void(nlohmann::ordered_json& classJson, Component& comp)> componentDetails;
 
@@ -136,7 +157,7 @@ namespace VH
 		std::function <void(nlohmann::ordered_json& elenJson, bool component)> recursiveNamespaces;
 
 		std::vector<std::string> nameSpaces;
-		recursiveNamespaces = [&](nlohmann::ordered_json& elenJson, bool isComponent)
+		recursiveNamespaces = [&](nlohmann::ordered_json& elenJson, bool isComponentOrEnum)
 			{
 				if (elenJson["type"] == "namespace")
 				{
@@ -145,7 +166,7 @@ namespace VH
 					{
 						for (auto member : elenJson["members"])
 						{
-							if (member["type"] == "class" && isComponent)
+							if (member["type"] == "class" && isComponentOrEnum)
 							{
 								for (auto itr = member["meta"].begin(); itr != member["meta"].end(); itr++)
 								{
@@ -158,7 +179,14 @@ namespace VH
 									}
 								}
 							}
-							else if (member["type"] == "function" && !isComponent)
+							else if (member["type"] == "enum" && isComponentOrEnum)
+							{
+								Enum _enum = {};
+								_enum.nameSpaces = nameSpaces;
+								enumDetails(member, _enum);
+								enums.push_back(_enum);
+							}
+							else if (member["type"] == "function" && !isComponentOrEnum)
 							{
 								for (auto itr = member["meta"].begin(); itr != member["meta"].end(); itr++)
 								{
@@ -183,7 +211,7 @@ namespace VH
 							}
 							else if (member["type"] == "namespace")
 							{
-								recursiveNamespaces(member, isComponent);
+								recursiveNamespaces(member, isComponentOrEnum);
 							}
 						}
 						nameSpaces.pop_back();
@@ -192,7 +220,7 @@ namespace VH
 				}
 				else
 				{
-					if (elenJson["type"] == "class" && isComponent)
+					if (elenJson["type"] == "class" && isComponentOrEnum)
 					{
 						for (auto itr = elenJson["meta"].begin(); itr != elenJson["meta"].end(); itr++)
 						{
@@ -206,7 +234,14 @@ namespace VH
 						}
 
 					}
-					else if (elenJson["type"] == "function" && !isComponent)
+					else if (elenJson["type"] == "enum" && isComponentOrEnum)
+					{
+						Enum _enum = {};
+						_enum.nameSpaces = nameSpaces;
+						enumDetails(elenJson, _enum);
+						enums.push_back(_enum);
+					}
+					else if (elenJson["type"] == "function" && !isComponentOrEnum)
 					{
 						for (auto itr = elenJson["meta"].begin(); itr != elenJson["meta"].end(); itr++)
 						{

@@ -118,10 +118,12 @@ void Serialize_Camera3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Camera3DComponent>* comp = (flecs::component<VE::Components::Camera3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<glm::vec2>("renderTargetSize").member<NormalizedColor>("backgroundColor").member<float>("zoom").member<bool>("isMain"))
+		comp->opaque(comp->world().component().member<glm::vec2>("renderTargetSize").member<std::filesystem::path>("skyboxTexturePath").member<NormalizedColor>("backgroundColor").member<float>("zoom").member<bool>("isMain"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Camera3DComponent* data) -> int		{
 		s->member("renderTargetSize");
 		s->value(data->renderTargetSize);
+		s->member("skyboxTexturePath");
+		s->value(data->skyboxTexturePath);
 		s->member("backgroundColor");
 		s->value(data->backgroundColor);
 		s->member("zoom");
@@ -133,6 +135,7 @@ void Serialize_Camera3DComponent()
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "renderTargetSize")) { return &data->renderTargetSize;}
+			else if (!strcmp(member, "skyboxTexturePath")) { return &data->skyboxTexturePath;}
 			else if (!strcmp(member, "backgroundColor")) { return &data->backgroundColor;}
 			else if (!strcmp(member, "zoom")) { return &data->zoom;}
 			else if (!strcmp(member, "isMain")) { return &data->isMain;}
@@ -151,8 +154,10 @@ void Serialize_Model3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Model3DComponent>* comp = (flecs::component<VE::Components::Model3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("modelFilepath").member<std::filesystem::path>("diffuseTextureMapFilepath"))
+		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath").member<std::filesystem::path>("diffuseTextureMapFilepath"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Model3DComponent* data) -> int		{
+		s->member("basicMesh");
+		s->value(data->basicMesh);
 		s->member("modelFilepath");
 		s->value(data->modelFilepath);
 		s->member("diffuseTextureMapFilepath");
@@ -161,6 +166,7 @@ void Serialize_Model3DComponent()
 		}).ensure_member([](VE::Components::Model3DComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
+			else if (!strcmp(member, "basicMesh")) { return &data->basicMesh;}
 			else if (!strcmp(member, "modelFilepath")) { return &data->modelFilepath;}
 			else if (!strcmp(member, "diffuseTextureMapFilepath")) { return &data->diffuseTextureMapFilepath;}
 		return nullptr;

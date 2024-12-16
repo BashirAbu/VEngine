@@ -249,7 +249,7 @@ namespace VE
         }
 
 
-        VE_API void FileSystem(std::filesystem::path& path, std::string label)
+        VE_API void FileSystem(std::filesystem::path& path, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::PushID(path.c_str());
             ImGui::Columns(2, 0, false);
@@ -261,6 +261,10 @@ namespace VE
                 if (!path.empty())
                 {
                     path = GetRelativePath(path);
+                    if (callback)
+                    {
+                        callback(data);
+                    }
                 }
             }
             ImGui::NextColumn();
@@ -268,15 +272,37 @@ namespace VE
             ImGui::PopID();
         }
 
-        VE_API void Checkbox(bool& variable, std::string label)
+        VE_API void Checkbox(bool& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::Checkbox(((std::string)"##" + label.c_str()).c_str(), &variable);
+            if (ImGui::Checkbox(((std::string)"##" + label.c_str()).c_str(), &variable)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
            
+        }
+
+        VE_API void Combo(const char** items, int* currentItem, size_t items_count, std::string label, void* data, std::function<void(void* data)> callback)
+        {
+            ImGui::Columns(2, 0, false);
+            ImGui::Text(label.c_str());
+            ImGui::NextColumn();
+            if (ImGui::Combo(("##" + label).c_str(), currentItem, items, (int)items_count)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
+            ImGui::NextColumn();
+            ImGui::Columns(1);
         }
 
     }

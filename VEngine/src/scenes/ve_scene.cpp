@@ -633,6 +633,7 @@ namespace VE
 			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
 				{
 					UnloadRenderTexture(c3dc.renderTarget);
+					UnloadModel(c3dc.skyboxModel);
 			});
 
 			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)

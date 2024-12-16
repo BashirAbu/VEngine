@@ -38,7 +38,7 @@ namespace VH
 		return result;
 	}
 
-	void HeaderTool::EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name)
+	void HeaderTool::EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name, std::vector<Meta>& propertyMeta)
 	{
 		std::string formatedName = FormatName(name);
 		if (dataType.find("vec2") != std::string::npos)
@@ -76,11 +76,109 @@ namespace VH
 		}
 		else if (dataType.find("path") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::FileSystem(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::FileSystem(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("bool") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Checkbox(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Checkbox(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
+
+		}
+		else 
+		{
+			for (auto headerFile : headerFiles)
+			{
+				for (auto _enum : headerFile.enums)
+				{
+					if (dataType.find(_enum.name) != std::string::npos)
+					{
+						//VE_API void Enum(const char** items, int* currentItem, size_t items_count, std::string label);
+
+						cppSourefile += "			const char* items[] = { \n";
+						for (auto item : _enum.items)
+						{
+							cppSourefile += "					\"" + item + "\",\n";
+						}
+						cppSourefile += "			};\n";
+						cppSourefile += "			EditorElement::Combo(items, (int*)&(" + compPTR + "->" + name + "), " + std::to_string(_enum.items.size()) + ", \"" + formatedName + "\"";
+
+						auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+						if (itr != propertyMeta.end())
+						{
+							cppSourefile += ", " + compPTR + ", ";
+							Meta meta = *itr;
+							Callback callBack;
+							for (const HeaderFile& headerFile : headerFiles)
+							{
+								auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+								if (iterator != headerFile.callbacks.end())
+								{
+									callBack = *iterator;
+									break;
+								}
+
+							}
+							std::string fullNameSpace = "";
+							for (std::string sn : callBack.nameSpaces)
+							{
+								fullNameSpace += sn + "::";
+							}
+							cppSourefile += fullNameSpace + callBack.name;
+						}
+						cppSourefile += ");\n";
+
+						break;
+					}
+				}
+			}
+			
 		}
 
 		cppSourefile += "\n\n";
@@ -145,7 +243,7 @@ namespace VH
 				{
 					if (std::find_if(property.meta.begin(), property.meta.end(), [](const Meta& meta) { return meta.key == "Editor";}) != property.meta.end())
 					{
-						EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name);
+						EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name, property.meta);
 					}
 				}
 

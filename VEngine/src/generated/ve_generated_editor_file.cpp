@@ -51,6 +51,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			VE::Components::SpriteComponent* SpriteComponent_ = entity.get_mut<VE::Components::SpriteComponent>();
 			EditorElement::FileSystem(SpriteComponent_->texturePath, "Texture Path");
 
+
 			EditorElement::Vec2(SpriteComponent_->origin, "Origin");
 
 			EditorElement::Color(SpriteComponent_->tintColor, "Tint Color");
@@ -58,6 +59,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			EditorElement::Int(SpriteComponent_->renderOrder, "Render Order");
 
 			EditorElement::FileSystem(SpriteComponent_->shaderPath, "Shader Path");
+
 
 			ImGui::TreePop();
 		}
@@ -85,6 +87,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 			EditorElement::Checkbox(Camera2DComponent_->isMain, "Is Main");
 
+
 			ImGui::TreePop();
 		}
 	}
@@ -105,11 +108,15 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			VE::Components::Camera3DComponent* Camera3DComponent_ = entity.get_mut<VE::Components::Camera3DComponent>();
 			EditorElement::Vec2(Camera3DComponent_->renderTargetSize, "Render Target Size");
 
+			EditorElement::FileSystem(Camera3DComponent_->skyboxTexturePath, "Skybox Texture Path");
+
+
 			EditorElement::Color(Camera3DComponent_->backgroundColor, "Background Color");
 
 			EditorElement::Float(Camera3DComponent_->zoom, "Zoom");
 
 			EditorElement::Checkbox(Camera3DComponent_->isMain, "Is Main");
+
 
 			ImGui::TreePop();
 		}
@@ -129,9 +136,19 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 		{
 			
 			VE::Components::Model3DComponent* Model3DComponent_ = entity.get_mut<VE::Components::Model3DComponent>();
+			const char* items[] = { 
+					"None",
+					"Cube",
+					"Sphere",
+			};
+			EditorElement::Combo(items, (int*)&(Model3DComponent_->basicMesh), 3, "Basic Mesh", Model3DComponent_, VE::Components::BasicModelOnChange);
+
+
 			EditorElement::FileSystem(Model3DComponent_->modelFilepath, "Model Filepath");
 
+
 			EditorElement::FileSystem(Model3DComponent_->diffuseTextureMapFilepath, "Diffuse Texture Map Filepath");
+
 
 			ImGui::TreePop();
 		}
@@ -155,6 +172,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 
 			EditorElement::Checkbox(UICanvasComponent_->isMain, "Is Main");
 
+
 			ImGui::TreePop();
 		}
 	}
@@ -174,6 +192,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			
 			VE::Components::UI::UILabelComponent* UILabelComponent_ = entity.get_mut<VE::Components::UI::UILabelComponent>();
 			EditorElement::FileSystem(UILabelComponent_->fontFilepath, "Font Filepath");
+
 
 			EditorElement::String(UILabelComponent_->text, "Text");
 
@@ -205,6 +224,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			VE::Components::UI::UIImageComponent* UIImageComponent_ = entity.get_mut<VE::Components::UI::UIImageComponent>();
 			EditorElement::FileSystem(UIImageComponent_->imageFilepath, "Image Filepath");
 
+
 			EditorElement::Vec2(UIImageComponent_->origin, "Origin");
 
 			EditorElement::Color(UIImageComponent_->tintColor, "Tint Color");
@@ -230,6 +250,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			
 			VE::Components::UI::UIButtonComponent* UIButtonComponent_ = entity.get_mut<VE::Components::UI::UIButtonComponent>();
 			EditorElement::FileSystem(UIButtonComponent_->imageFilepath, "Image Filepath");
+
 
 			EditorElement::Vec2(UIButtonComponent_->imageOrigin, "Image Origin");
 

@@ -21,6 +21,14 @@ namespace VH
 		std::vector<ParsedName> properites;
 	};
 
+	struct Enum 
+	{
+		std::string name = "";
+		std::vector<std::string> nameSpaces;
+		std::vector<std::string> items;
+		std::vector<Meta> meta;
+	};
+
 	struct System 
 	{
 		std::string name;
@@ -46,6 +54,7 @@ namespace VH
 
 		std::string json;
 		std::vector<Component> components;
+		std::vector<Enum> enums;
 		std::vector<System> systems;
 		std::vector<Callback> callbacks;
 		std::filesystem::path headerFilepath;

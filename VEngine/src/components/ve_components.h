@@ -198,6 +198,14 @@ namespace VE
 			glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
 											  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
 			VE_PROPERTY(Editor)
+			std::filesystem::path skyboxTexturePath = "";
+			std::filesystem::path oldSkyboxTexturePath = "";
+			Texture* skyboxTexture = nullptr;
+			Shader* skyboxShader = nullptr;
+			Shader* cubemapShader = nullptr;
+			Model skyboxModel = {};
+
+			VE_PROPERTY(Editor)
 			NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 			VE_PROPERTY(Editor)
 			float zoom = 1.0f;
@@ -205,9 +213,26 @@ namespace VE
 			bool isMain = false;
 		};
 
+		VE_ENUM()
+		enum class BasicMesh
+		{
+			None = 0,
+			Cube,
+			Sphere,
+		};
+
+		VE_FUNCTION(Callback)
+		inline void BasicModelOnChange(void* data)
+		{
+			
+		}
+
 		VE_CLASS(Component)
 		struct Model3DComponent
 		{
+			VE_PROPERTY(Editor, OnChange = BasicModelOnChange)
+			BasicMesh basicMesh = BasicMesh::None;
+			Model basicModel = {};
 			Model* model = nullptr;
 			VE_PROPERTY(Editor)
 			std::filesystem::path modelFilepath = "";
@@ -217,10 +242,9 @@ namespace VE
 			VE_PROPERTY(Editor)
 			std::filesystem::path diffuseTextureMapFilepath = "";
 			std::filesystem::path oldDiffuseTextureMapFilepath = "";
-
-
 		};
 
+		
 
 		namespace UI
 		{
