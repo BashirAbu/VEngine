@@ -124,7 +124,7 @@ namespace VE::Systems
 
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
 	{
-		if (model.model)
+		if (model.model && model.pbrShader)
 		{
 			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
@@ -133,8 +133,6 @@ namespace VE::Systems
 			m3d.entity = e;
 			VE::Scene::GetSingleton()->renderer.Submit(m3d);
 		}
-
-
 	}
 	void UICanvasSystem(flecs::entity e, Components::UI::UICanvasComponent& canvas)
 	{

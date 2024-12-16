@@ -553,6 +553,9 @@ namespace VE
 	}
 
 
+	
+
+
 	//Serialization stuff
 	void Scene::ManualComponentRegisteration()
 	{
@@ -671,10 +674,26 @@ namespace VE
 					UnloadModel(c3dc.skyboxModel);
 			});
 
+
 			world.component<Components::Model3DComponent>().on_set([](flecs::entity e, Components::Model3DComponent& model)
 				{
 					model.model = nullptr;
 					model.basicModel = {};
+					model.pbrShader = nullptr;
+
+					model.pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+
+					//(*model.pbrShader).locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation((*model.pbrShader), "albedoMap");
+					//(*model.pbrShader).locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation((*model.pbrShader), "mraMap");
+					//(*model.pbrShader).locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation((*model.pbrShader), "normalMap");
+					//(*model.pbrShader).locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation((*model.pbrShader), "emissiveMap");
+					//(*model.pbrShader).locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation((*model.pbrShader), "albedoColor");
+					//(*model.pbrShader).locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation((*model.pbrShader), "viewPos");
+
+					//int lightCountLoc = GetShaderLocation((*model.pbrShader), "numOfLights");
+					//int maxLightCount = MAX_LIGHTS;
+					//SetShaderValue((*model.pbrShader), lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
+
 					if (!model.modelFilepath.empty())
 					{
 						model.model = AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
@@ -684,6 +703,15 @@ namespace VE
 						model.basicModel = Components::LoadBasicMesh(model.basicMesh);
 						model.model = &(model.basicModel);
 					}
+
+					if (model.model && model.pbrShader)
+					{
+						for (size_t i = 0; i < model.model->materialCount; i++)
+						{
+							model.model->materials[i].shader = *model.pbrShader;
+						}
+					}
+					
 				});
 
 

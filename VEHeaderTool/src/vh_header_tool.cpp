@@ -370,6 +370,25 @@ namespace VH
 					}
 				}
 			}
+
+			for (auto headerFile : headerFiles)
+			{
+				for (auto comp : headerFile.components)
+				{
+					if (dataType.find(comp.name.name) != std::string::npos)
+					{
+						std::string compFullSpacename = "";
+						for (std::string sn : comp.name.nameSpaces)
+						{
+							compFullSpacename += sn + "::";
+						}
+
+						cppSourefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = &" + compPTR + "->" + name + ";\n";
+						cppSourefile += "			Draw" + comp.name.name + "EditorUI(\"" + name + "\", entity, " + comp.name.name + "_" + ", false); \n";
+					}
+				}
+			}
+
 			
 		}
 
@@ -395,18 +414,6 @@ namespace VH
 		cppSourcefile += "using namespace VE::_Components;\n";
 		cppSourcefile += "using namespace VE::Components::UI;\n\n\n";
 
-		if (type == Type::Engine)
-		{
-			cppSourcefile += "void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)\n{\n";
-		} 
-		else 
-		{
-			cppSourcefile += "extern \"C\" VE_PROJECT_API void ProjectDrawComponentElements(std::string name, flecs::entity entity)\n{\n";
-		}
-		cppSourcefile += "	ImGui::PushID(name.c_str());\n"
-			"	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
-
-
 		for (const HeaderFile& headerFile : headerFiles)
 		{
 			for (const Component& comp : headerFile.components)
@@ -416,20 +423,21 @@ namespace VH
 				{
 					compFullSpacename += sn + "::";
 				}
+				cppSourcefile += "void Draw" + comp.name.name + "EditorUI(std::string name, flecs::entity entity, " + compFullSpacename + comp.name.name + "* " + comp.name.name + "_, bool removable)\n{\n";
 
-				cppSourcefile += "	if (name == \"" + comp.name.name + "\")\n	{\n"
-					"		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());\n";
-				if ((compFullSpacename + comp.name.name) != "VE::Components::TransformComponent")
-				{
-					cppSourcefile += "		if (ImGui::BeginPopupContextItem(0, 1))\n		{\n";
-					cppSourcefile += "			if(ImGui::MenuItem(\"Remove\"))\n			{\n";
-					cppSourcefile += "				entity.remove<" + compFullSpacename + comp.name.name + ">();\n";
-					cppSourcefile += "			}\n";
-					cppSourcefile += "			ImGui::EndPopup();\n		}\n";
-				}
+				cppSourcefile += "	ImGui::PushID(name.c_str());\n"
+					"	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
+				cppSourcefile += "		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());\n";
+				cppSourcefile += "		if(removable)\n";
+				cppSourcefile += "		if (ImGui::BeginPopupContextItem(0, 1))\n		{\n";
+				cppSourcefile += "			if(ImGui::MenuItem(\"Remove\"))\n			{\n";
+				cppSourcefile += "				entity.remove<" + compFullSpacename + comp.name.name + ">();\n";
+				cppSourcefile += "			}\n";
+				cppSourcefile += "			ImGui::EndPopup();\n		}\n";
+				
 				cppSourcefile += "		if (open)\n		{\n"
 					"			\n";
-				cppSourcefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = entity.get_mut<" + compFullSpacename + comp.name.name + ">();\n";
+				
 				
 				for (ParsedName property : comp.properites)
 				{
@@ -440,11 +448,45 @@ namespace VH
 				}
 
 				cppSourcefile += "			ImGui::TreePop();\n		}\n";
-				cppSourcefile += "	}\n";
+				cppSourcefile += "	\tImGui::PopID();\n}\n";
 			}
 		}
+		if (type == Type::Engine)
+		{
+			cppSourcefile += "void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)\n{\n";
+		}
+		else
+		{
+			cppSourcefile += "extern \"C\" VE_PROJECT_API void ProjectDrawComponentElements(std::string name, flecs::entity entity)\n{\n";
 
-		cppSourcefile += "\n	ImGui::PopID();\n}\n";
+		}
+
+		//call drawFunction
+		for (const HeaderFile& headerFile : headerFiles)
+		{
+			for (const Component& comp : headerFile.components)
+			{
+				std::string compFullSpacename = "";
+				for (std::string sn : comp.name.nameSpaces)
+				{
+					compFullSpacename += sn + "::";
+				}
+
+				cppSourcefile += "	if(name == \"" + comp.name.name + "\"){\n";
+			    cppSourcefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = entity.get_mut<" + compFullSpacename + comp.name.name + ">();\n";
+				cppSourcefile += "		Draw" + comp.name.name + "EditorUI(name, entity," + comp.name.name + "_,";
+				if (comp.name.name == "TransformComponent")
+				{
+					cppSourcefile += " false";
+				}
+				else 
+				{
+					cppSourcefile += " true";
+				}
+				cppSourcefile += ");\n	}\n";
+			}
+		}
+		cppSourcefile += "\n}\n";
 
 		cppSourcefile += "#endif\n";
 

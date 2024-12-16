@@ -145,6 +145,33 @@ void Serialize_Camera3DComponent()
 }
 
 
+void Serialize_VEMaterial()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "VEMaterial"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::VEMaterial>* comp = (flecs::component<VE::Components::VEMaterial>*)&compEntity; 
+		comp->opaque(comp->world().component().member<BasicMesh>("mesh").member<float>("value"))
+		.serialize([](const flecs::serializer* s, const VE::Components::VEMaterial* data) -> int		{
+		s->member("mesh");
+		s->value(data->mesh);
+		s->member("value");
+		s->value(data->value);
+			 return 0;
+		}).ensure_member([](VE::Components::VEMaterial* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "mesh")) { return &data->mesh;}
+			else if (!strcmp(member, "value")) { return &data->value;}
+		return nullptr;
+		});
+	}
+}
+
+
 void Serialize_Model3DComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -154,18 +181,21 @@ void Serialize_Model3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Model3DComponent>* comp = (flecs::component<VE::Components::Model3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath"))
+		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath").member<VEMaterial>("mat"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Model3DComponent* data) -> int		{
 		s->member("basicMesh");
 		s->value(data->basicMesh);
 		s->member("modelFilepath");
 		s->value(data->modelFilepath);
+		s->member("mat");
+		s->value(data->mat);
 			 return 0;
 		}).ensure_member([](VE::Components::Model3DComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "basicMesh")) { return &data->basicMesh;}
 			else if (!strcmp(member, "modelFilepath")) { return &data->modelFilepath;}
+			else if (!strcmp(member, "mat")) { return &data->mat;}
 		return nullptr;
 		});
 	}
@@ -301,6 +331,7 @@ void EngineGeneratedSerialization()
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
 	 Serialize_Camera3DComponent();
+	 Serialize_VEMaterial();
 	 Serialize_Model3DComponent();
 	 Serialize_UICanvasComponent();
 	 Serialize_UILabelComponent();
@@ -317,6 +348,7 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera3DComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::VEMaterial>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Model3DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UILabelComponent>();

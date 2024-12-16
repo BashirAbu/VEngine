@@ -344,6 +344,15 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
+		struct VEMaterial 
+		{
+			VE_PROPERTY(Editor)
+			BasicMesh mesh = BasicMesh::None;
+			VE_PROPERTY(Editor)
+			float value = 0.0f;
+		};
+
+		VE_CLASS(Component)
 		struct Model3DComponent
 		{
 			VE_PROPERTY(Editor, OnChange = BasicModelOnChange)
@@ -352,6 +361,12 @@ namespace VE
 			Model* model = nullptr;
 			VE_PROPERTY(Editor, OnChange = ModelOnChange)
 			std::filesystem::path modelFilepath = "";
+
+			Shader* pbrShader = nullptr;
+
+
+			VE_PROPERTY(Editor)
+			VEMaterial mat;
 		};
 
 		VE_FUNCTION(Callback)
@@ -364,8 +379,11 @@ namespace VE
 			if (!comp->modelFilepath.empty())
 			{
 				comp->model = AssetsManager::GetSingleton()->LoadModel(comp->modelFilepath);
+				for (size_t i = 0; i < comp->model->materialCount; i++)
+				{
+					comp->model->materials[i].shader = *comp->pbrShader;
+				}
 			}
-
 		}
 
 		inline Model LoadBasicMesh(BasicMesh basicMesh) 
@@ -402,6 +420,11 @@ namespace VE
 
 				comp->basicModel = LoadBasicMesh(comp->basicMesh);
 				comp->model = &comp->basicModel;
+
+				for (size_t i = 0; i < comp->model->materialCount; i++)
+				{
+					comp->model->materials[i].shader = *comp->pbrShader;
+				}
 			}
 		}
 		

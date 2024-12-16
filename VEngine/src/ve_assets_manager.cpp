@@ -356,7 +356,6 @@ namespace VE
 
 			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty()? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
 #else
-#endif
 
 			std::string fragmentShader = "";
 			std::string vertexShader = "";
@@ -382,6 +381,7 @@ namespace VE
 				SpirvToGLSL(vertexSprivBinaryUint32, vertexShader);
 			}
 			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty() ? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
+#endif
 
 			return &shaders[filepath.string()];
 		}

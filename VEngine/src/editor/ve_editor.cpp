@@ -373,8 +373,6 @@ namespace VE
 		}
 	}
 
-	
-
 	void Editor::AddEntityNode(flecs::entity e)
 	{
 		if (e.parent())

@@ -85,6 +85,7 @@ namespace VE
 		float editorCameraZoom = 20.0f;
 
 
+
 		glm::vec2 oldRenderTargetSize;
 		RenderTexture editorCameraRenderTarget;
 
