@@ -221,8 +221,18 @@ freetype_src_files =
 --spirv_cross src files
 spirv_cross_src_files = 
 {
-    "VEngine/third_party/SPIRV-Cross/*.cpp",
-    "VEngine/third_party/SPIRV-Cross/*.c",
+    "VEngine/third_party/SPIRV-Cross/spirv_reflect.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_parser.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_msl.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_hlsl.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_glsl.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cross_util.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cross_parsed_ir.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cross_c.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cross.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cpp.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cfg.cpp",
+    "VEngine/third_party/SPIRV-Cross/spirv_cfg.cpp",
 }
 --Base VE_Engine source files.
 base_engine_src_files = 

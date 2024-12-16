@@ -213,6 +213,54 @@ namespace VE
 		}
 		else
 		{
+			std::function <void(std::vector<uint32_t>&, std::string&)> SpirvToGLSL = [&](std::vector<uint32_t>& spirvBinary, std::string& glslSource)
+			{
+				spirv_cross::CompilerGLSL glsl(std::move(spirvBinary));
+
+				spirv_cross::CompilerGLSL::Options options;
+
+
+				switch (rlGetVersion())
+				{
+				case RL_OPENGL_21:
+				{
+					options.version = 120;
+					options.es = false;
+				}break;
+				case RL_OPENGL_33:
+				{
+					options.version = 330;
+					options.es = false;
+				}break;
+				case RL_OPENGL_43:
+				{
+					options.version = 330;
+					options.es = false;
+				}break;
+				case RL_OPENGL_ES_20:
+				{
+					options.version = 100;
+					options.es = true;
+				}break;
+				case RL_OPENGL_ES_30:
+				{
+					options.version = 300;
+					options.es = true;
+				}break;
+				default:
+				{
+					options = {};
+					TraceLog(LOG_ERROR, "OpenGl version is not supported!");
+				}break;
+				}
+
+
+				glsl.set_common_options(options);
+
+				glslSource = glsl.compile();
+			};
+
+
 #ifdef VE_EDITOR
 			std::filesystem::path fullpath = assetsFolderPath.generic_string() + filepath.generic_string();
 			FILE* shaderFile = fopen(fullpath.generic_string().c_str(), "r");
@@ -258,52 +306,7 @@ namespace VE
 				}
 			}
 			
-			std::function <void(std::vector<uint32_t>&, std::string&)> SpirvToGLSL = [&](std::vector<uint32_t>& spirvBinary, std::string& glslSource)
-				{
-					spirv_cross::CompilerGLSL glsl(std::move(spirvBinary));
-
-					spirv_cross::CompilerGLSL::Options options;
-
-
-					switch (rlGetVersion())
-					{
-					case RL_OPENGL_21:
-					{
-						options.version = 120;
-						options.es = false;
-					}break;
-					case RL_OPENGL_33:
-					{
-						options.version = 330;
-						options.es = false;
-					}break;
-					case RL_OPENGL_43:
-					{
-						options.version = 330;
-						options.es = false;
-					}break;
-					case RL_OPENGL_ES_20:
-					{
-						options.version = 100;
-						options.es = true;
-					}break;
-					case RL_OPENGL_ES_30:
-					{
-						options.version = 300;
-						options.es = true;
-					}break;
-					default:
-					{
-						options = {};
-						TraceLog(LOG_ERROR, "OpenGl version is not supported!");
-					}break;
-					}
-
-
-					glsl.set_common_options(options);
-
-					glslSource = glsl.compile();
-				};
+			
 			std::function <void(std::string&, ShaderType)> crossPlatformShader = [&](std::string& shaderSource, ShaderType shaderType)
 				{
 					if (!shaderSource.empty())
@@ -354,6 +357,31 @@ namespace VE
 			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty()? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
 #else
 #endif
+
+			std::string fragmentShader = "";
+			std::string vertexShader = "";
+
+			std::string fragSprivFileName = filepath.stem().string() + "_frag.spv";
+			std::string vertSprivFileName = filepath.stem().string() + "_vert.spv";
+			
+			AssetData fragSprivBinaryUint8 = GetAssetData(fragSprivFileName);
+
+			if (fragSprivBinaryUint8.size > 0)
+			{
+				std::vector<uint32_t> fragSprivBinaryUint32(fragSprivBinaryUint8.size / sizeof(uint32_t));
+				memcpy(fragSprivBinaryUint32.data(), fragSprivBinaryUint8.data, fragSprivBinaryUint8.size);
+				SpirvToGLSL(fragSprivBinaryUint32, fragmentShader);
+			}
+
+			AssetData vertexSprivBinaryUint8 = GetAssetData(vertSprivFileName);
+
+			if (vertexSprivBinaryUint8.size > 0)
+			{
+				std::vector<uint32_t> vertexSprivBinaryUint32(vertexSprivBinaryUint8.size / sizeof(uint32_t));
+				memcpy(vertexSprivBinaryUint32.data(), vertexSprivBinaryUint8.data, vertexSprivBinaryUint8.size);
+				SpirvToGLSL(vertexSprivBinaryUint32, vertexShader);
+			}
+			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty() ? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());
 
 			return &shaders[filepath.string()];
 		}
