@@ -19,7 +19,7 @@ namespace VE
 		void RenderScene();
 		struct Tex2D
 		{
-			Texture2D texture = {};
+			Texture2D** texture;
 			Rectangle source = {};
 			Rectangle dest = {};
 			Vector2 origin = {};
@@ -32,7 +32,7 @@ namespace VE
 
 		struct Model3D
 		{
-			Model model;
+			Model** model;
 			flecs::entity entity;
 		};
 

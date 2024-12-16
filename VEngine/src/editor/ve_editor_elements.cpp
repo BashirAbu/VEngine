@@ -8,7 +8,7 @@ namespace VE
 	namespace EditorElement
 	{
        
-        void Vec2(glm::vec2& vec, std::string label)
+        void Vec2(glm::vec2& vec, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::PushID(label.c_str());
             ImGui::Text(label.c_str());
@@ -17,7 +17,13 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##x", &vec.x);
+            if (ImGui::DragFloat("##x", &vec.x)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -25,7 +31,13 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##y", &vec.y);
+            if (ImGui::DragFloat("##y", &vec.y)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -35,7 +47,7 @@ namespace VE
             ImGui::PopID();
             
         }
-        void Vec3(glm::vec3& vec, std::string label)
+        void Vec3(glm::vec3& vec, std::string label, void* data, std::function<void(void* data)> callback)
 		{
 
             ImGui::PushID(label.c_str());
@@ -47,7 +59,13 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##x", &vec.x);
+            if (ImGui::DragFloat("##x", &vec.x)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -55,14 +73,26 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##y", &vec.y);
+            if (ImGui::DragFloat("##y", &vec.y)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
             ImGui::Text("Z");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##z", &vec.z);
+            if (ImGui::DragFloat("##z", &vec.z)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -71,7 +101,7 @@ namespace VE
 
             ImGui::PopID();
 		}
-        void Vec4(glm::vec4& vec, std::string label)
+        void Vec4(glm::vec4& vec, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::PushID(label.c_str());
 
@@ -82,7 +112,13 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##x", &vec.x);
+            if (ImGui::DragFloat("##x", &vec.x)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -90,21 +126,39 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##y", &vec.y);
+            if (ImGui::DragFloat("##y", &vec.y)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
             ImGui::Text("Z");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##z", &vec.z);
+            if (ImGui::DragFloat("##z", &vec.z)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
             ImGui::Text("W");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            ImGui::DragFloat("##w", &vec.w);
+            if (ImGui::DragFloat("##w", &vec.w)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::PopItemWidth();
             ImGui::NextColumn();
 
@@ -113,116 +167,182 @@ namespace VE
 
             ImGui::PopID();
         }
-        void Color(glm::vec4& color, std::string label)
+        void Color(glm::vec4& color, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::ColorPicker4(label.c_str(), &color.x);
+            if (ImGui::ColorPicker4(label.c_str(), &color.x)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
 
             ImGui::Columns(1);
         }
-        VE_API void Float(float& variable, std::string label)
+        VE_API void Float(float& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragFloat(((std::string)"##" + label).c_str(), &variable);
+            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), &variable)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
 
         }
-        VE_API void Double(double& variable, std::string label) 
+        VE_API void Double(double& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragFloat(((std::string)"##" + label).c_str(), (float*)&variable);
+            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), (float*)&variable)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
 
         }
-        VE_API void Int(uint8_t& variable, std::string label) 
+        VE_API void Int(uint8_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT8_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT8_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
             
         }
-        VE_API void Int(uint16_t& variable, std::string label) 
+        VE_API void Int(uint16_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
 
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT16_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT16_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
         }
-        VE_API void Int(uint32_t& variable, std::string label) 
+        VE_API void Int(uint32_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT32_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT32_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
 
         }
-        VE_API void Int(uint64_t& variable, std::string label) 
+        VE_API void Int(uint64_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
 
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT32_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, 0, UINT32_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);            
         }
-        VE_API void Int(int8_t& variable, std::string label) 
+        VE_API void Int(int8_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT8_MIN, INT8_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT8_MIN, INT8_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
         }
-        VE_API void Int(int16_t& variable, std::string label) 
+        VE_API void Int(int16_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT16_MIN, INT16_MAX);
-            ImGui::NextColumn();
-            ImGui::Columns(1);
-
-        }
-        VE_API void Int(int32_t& variable, std::string label) 
-        {
-            ImGui::Columns(2, 0, false);
-            ImGui::Text(label.c_str());
-            ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT32_MIN, INT32_MAX);
-            ImGui::NextColumn();
-            ImGui::Columns(1);
-        }
-        VE_API void Int(int64_t& variable, std::string label) 
-        {
-            ImGui::Columns(2, 0, false);
-            ImGui::Text(label.c_str());
-            ImGui::NextColumn();
-            ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT32_MIN, INT32_MAX);
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT16_MIN, INT16_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
             ImGui::NextColumn();
             ImGui::Columns(1);
 
         }
+        VE_API void Int(int32_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
+        {
+            ImGui::Columns(2, 0, false);
+            ImGui::Text(label.c_str());
+            ImGui::NextColumn();
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT32_MIN, INT32_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
+            ImGui::NextColumn();
+            ImGui::Columns(1);
+        }
+        VE_API void Int(int64_t& variable, std::string label, void* data, std::function<void(void* data)> callback)
+        {
+            ImGui::Columns(2, 0, false);
+            ImGui::Text(label.c_str());
+            ImGui::NextColumn();
+            if (ImGui::DragInt(((std::string)"##" + label).c_str(), (int*)&variable, 1.0f, INT32_MIN, INT32_MAX)) 
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
+            ImGui::NextColumn();
+            ImGui::Columns(1);
 
-        VE_API void String(std::string& variable, std::string label) 
+        }
+
+        VE_API void String(std::string& variable, std::string label, void* data, std::function<void(void* data)> callback)
         {
 
             ImGui::Columns(2, 0, false);
@@ -230,7 +350,7 @@ namespace VE
             ImGui::NextColumn();
 
            
-            ImGui::InputText(((std::string)"##" + label).c_str(), variable.data(), variable.size() + 1,
+            if (ImGui::InputText(((std::string)"##" + label).c_str(), variable.data(), variable.size() + 1,
                 ImGuiInputTextFlags_CallbackResize, [](ImGuiInputTextCallbackData* data) -> int
                 {
                     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
@@ -240,7 +360,14 @@ namespace VE
                         data->Buf = str->data();
                     }
                     return 0;
-                }, &variable);
+                }, &variable))
+
+            {
+                if (callback)
+                {
+                    callback(data);
+                }
+            }
 
 
             ImGui::NextColumn();

@@ -28,7 +28,7 @@ namespace VE
 			{
 				BeginShaderMode(t2d.shader);
 			}
-			DrawTexturePro(t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
+			DrawTexturePro(**t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
 			if (t2d.shader.id > 0)
 			{
 				EndShaderMode();
@@ -40,7 +40,7 @@ namespace VE
 	{
 		for (const auto& m3d : model3DRenderQueue)
 		{
-			DrawModel(m3d.model, {}, 1.0f, WHITE);
+			DrawModel(**m3d.model, {}, 1.0f, WHITE);
 		}
 	}
 
@@ -48,7 +48,7 @@ namespace VE
 	{
 		for (const auto& t2d : UIRenderQueue)
 		{
-			DrawTexturePro(t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
+			DrawTexturePro(**t2d.texture, t2d.source, t2d.dest, t2d.origin, t2d.rotation, t2d.tint);
 		}
 	}
 

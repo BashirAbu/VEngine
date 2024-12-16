@@ -43,36 +43,228 @@ namespace VH
 		std::string formatedName = FormatName(name);
 		if (dataType.find("vec2") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec2(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Vec2(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("vec3") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec3(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Vec3(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("vec4") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec4(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Vec4(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("NormalizedColor") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		
 		else if (dataType.find("float") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("double") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("int") != std::string::npos || dataType.find("size_t") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("string") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::String(" + compPTR + "->" + name + ", \"" + formatedName + "\");";
+			cppSourefile += "			EditorElement::String(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
+			if (itr != propertyMeta.end())
+			{
+				cppSourefile += ", " + compPTR + ", ";
+				Meta meta = *itr;
+				Callback callBack;
+				for (const HeaderFile& headerFile : headerFiles)
+				{
+					auto iterator = std::find_if(headerFile.callbacks.begin(), headerFile.callbacks.end(), [&](const Callback& _cb) { return _cb.name == meta.value; });
+					if (iterator != headerFile.callbacks.end())
+					{
+						callBack = *iterator;
+						break;
+					}
+
+				}
+				std::string fullNameSpace = "";
+				for (std::string sn : callBack.nameSpaces)
+				{
+					fullNameSpace += sn + "::";
+				}
+				cppSourefile += fullNameSpace + callBack.name;
+			}
+			cppSourefile += ");\n";
 		}
 		else if (dataType.find("path") != std::string::npos)
 		{

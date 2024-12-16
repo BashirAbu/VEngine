@@ -36,7 +36,7 @@ namespace VE
 		world.system<Components::UI::UICanvasComponent>("UICanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::UICanvasSystem);
 		world.system<Components::TransformComponent, Components::UI::UILabelComponent>("UILabelRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UILabelRenderSystem);
 		world.system<Components::TransformComponent, Components::UI::UIImageComponent>("UIImageRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UIImageRenderSystem);
-		world.system<Components::TransformComponent, Components::UI::UIButtonComponent>("UIButtonSystem ").kind(OnRender).without<_Components::Disabled>().each(Systems::UIButtonSystem);
+		world.system<Components::TransformComponent, Components::UI::UIButtonComponent, Components::UI::UIImageComponent>("UIButtonSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UIButtonSystem);
 
 
 		//register project components & systems.
@@ -636,22 +636,71 @@ namespace VE
 					UnloadModel(c3dc.skyboxModel);
 			});
 
-			world.component<Components::UI::UILabelComponent>().on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
+			world.component<Components::Model3DComponent>().on_set([](flecs::entity e, Components::Model3DComponent& model)
 				{
-					UnloadTexture(lb.texture);
+					model.model = nullptr;
+					model.basicModel = {};
+					if (!model.modelFilepath.empty())
+					{
+						model.model = AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
+					}
+					if (model.basicMesh != Components::BasicMesh::None)
+					{
+						model.basicModel = Components::LoadBasicMesh(model.basicMesh);
+						model.model = &(model.basicModel);
+					}
+				});
+
+
+			world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)
+				{
+					lb.texturePtr = nullptr;
+					lb.texture = {};
+					lb.font = nullptr;
+
+					if (!lb.fontFilepath.empty())
+					{
+						lb.font = AssetsManager::GetSingleton()->LoadFont(lb.fontFilepath, (int)lb.size);
+						lb.texture = RaylibGetTextureFromText_UTF8(lb.font, lb.text);
+						lb.texturePtr = &lb.texture;
+					}
+				})
+				.on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
+				{
+					if (lb.texturePtr)
+					{
+						UnloadTexture(*lb.texturePtr);
+					}
 					if (lb.font)
 					{
 						delete lb.font;
 						lb.font = nullptr;
 					}
 				});
-			world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)
+
+			world.component<Components::UI::UIImageComponent>().on_set([](flecs::entity e, Components::UI::UIImageComponent& img)
 				{
-					lb.texture = {};
-					lb.font = nullptr;
-					lb.oldFontFilepath = "";
-					lb.oldText = "";
-					lb.oldTextSize = 0;
+					img.texture = nullptr;
+					if (!img.imageFilepath.empty())
+					{
+						img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
+					}
+				});
+
+			world.component<Components::UI::UIButtonComponent>().on_add([](flecs::entity e, Components::UI::UIButtonComponent) 
+				{
+					e.add<Components::UI::UIImageComponent>();
+				}).on_set([](flecs::entity e, Components::UI::UIButtonComponent)
+				{
+						Components::UI::UIImageComponent& img = *e.get_mut<Components::UI::UIImageComponent>();
+
+						img.texture = nullptr;
+
+						if (!img.imageFilepath.empty())
+						{
+							img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
+						}
+
 				});
 
 		world.component<_Components::SceneEntityTag>();

@@ -1242,7 +1242,7 @@ namespace VE
 							BeginShaderMode(colorPickingShader);
 							float id = (float)((int)tex2d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawTexturePro(tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
+							DrawTexturePro(**tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
 							EndShaderMode();
 						}
 					}
@@ -1254,7 +1254,7 @@ namespace VE
 							BeginShaderMode(colorPickingShader);
 							float id = (float)((int)tex2d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawTexturePro(tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
+							DrawTexturePro(**tex2d.texture, tex2d.source, tex2d.dest, tex2d.origin, tex2d.rotation, tex2d.tint);
 							EndShaderMode();
 						}
 					}
@@ -1274,19 +1274,19 @@ namespace VE
 						if (m3d.entity)
 						{
 							std::vector<Shader> oldShaders;
-							for (size_t i = 0; i < m3d.model.materialCount; i++)
+							for (size_t i = 0; i < (*m3d.model)->materialCount; i++)
 							{
-								oldShaders.push_back(m3d.model.materials[i].shader);
-								m3d.model.materials[i].shader = colorPickingShader;
+								oldShaders.push_back((*m3d.model)->materials[i].shader);
+								(*m3d.model)->materials[i].shader = colorPickingShader;
 							}
 						
 							float id = (float)((int)m3d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
-							DrawModel(m3d.model, {}, 1.0f, WHITE);
+							DrawModel((**m3d.model), {}, 1.0f, WHITE);
 
-							for (size_t i = 0; i < m3d.model.materialCount; i++)
+							for (size_t i = 0; i < (*m3d.model)->materialCount; i++)
 							{
-								m3d.model.materials[i].shader = oldShaders[i];
+								(*m3d.model)->materials[i].shader = oldShaders[i];
 							}
 						}
 					}

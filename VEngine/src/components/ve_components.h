@@ -221,11 +221,6 @@ namespace VE
 			Sphere,
 		};
 
-		VE_FUNCTION(Callback)
-		inline void BasicModelOnChange(void* data)
-		{
-			
-		}
 
 		VE_CLASS(Component)
 		struct Model3DComponent
@@ -234,16 +229,60 @@ namespace VE
 			BasicMesh basicMesh = BasicMesh::None;
 			Model basicModel = {};
 			Model* model = nullptr;
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = ModelOnChange)
 			std::filesystem::path modelFilepath = "";
-			std::filesystem::path oldModelFilepath = "";
-
-			Texture* diffuseTextureMap = nullptr;
-			VE_PROPERTY(Editor)
-			std::filesystem::path diffuseTextureMapFilepath = "";
-			std::filesystem::path oldDiffuseTextureMapFilepath = "";
 		};
 
+		VE_FUNCTION(Callback)
+		inline void ModelOnChange(void* data)
+		{
+			if (!data) return;
+
+			Model3DComponent* comp = (Model3DComponent*)data;
+
+			if (!comp->modelFilepath.empty())
+			{
+				comp->model = AssetsManager::GetSingleton()->LoadModel(comp->modelFilepath);
+			}
+
+		}
+
+		inline Model LoadBasicMesh(BasicMesh basicMesh) 
+		{
+			Model basicModel = {};
+			switch (basicMesh)
+			{
+			case BasicMesh::Cube:
+			{
+				basicModel = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
+			}break;
+			case BasicMesh::Sphere:
+			{
+				basicModel = LoadModelFromMesh(GenMeshSphere(1.0f, 12, 12));
+			}break;
+			}
+
+			return basicModel;
+		}
+
+		VE_FUNCTION(Callback)
+		inline void BasicModelOnChange(void* data)
+		{
+			if (!data) return;
+
+			Model3DComponent* comp = (Model3DComponent*)data;
+
+			if (comp->basicMesh != BasicMesh::None)
+			{
+				if (IsModelValid(comp->basicModel)) 
+				{
+					UnloadModel(comp->basicModel);
+				}
+
+				comp->basicModel = LoadBasicMesh(comp->basicMesh);
+				comp->model = &comp->basicModel;
+			}
+		}
 		
 
 		namespace UI
@@ -264,10 +303,9 @@ namespace VE
 			struct UILabelComponent 
 			{
 				class VE::Font* font = nullptr;
-				VE_PROPERTY(Editor)
+				VE_PROPERTY(Editor, OnChange = UILabelFontOnChange)
 				std::filesystem::path fontFilepath = "";
-				std::filesystem::path oldFontFilepath = "";
-				VE_PROPERTY(Editor)
+				VE_PROPERTY(Editor, OnChange = UILabelTextOnChange)
 				std::string text = "";
 				VE_PROPERTY(Editor);
 				glm::vec2 origin = {};
@@ -275,19 +313,84 @@ namespace VE
 				int32_t renderOrder = 0;
 				VE_PROPERTY(Editor)
 				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
-				VE_PROPERTY(Editor)
+				VE_PROPERTY(Editor, OnChange = UILabelSizeOnChange)
 				float size = 12;
-				float oldTextSize = 12;
-				std::string oldText = "";
 				Texture2D texture = {};
+				Texture2D* texturePtr = nullptr;
 			};
+
+			VE_FUNCTION(Callback)
+			inline void UILabelFontOnChange(void* data) 
+			{
+				UILabelComponent* label = (UILabelComponent*)data;
+
+				if (label)
+				{
+					if (label->font)
+					{
+						delete label->font;
+						label->font = nullptr;
+					}
+
+					label->font = AssetsManager::GetSingleton()->LoadFont(label->fontFilepath, (int32_t)label->size);
+					if (label->texture.id > 0)
+					{
+						UnloadTexture(label->texture);
+						label->texturePtr = nullptr;
+					}
+
+					label->texture = RaylibGetTextureFromText_UTF8(label->font, label->text);
+					label->texturePtr = &label->texture;
+				}
+			}
+			VE_FUNCTION(Callback)
+			inline void UILabelSizeOnChange(void* data) 
+			{
+				UILabelComponent* label = (UILabelComponent*)data;
+
+				if (label)
+				{
+					if (label->font)
+					{
+						label->font->SetFontSize((int32_t)label->size);
+
+						if (label->texture.id > 0)
+						{
+							UnloadTexture(label->texture);
+							label->texturePtr = nullptr;
+						}
+
+						label->texture = RaylibGetTextureFromText_UTF8(label->font, label->text);
+						label->texturePtr = &label->texture;
+					}
+				}
+			}
+
+			VE_FUNCTION(Callback)
+			inline void UILabelTextOnChange(void* data)
+			{
+				UILabelComponent* label = (UILabelComponent*)data;
+				if (label)
+				{
+					if (label->font)
+					{
+						if (label->texture.id > 0)
+						{
+							UnloadTexture(label->texture);
+							label->texturePtr = nullptr;
+						}
+						label->texture = RaylibGetTextureFromText_UTF8(label->font, label->text);
+						label->texturePtr = &label->texture;
+					}
+				}
+			}
+
 
 			VE_CLASS(Component)
 			struct UIImageComponent
 			{
-				VE_PROPERTY(Editor)
+				VE_PROPERTY(Editor, OnChange = UIImageComponentTextureOnChange)
 				std::filesystem::path imageFilepath = "";
-				std::filesystem::path oldImageFilepath = "";
 				VE_PROPERTY(Editor)
 				glm::vec2 origin = {};
 				VE_PROPERTY(Editor)
@@ -297,23 +400,22 @@ namespace VE
 				Texture* texture = nullptr;
 			};
 
+			VE_FUNCTION(Callback)
+			inline void UIImageComponentTextureOnChange(void* data) 
+			{
+				UIImageComponent* img = (UIImageComponent*)data;
+				if (img)
+				{
+					img->texture = AssetsManager::GetSingleton()->LoadTexture(img->imageFilepath);
+				}
+			}
+
 			VE_CLASS(Component)
 			struct UIButtonComponent
 			{
-				//Image
-				VE_PROPERTY(Editor)
-				std::filesystem::path imageFilepath = "";
-				std::filesystem::path oldImageFilepath = "";
-				VE_PROPERTY(Editor)
-				glm::vec2 imageOrigin = {};
-				VE_PROPERTY(Editor)
-				NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 				VE_PROPERTY(Editor)
 				NormalizedColor pressTintColor = { .78f, .78f, .78f, 1.0f };
-				VE_PROPERTY(Editor)
-				int32_t imageRenderOrder = 0;
-				Texture* imgTexture = nullptr;
-
+				NormalizedColor imgTintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 				std::function<void()> callback = nullptr;
 
 				bool __down = false;

@@ -179,7 +179,7 @@ namespace VE::Systems
 
 
 			VE::Renderer::Tex2D tex = {};
-			tex.texture = *sc.texture;
+			tex.texture = &sc.texture;
 			tex.source = src;
 			tex.dest = dest;
 			tex.origin = org;
@@ -197,42 +197,14 @@ namespace VE::Systems
 
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
 	{
-		if (model.basicMesh != Components::BasicMesh::None && !model.model)
-		{
-			switch (model.basicMesh)
-			{
-			case Components::BasicMesh::Cube: 
-			{
-				Mesh cubeMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
-				model.basicModel = LoadModelFromMesh(cubeMesh);;
-			}break;
-			case Components::BasicMesh::Sphere:
-			{
-				Mesh sphereMesh = GenMeshSphere(1.0f, 12, 12);
-				model.basicModel = LoadModelFromMesh(sphereMesh);
-			}break;
-			}
-		}
-
-		if (model.modelFilepath != model.oldModelFilepath)
-		{
-			model.model = AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
-		}
-		if (model.diffuseTextureMapFilepath != model.oldDiffuseTextureMapFilepath)
-		{
-			model.diffuseTextureMap = AssetsManager::GetSingleton()->LoadTexture(model.diffuseTextureMapFilepath);
-		}
 		if (model.model)
 		{
 			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
 			VE::Renderer::Model3D m3d = {};
-			m3d.model = *model.model;
+			m3d.model = &model.model;
 			m3d.entity = e;
 			VE::Scene::GetSingleton()->renderer.Submit(m3d);
-
-			model.oldModelFilepath = model.modelFilepath;
-			model.oldDiffuseTextureMapFilepath = model.diffuseTextureMapFilepath;
 		}
 
 
@@ -265,10 +237,7 @@ namespace VE::Systems
 	}
 	void UIImageRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIImageComponent& img)
 	{
-		if (img.imageFilepath != img.oldImageFilepath)
-		{
-			img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
-		}
+		
 		if (img.texture)
 		{
 			Rectangle src, dest;
@@ -294,7 +263,7 @@ namespace VE::Systems
 
 
 			VE::Renderer::Tex2D tex = {};
-			tex.texture = *img.texture;
+			tex.texture = &img.texture;
 			tex.source = src;
 			tex.dest = dest;
 			tex.origin = org;
@@ -304,39 +273,14 @@ namespace VE::Systems
 			tex.entity = e;
 
 			VE::Scene::GetSingleton()->renderer.SubmitUI(tex);
-			img.oldImageFilepath = img.imageFilepath;
 		}
 	}
 
 	void UILabelRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UILabelComponent& label)
 	{
-		if (label.fontFilepath != label.oldFontFilepath)
-		{
-			if (label.font)
-			{
-				delete label.font;
-				label.font = nullptr;
-			}
-			label.font = AssetsManager::GetSingleton()->LoadFont(label.fontFilepath, (int32_t)label.size);
-			//Render
-			UnloadTexture(label.texture);
-
-			if (label.font->GetFontSize() != label.size)
-				label.font->SetFontSize((int32_t)label.size);
-			label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
-		}
+		
 		if (label.font)
 		{
-			if (label.oldText != label.text || (label.oldTextSize != label.size && label.size > 0))
-			{
-				UnloadTexture(label.texture);
-
-				if (label.font->GetFontSize() != label.size)
-					label.font->SetFontSize((int32_t)label.size);
-
-				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
-
-			}
 
 			Rectangle src, dest;
 			src.x = 0.0f;
@@ -362,20 +306,17 @@ namespace VE::Systems
 			l2d.dest = dest;
 			Vector2 org = { dest.width * label.origin.x, dest.height * label.origin.y };
 			l2d.origin = org;
-			l2d.texture = label.texture;
+			l2d.texture = &label.texturePtr;
 			l2d.rotation = tc.GetWorldRotation().z;
 			l2d.tint = GLMVec4ToRayColor(label.color);
 			l2d.entity = e;
 			l2d.renderOrder = label.renderOrder;
-			label.oldText = label.text;
-			label.oldFontFilepath = label.fontFilepath;
-			label.oldTextSize = label.size;
 			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d);
 		}
 	}
 
 
-	void UIButtonSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIButtonComponent& button)
+	void UIButtonSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIButtonComponent& button, Components::UI::UIImageComponent& img)
 	{
 		//get main canvas.
 		flecs::query qCanvas = e.world().query<VE::Components::UI::UICanvasComponent>();
@@ -396,13 +337,13 @@ namespace VE::Systems
 					mousePos.y / VE::Scene::GetSingleton()->renderer.GetMainRenderTarget().texture.height);
 				vMousePos = glm::vec2(vMousePos.x * canvas->canvasSize.x, vMousePos.y * canvas->canvasSize.y);
 
-				if (button.imgTexture) 
+				if (img.texture) 
 				{
 					Rectangle rect = {};
-					rect.x = tc.GetWorldPosition().x - button.imageOrigin.x * button.imgTexture->width;
-					rect.width = button.imgTexture->width * tc.GetWorldScale().x;
-					rect.y = tc.GetWorldPosition().y - button.imageOrigin.y * button.imgTexture->height;
-					rect.height = button.imgTexture->height * tc.GetWorldScale().x;
+					rect.x = tc.GetWorldPosition().x - img.origin.x * img.texture->width;
+					rect.width = img.texture->width * tc.GetWorldScale().x;
+					rect.y = tc.GetWorldPosition().y - img.origin.y * img.texture->height;
+					rect.height = img.texture->height * tc.GetWorldScale().x;
 
 					Vector2 point = {vMousePos.x, vMousePos.y};
 					if (CheckCollisionPointRec(point, rect))
@@ -414,6 +355,12 @@ namespace VE::Systems
 						else 
 						{
 							button.__down = false;
+						}
+
+						if (VE::Input::IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+						{
+							button.imgTintColor = img.tintColor;
+							img.tintColor = button.pressTintColor;
 						}
 
 						if (VE::Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
@@ -433,24 +380,9 @@ namespace VE::Systems
 			}
 		}
 
-		Components::UI::UIImageComponent img;
-
-		img.imageFilepath = button.imageFilepath;
-		img.oldImageFilepath = button.oldImageFilepath;
-		img.origin = button.imageOrigin;
-		img.renderOrder = button.imageRenderOrder;
-		img.tintColor = button.__down ? button.pressTintColor : button.tintColor;
-
-
-		if (button.imageFilepath != button.oldImageFilepath)
+		if (!button.__down) 
 		{
-			button.imgTexture = AssetsManager::GetSingleton()->LoadTexture(button.imageFilepath);
+			img.tintColor = button.imgTintColor;
 		}
-		img.texture = button.imgTexture;
-
-		UIImageRenderSystem(e, tc, img);
-		button.oldImageFilepath = button.imageFilepath;
 	}
-	
-
 }

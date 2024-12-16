@@ -154,21 +154,18 @@ void Serialize_Model3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Model3DComponent>* comp = (flecs::component<VE::Components::Model3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath").member<std::filesystem::path>("diffuseTextureMapFilepath"))
+		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Model3DComponent* data) -> int		{
 		s->member("basicMesh");
 		s->value(data->basicMesh);
 		s->member("modelFilepath");
 		s->value(data->modelFilepath);
-		s->member("diffuseTextureMapFilepath");
-		s->value(data->diffuseTextureMapFilepath);
 			 return 0;
 		}).ensure_member([](VE::Components::Model3DComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "basicMesh")) { return &data->basicMesh;}
 			else if (!strcmp(member, "modelFilepath")) { return &data->modelFilepath;}
-			else if (!strcmp(member, "diffuseTextureMapFilepath")) { return &data->diffuseTextureMapFilepath;}
 		return nullptr;
 		});
 	}
@@ -283,27 +280,15 @@ void Serialize_UIButtonComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::UI::UIButtonComponent>* comp = (flecs::component<VE::Components::UI::UIButtonComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<std::filesystem::path>("imageFilepath").member<glm::vec2>("imageOrigin").member<NormalizedColor>("tintColor").member<NormalizedColor>("pressTintColor").member<int32_t>("imageRenderOrder"))
+		comp->opaque(comp->world().component().member<NormalizedColor>("pressTintColor"))
 		.serialize([](const flecs::serializer* s, const VE::Components::UI::UIButtonComponent* data) -> int		{
-		s->member("imageFilepath");
-		s->value(data->imageFilepath);
-		s->member("imageOrigin");
-		s->value(data->imageOrigin);
-		s->member("tintColor");
-		s->value(data->tintColor);
 		s->member("pressTintColor");
 		s->value(data->pressTintColor);
-		s->member("imageRenderOrder");
-		s->value(data->imageRenderOrder);
 			 return 0;
 		}).ensure_member([](VE::Components::UI::UIButtonComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
-			else if (!strcmp(member, "imageFilepath")) { return &data->imageFilepath;}
-			else if (!strcmp(member, "imageOrigin")) { return &data->imageOrigin;}
-			else if (!strcmp(member, "tintColor")) { return &data->tintColor;}
 			else if (!strcmp(member, "pressTintColor")) { return &data->pressTintColor;}
-			else if (!strcmp(member, "imageRenderOrder")) { return &data->imageRenderOrder;}
 		return nullptr;
 		});
 	}
