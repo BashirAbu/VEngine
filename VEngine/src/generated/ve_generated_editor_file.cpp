@@ -85,7 +85,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 		{
 			
 			VE::Components::Camera2DComponent* Camera2DComponent_ = entity.get_mut<VE::Components::Camera2DComponent>();
-			EditorElement::Vec2(Camera2DComponent_->renderTargetSize, "Render Target Size");
+			EditorElement::Vec2(Camera2DComponent_->renderTargetSize, "Render Target Size", Camera2DComponent_, VE::Components::Camera2DComponentRenderTargetSizeOnChange);
 
 
 			EditorElement::Color(Camera2DComponent_->backgroundColor, "Background Color");
@@ -94,7 +94,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			EditorElement::Float(Camera2DComponent_->zoom, "Zoom");
 
 
-			EditorElement::Checkbox(Camera2DComponent_->isMain, "Is Main");
+			EditorElement::Checkbox(Camera2DComponent_->isMain, "Is Main", Camera2DComponent_, VE::Components::Camera2DComponentRenderIsMainOnChange);
 
 
 			ImGui::TreePop();
@@ -115,10 +115,10 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 		{
 			
 			VE::Components::Camera3DComponent* Camera3DComponent_ = entity.get_mut<VE::Components::Camera3DComponent>();
-			EditorElement::Vec2(Camera3DComponent_->renderTargetSize, "Render Target Size");
+			EditorElement::Vec2(Camera3DComponent_->renderTargetSize, "Render Target Size", Camera3DComponent_, VE::Components::Camera3DComponentRenderTargetSizeOnChange);
 
 
-			EditorElement::FileSystem(Camera3DComponent_->skyboxTexturePath, "Skybox Texture Path");
+			EditorElement::FileSystem(Camera3DComponent_->skyboxTexturePath, "Skybox Texture Path", Camera3DComponent_, VE::Components::Camera3DComponentSkyboxTextureOnChange);
 
 
 			EditorElement::Color(Camera3DComponent_->backgroundColor, "Background Color");
@@ -127,7 +127,7 @@ void VE::Editor::DrawComponentElements(std::string name, flecs::entity entity)
 			EditorElement::Float(Camera3DComponent_->zoom, "Zoom");
 
 
-			EditorElement::Checkbox(Camera3DComponent_->isMain, "Is Main");
+			EditorElement::Checkbox(Camera3DComponent_->isMain, "Is Main", Camera3DComponent_, VE::Components::Camera3DComponentRenderIsMainOnChange);
 
 
 			ImGui::TreePop();

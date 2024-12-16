@@ -1301,7 +1301,6 @@ namespace VE
 				glm::vec2 mousePos = SceneViewportMousePos();
 				int pixelIndex = (int)(pickImage.height - mousePos.y) * pickImage.width + (int)mousePos.x;
 				float id = pickingData[pixelIndex < pickImage.width * pickImage.height ? pixelIndex : 0];
-				TraceLog(LOG_DEBUG, "X: %f, Y: %f, ID: %f", mousePos.x, mousePos.y, id);
 				if (usingImGuizmo)
 				{
 					//do nothing brother.	

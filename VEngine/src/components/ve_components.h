@@ -200,28 +200,60 @@ namespace VE
 		{
 			Camera2D camera = {};
 			RenderTexture renderTarget = {};
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = Camera2DComponentRenderTargetSizeOnChange)
 			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
 										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
 			VE_PROPERTY(Editor)
 			NormalizedColor backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 			VE_PROPERTY(Editor)
 			float zoom = 1.0f;
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = Camera2DComponentRenderIsMainOnChange)
 			bool isMain = false;
 		};
 
+		VE_FUNCTION(Callback)
+		inline void Camera2DComponentRenderTargetSizeOnChange(void* data) 
+		{
+			Camera2DComponent* camera = (Camera2DComponent*) data;
+			if (camera)
+			{
+				UnloadRenderTexture(camera->renderTarget);
+
+				camera->renderTarget = LoadRenderTexture((int)camera->renderTargetSize.x, (int)camera->renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+				SetTextureFilter(camera->renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+			}
+		}
+
+		VE_FUNCTION(Callback)
+		inline void Camera2DComponentRenderIsMainOnChange(void* data) 
+		{
+			Camera2DComponent* camera = (Camera2DComponent*)data;
+			if (camera)
+			{
+				if (camera->isMain)
+				{
+					flecs::entity cameraEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<Camera2DComponent>().find([&](flecs::entity e, Camera2DComponent& c2dc)
+						{
+							return &c2dc == camera;
+						});
+
+					if (cameraEntity)
+					{
+						VE::Scene::GetSingleton()->SetMainCamera(cameraEntity);
+					}
+				}
+			}
+		}
 		VE_CLASS(Component)
 		struct Camera3DComponent
 		{
 			Camera camera = {};
 			RenderTexture renderTarget = {};
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = Camera3DComponentRenderTargetSizeOnChange)
 			glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
 											  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = Camera3DComponentSkyboxTextureOnChange)
 			std::filesystem::path skyboxTexturePath = "";
-			std::filesystem::path oldSkyboxTexturePath = "";
 			Texture* skyboxTexture = nullptr;
 			Shader* skyboxShader = nullptr;
 			Shader* cubemapShader = nullptr;
@@ -231,9 +263,77 @@ namespace VE
 			NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 			VE_PROPERTY(Editor)
 			float zoom = 1.0f;
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = Camera3DComponentRenderIsMainOnChange)
 			bool isMain = false;
 		};
+
+		VE_FUNCTION(Callback)
+		inline void Camera3DComponentSkyboxTextureOnChange(void* data)
+		{
+			Camera3DComponent* camera = (Camera3DComponent*)data;
+			if (camera)
+			{
+				if (!camera->skyboxTexturePath.empty())
+				{
+					camera->skyboxTexture = AssetsManager::GetSingleton()->LoadTexture(camera->skyboxTexturePath);
+					if (camera->skyboxTexture)
+					{
+						camera->skyboxShader = AssetsManager::GetSingleton()->LoadShader("shaders/skybox.glsl");
+						camera->cubemapShader = AssetsManager::GetSingleton()->LoadShader("shaders/cubemap.glsl");
+						Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
+						camera->skyboxModel = LoadModelFromMesh(cube);
+
+						camera->skyboxModel.materials[0].shader = *camera->skyboxShader;
+
+						SetShaderValue(camera->skyboxModel.materials[0].shader, GetShaderLocation(camera->skyboxModel.materials[0].shader, "environmentMap"), (int[1])(MATERIAL_MAP_CUBEMAP), SHADER_UNIFORM_INT);
+						SetShaderValue(camera->skyboxModel.materials[0].shader, GetShaderLocation(camera->skyboxModel.materials[0].shader, "doGamma"), (int[1])(0), SHADER_UNIFORM_INT);
+						SetShaderValue(camera->skyboxModel.materials[0].shader, GetShaderLocation(camera->skyboxModel.materials[0].shader, "vflipped"), (int[1])(0), SHADER_UNIFORM_INT);
+
+						SetShaderValue(*camera->cubemapShader, GetShaderLocation(*camera->cubemapShader, "equirectangularMap"), (int[1])(0), SHADER_UNIFORM_INT);
+
+						Image img = LoadImageFromTexture(*camera->skyboxTexture);
+						camera->skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
+						UnloadImage(img);
+					}
+				}
+			}
+		}
+
+		VE_FUNCTION(Callback)
+		inline void Camera3DComponentRenderTargetSizeOnChange(void* data)
+		{
+			Camera3DComponent* camera = (Camera3DComponent*)data;
+			if (camera)
+			{
+				UnloadRenderTexture(camera->renderTarget);
+
+				camera->renderTarget = LoadRenderTexture((int)camera->renderTargetSize.x, (int)camera->renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+				SetTextureFilter(camera->renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+			}
+		}
+
+		VE_FUNCTION(Callback)
+		inline void Camera3DComponentRenderIsMainOnChange(void* data)
+		{
+			Camera3DComponent* camera = (Camera3DComponent*)data;
+			if (camera)
+			{
+				if (camera->isMain)
+				{
+					flecs::entity cameraEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<Camera3DComponent>().find([&](flecs::entity e, Camera3DComponent& c3dc)
+						{
+							return &c3dc == camera;
+						});
+
+					if (cameraEntity)
+					{
+						VE::Scene::GetSingleton()->SetMainCamera(cameraEntity);
+					}
+				}
+			}
+		}
+
+
 
 		VE_ENUM()
 		enum class BasicMesh
@@ -242,7 +342,6 @@ namespace VE
 			Cube,
 			Sphere,
 		};
-
 
 		VE_CLASS(Component)
 		struct Model3DComponent

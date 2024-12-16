@@ -59,56 +59,9 @@ namespace VE::Systems
 
 		c2dc.camera.rotation = transform.GetWorldRotation().z;
 		c2dc.camera.zoom = c2dc.zoom;
-
-		if (c2dc.isMain)
-		{
-			VE::Scene::GetSingleton()->SetMainCamera(e);
-		}
-
-		if (glm::vec2(c2dc.renderTarget.texture.width, c2dc.renderTarget.texture.height) != c2dc.renderTargetSize)
-		{
-			UnloadRenderTexture(c2dc.renderTarget);
-			c2dc.renderTarget = LoadRenderTexture((int)c2dc.renderTargetSize.x, (int)c2dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-			SetTextureFilter(c2dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-		}
 	}
 	void Camera3DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera3DComponent& c3dc)
 	{
-		if (c3dc.skyboxTexturePath != c3dc.oldSkyboxTexturePath)
-		{
-			c3dc.skyboxTexture = AssetsManager::GetSingleton()->LoadTexture(c3dc.skyboxTexturePath);
-			if (c3dc.skyboxShader)
-			{
-				Image img = LoadImageFromTexture(*c3dc.skyboxTexture);
-				c3dc.skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-				UnloadImage(img);
-			}
-		}
-
-		if (c3dc.skyboxTexture && !c3dc.skyboxShader)
-		{
-			c3dc.skyboxShader = AssetsManager::GetSingleton()->LoadShader("shaders/skybox.glsl");
-			c3dc.cubemapShader = AssetsManager::GetSingleton()->LoadShader("shaders/cubemap.glsl");
-			Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
-			c3dc.skyboxModel = LoadModelFromMesh(cube);
-
-			c3dc.skyboxModel.materials[0].shader = *c3dc.skyboxShader;
-
-			int value = 0;
-			SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "environmentMap"), (int[1])(MATERIAL_MAP_CUBEMAP), SHADER_UNIFORM_INT);
-			SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "doGamma"), (int[1])(0), SHADER_UNIFORM_INT);
-			SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "vflipped"), (int[1])(0), SHADER_UNIFORM_INT);
-
-			SetShaderValue(*c3dc.cubemapShader, GetShaderLocation(*c3dc.cubemapShader, "equirectangularMap"), (int[1])(0), SHADER_UNIFORM_INT);
-
-			Image img = LoadImageFromTexture(*c3dc.skyboxTexture);
-			c3dc.skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-			UnloadImage(img);
-		}
-
-
-
-
 		Matrix transformMatrix = GlmMat4ToRaylibMatrix(transform.__worldMatrix);
 		c3dc.camera.position.x = transformMatrix.m12;
 		c3dc.camera.position.y = transformMatrix.m13;
@@ -126,21 +79,6 @@ namespace VE::Systems
 		c3dc.camera.up.x = transformMatrix.m4;
 		c3dc.camera.up.y = transformMatrix.m5;
 		c3dc.camera.up.z = transformMatrix.m6;
-
-
-		if (c3dc.isMain)
-		{
-			VE::Scene::GetSingleton()->SetMainCamera(e);
-		}
-
-		if (glm::vec2(c3dc.renderTarget.texture.width, c3dc.renderTarget.texture.height) != c3dc.renderTargetSize)
-		{
-			UnloadRenderTexture(c3dc.renderTarget);
-			c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-			SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-		}
-
-		c3dc.oldSkyboxTexturePath = c3dc.skyboxTexturePath;
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{

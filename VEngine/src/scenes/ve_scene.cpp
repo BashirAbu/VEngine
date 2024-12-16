@@ -628,7 +628,7 @@ namespace VE
 				{
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
-		world.component<Components::Camera3DComponent>().on_add([](flecs::entity e, Components::Camera3DComponent& c3dc)
+		world.component<Components::Camera3DComponent>().on_set([](flecs::entity e, Components::Camera3DComponent& c3dc)
 			{
 				c3dc.camera.fovy = 45.0f;
 				c3dc.camera.projection = CAMERA_PERSPECTIVE;
@@ -638,6 +638,32 @@ namespace VE
 				e.add<Components::TransformComponent>();
 				c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 				SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+
+
+				if (!c3dc.skyboxTexturePath.empty())
+				{
+					c3dc.skyboxTexture = AssetsManager::GetSingleton()->LoadTexture(c3dc.skyboxTexturePath);
+					if (c3dc.skyboxTexture)
+					{
+						c3dc.skyboxShader = AssetsManager::GetSingleton()->LoadShader("shaders/skybox.glsl");
+						c3dc.cubemapShader = AssetsManager::GetSingleton()->LoadShader("shaders/cubemap.glsl");
+						Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
+						c3dc.skyboxModel = LoadModelFromMesh(cube);
+
+						c3dc.skyboxModel.materials[0].shader = *c3dc.skyboxShader;
+
+						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "environmentMap"), (int[1])(MATERIAL_MAP_CUBEMAP), SHADER_UNIFORM_INT);
+						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "doGamma"), (int[1])(0), SHADER_UNIFORM_INT);
+						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "vflipped"), (int[1])(0), SHADER_UNIFORM_INT);
+
+						SetShaderValue(*c3dc.cubemapShader, GetShaderLocation(*c3dc.cubemapShader, "equirectangularMap"), (int[1])(0), SHADER_UNIFORM_INT);
+
+						Image img = LoadImageFromTexture(*c3dc.skyboxTexture);
+						c3dc.skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
+						UnloadImage(img);
+					}
+				}
+
 
 			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
 				{
