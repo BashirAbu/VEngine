@@ -456,8 +456,9 @@ namespace VH
 								"\t\t\tImVec2 plusSize = ImGui::CalcTextSize(\"+\");\n"
 								"\t\t\tImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));\n"
 								"\t\t\tImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));\n"
-								"\t\t\tif(ImGui::Button(\"+\", {plusSize.x * 4.0f, plusSize.y})){" + comp.name.name + "_" + "->" + property.name + ".push_back({});}\n"
-								"\t\t\tImGui::PopStyleVar(2);\n";
+								"\t\t\tif(ImGui::Button(\"+\", {plusSize.x * 4.0f, plusSize.y * 0.85f})){" + comp.name.name + "_" + "->" + property.name + ".push_back({});}\n"
+								"\t\t\tImGui::PopStyleVar(2);\n"
+								"\t\t\tint elementIndexToRemove = -1;\n";
 							cppSourcefile += "\t\t\tif(_open){\n";
 							cppSourcefile += "\n\t\t\t\tfor(size_t i = 0; i < " + comp.name.name + "_" + "->" + property.name + ".size(); i++){\n"
 							"\t\t\t\t\t\tImGui::PushID(((std::string)\"" + property.name + "\" + (const char*)(size_t[1])i).c_str());\n";
@@ -467,13 +468,14 @@ namespace VH
 								"\t\t\t\t\tImVec2 plusSize = ImGui::CalcTextSize(\"-\");\n"
 								"\t\t\t\t\tImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));\n"
 								"\t\t\t\t\tImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));\n"
-								"\t\t\t\t\tif(ImGui::Button(\"-\", {plusSize.x * 4.0f, plusSize.y})){}\n"
+								"\t\t\t\t\tif(ImGui::Button(\"-\", {plusSize.x * 4.0f, plusSize.y})){elementIndexToRemove = (int)i;}\n"
 								"\t\t\t\t\tImGui::PopStyleVar(2);\n";
 							cppSourcefile += "\t\t\t\t\t\tif(__open){\n";
 							EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.args[0], property.name, property.meta, true);
 							cppSourcefile += "\t\t\t\t\t\tImGui::TreePop();}\n";
 							cppSourcefile += "\t\t\t\t\t\tImGui::PopID();\n";
 							cppSourcefile += "\t\t\t\t\t}\n";
+							cppSourcefile += "\t\t\tif(elementIndexToRemove > 0 && elementIndexToRemove < " + comp.name.name + "_" + "->" + property.name + ".size()) " + comp.name.name + "_" + "->" + property.name + ".erase(" + comp.name.name + "_" + "->" + property.name + ".begin() + elementIndexToRemove);";
 							cppSourcefile += "\n\t\t\tImGui::TreePop();\n}\n";
 							cppSourcefile += "\t\t\tImGui::PopID();}\n";
 						}
