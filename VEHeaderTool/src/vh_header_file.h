@@ -13,6 +13,8 @@ namespace VH
 		std::vector<std::string> nameSpaces;
 		std::string dataType = "";
 		std::string name = "";
+		bool templateType = false;
+		std::vector<std::string> args;
 	};
 
 	struct Component

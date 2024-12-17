@@ -13,7 +13,7 @@ namespace VH
 		HeaderTool(Type type);
 		~HeaderTool();
 
-		void EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name, std::vector<Meta>& propertyMeta);
+		void EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name, std::vector<Meta>& propertyMeta, bool isVector = false);
 		void GenerateEditorUIFile();
 		
 		void GenerateSerializationFile();

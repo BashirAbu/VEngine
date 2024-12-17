@@ -81,6 +81,20 @@ namespace VH
 					prop.dataType = propertyDatatype;
 					prop.name = member["name"];
 
+					if (member["dataType"].contains("type"))
+					{
+						if (member["dataType"]["type"] == "template")
+						{
+							prop.templateType = true;
+							if (member["dataType"].contains("arguments") && prop.templateType)
+							{
+								for (auto arg : member["dataType"]["arguments"])
+								{
+									prop.args.push_back(arg["name"]);
+								}
+							}
+						}
+					}
 					comp.properites.push_back(prop);
 				}
 			};

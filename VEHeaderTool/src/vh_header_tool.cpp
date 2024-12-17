@@ -1,6 +1,7 @@
 #include "vh_header_tool.h"
 #include <fstream>
 #include <iostream>
+#include <random>
 namespace VH 
 {
 	HeaderTool::HeaderTool(Type type)
@@ -38,12 +39,12 @@ namespace VH
 		return result;
 	}
 
-	void HeaderTool::EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name, std::vector<Meta>& propertyMeta)
+	void HeaderTool::EditorElement(std::string& cppSourefile, std::string compPTR, std::string dataType, std::string name, std::vector<Meta>& propertyMeta, bool isVector)
 	{
 		std::string formatedName = FormatName(name);
 		if (dataType.find("vec2") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec2(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Vec2(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -71,7 +72,7 @@ namespace VH
 		}
 		else if (dataType.find("vec3") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec3(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Vec3(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -99,7 +100,7 @@ namespace VH
 		}
 		else if (dataType.find("vec4") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Vec4(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Vec4(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -127,7 +128,7 @@ namespace VH
 		}
 		else if (dataType.find("NormalizedColor") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Color(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -156,7 +157,7 @@ namespace VH
 		
 		else if (dataType.find("float") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Float(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -184,7 +185,7 @@ namespace VH
 		}
 		else if (dataType.find("double") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Double(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -212,7 +213,7 @@ namespace VH
 		}
 		else if (dataType.find("int") != std::string::npos || dataType.find("size_t") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Int(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -240,7 +241,7 @@ namespace VH
 		}
 		else if (dataType.find("string") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::String(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::String(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -268,7 +269,7 @@ namespace VH
 		}
 		else if (dataType.find("path") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::FileSystem(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::FileSystem(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -296,7 +297,7 @@ namespace VH
 		}
 		else if (dataType.find("bool") != std::string::npos)
 		{
-			cppSourefile += "			EditorElement::Checkbox(" + compPTR + "->" + name + ", \"" + formatedName + "\"";
+			cppSourefile += "			EditorElement::Checkbox(" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 			if (itr != propertyMeta.end())
 			{
@@ -339,7 +340,7 @@ namespace VH
 							cppSourefile += "					\"" + item + "\",\n";
 						}
 						cppSourefile += "			};\n";
-						cppSourefile += "			EditorElement::Combo(items, (int*)&(" + compPTR + "->" + name + "), " + std::to_string(_enum.items.size()) + ", \"" + formatedName + "\"";
+						cppSourefile += "			EditorElement::Combo(items, (int*)&(" + compPTR + "->" + name + (isVector? "[i]" : "") +  "), " + std::to_string(_enum.items.size()) + ", \"" + formatedName + "\"";
 
 						auto itr = std::find_if(propertyMeta.begin(), propertyMeta.end(), [](const Meta& meta) { return meta.key == "OnChange"; });
 						if (itr != propertyMeta.end())
@@ -383,13 +384,11 @@ namespace VH
 							compFullSpacename += sn + "::";
 						}
 
-						cppSourefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = &" + compPTR + "->" + name + ";\n";
+						cppSourefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = &" + (isVector? compPTR + "->" + name + "[i];\n" : compPTR + "->" + name + ";\n");
 						cppSourefile += "			Draw" + comp.name.name + "EditorUI(\"" + name + "\", entity, " + comp.name.name + "_" + ", false); \n";
 					}
 				}
 			}
-
-			
 		}
 
 		cppSourefile += "\n\n";
@@ -397,6 +396,11 @@ namespace VH
 	}
 	void HeaderTool::GenerateEditorUIFile()
 	{
+		std::random_device dev;
+		std::mt19937 rng(dev());
+		std::uniform_int_distribution<std::mt19937::result_type> random(0, 1000);
+
+
 		std::string filename = "ve_generated_editor_file.cpp";
 
 		std::string cppSourcefile = "#ifdef VE_EDITOR\n";
@@ -425,7 +429,7 @@ namespace VH
 				}
 				cppSourcefile += "void Draw" + comp.name.name + "EditorUI(std::string name, flecs::entity entity, " + compFullSpacename + comp.name.name + "* " + comp.name.name + "_, bool removable)\n{\n";
 
-				cppSourcefile += "	ImGui::PushID(name.c_str());\n"
+				cppSourcefile += "	ImGui::PushID((name + (const char*)(int[1])(" + std::to_string(random(rng)) + ")).c_str()); \n"
 					"	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
 				cppSourcefile += "		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());\n";
 				cppSourcefile += "		if(removable)\n";
@@ -443,8 +447,42 @@ namespace VH
 				{
 					if (std::find_if(property.meta.begin(), property.meta.end(), [](const Meta& meta) { return meta.key == "Editor";}) != property.meta.end())
 					{
-						EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name, property.meta);
+						if (property.dataType == "vector")
+						{
+							cppSourcefile += "\t\t\t{ImGui::PushID(((std::string)\"" + property.name + "\" + (const char*)(int[1])(" + std::to_string(random(rng)) + ")).c_str()); \n";
+							cppSourcefile += "\t\t\tImGuiTreeNodeFlags _flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
+							cppSourcefile += "\t\t\tbool _open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), _flags, \"" + property.name + "\");\n";
+							cppSourcefile += "\t\t\tImGui::SameLine();\n"
+								"\t\t\tImVec2 plusSize = ImGui::CalcTextSize(\"+\");\n"
+								"\t\t\tImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));\n"
+								"\t\t\tImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));\n"
+								"\t\t\tif(ImGui::Button(\"+\", {plusSize.x * 4.0f, plusSize.y})){" + comp.name.name + "_" + "->" + property.name + ".push_back({});}\n"
+								"\t\t\tImGui::PopStyleVar(2);\n";
+							cppSourcefile += "\t\t\tif(_open){\n";
+							cppSourcefile += "\n\t\t\t\tfor(size_t i = 0; i < " + comp.name.name + "_" + "->" + property.name + ".size(); i++){\n"
+							"\t\t\t\t\t\tImGui::PushID(((std::string)\"" + property.name + "\" + (const char*)(size_t[1])i).c_str());\n";
+							cppSourcefile += "\t\t\t\t\t\tImGuiTreeNodeFlags __flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;\n";
+							cppSourcefile += "\t\t\t\t\t\tbool __open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), __flags, ((std::string)\"" + property.name + "[\" + std::to_string(i) + \"]\").c_str());\n";
+							cppSourcefile += "\t\t\t\t\t\tImGui::SameLine();\n"
+								"\t\t\t\t\tImVec2 plusSize = ImGui::CalcTextSize(\"-\");\n"
+								"\t\t\t\t\tImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));\n"
+								"\t\t\t\t\tImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));\n"
+								"\t\t\t\t\tif(ImGui::Button(\"-\", {plusSize.x * 4.0f, plusSize.y})){}\n"
+								"\t\t\t\t\tImGui::PopStyleVar(2);\n";
+							cppSourcefile += "\t\t\t\t\t\tif(__open){\n";
+							EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.args[0], property.name, property.meta, true);
+							cppSourcefile += "\t\t\t\t\t\tImGui::TreePop();}\n";
+							cppSourcefile += "\t\t\t\t\t\tImGui::PopID();\n";
+							cppSourcefile += "\t\t\t\t\t}\n";
+							cppSourcefile += "\n\t\t\tImGui::TreePop();\n}\n";
+							cppSourcefile += "\t\t\tImGui::PopID();}\n";
+						}
+						else 
+						{
+							EditorElement(cppSourcefile, comp.name.name + "_", property.nameSpaces[0] + property.dataType, property.name, property.meta);
+						}
 					}
+
 				}
 
 				cppSourcefile += "			ImGui::TreePop();\n		}\n";
@@ -529,8 +567,6 @@ namespace VH
 
 				if (!comp.properites.empty())
 				{
-
-
 					cppSourcefile += "void Serialize_" + comp.name.name + "()\n"
 						"{\n"
 						"	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)"
@@ -546,7 +582,21 @@ namespace VH
 					for (const ParsedName& property : comp.properites)
 					{
 						cppSourcefile += ".member<" + ((property.nameSpaces[0].empty()) ? "" : property.nameSpaces[0] + "::");
-						cppSourcefile += property.dataType + ">(\"" + property.name + "\")";
+						cppSourcefile += property.dataType;
+						if (property.templateType)
+						{
+							cppSourcefile += "<";
+							for (auto arg : property.args)
+							{
+								cppSourcefile += arg + ",";
+							}
+							if (property.args.size())
+							{
+								cppSourcefile.pop_back();
+							}
+							cppSourcefile += ">";
+						}
+						cppSourcefile += ">(\"" + property.name + "\")";
 					}
 					cppSourcefile += ")\n"
 						"		.serialize([](const flecs::serializer* s, const " + compFullSpacename + comp.name.name + "* data) -> int"
@@ -565,13 +615,12 @@ namespace VH
 						cppSourcefile += "			else if (!strcmp(member, \"" + property.name + "\")) { return &data->" + property.name + ";}\n";
 					}
 					cppSourcefile += "		return nullptr;\n"
-						"		});\n"
+						"		});\n";
+					cppSourcefile += "		flecs::world w = comp->world();\n"
+						"		w.component<std::vector<" + compFullSpacename + comp.name.name + ">>().opaque(VE::std_vector_support<" + compFullSpacename + comp.name.name + ">);\n"
 						"	}\n"
 						"}\n\n\n";
-
 				}
-
-				
 			}
 		}
 		if (type == Type::Engine)

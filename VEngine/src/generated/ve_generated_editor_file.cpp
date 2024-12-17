@@ -16,7 +16,7 @@ using namespace VE::Components::UI;
 
 void DrawTransformComponentEditorUI(std::string name, flecs::entity entity, VE::Components::TransformComponent* TransformComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(976)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -46,7 +46,7 @@ void DrawTransformComponentEditorUI(std::string name, flecs::entity entity, VE::
 }
 void DrawSpriteComponentEditorUI(std::string name, flecs::entity entity, VE::Components::SpriteComponent* SpriteComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(900)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -82,7 +82,7 @@ void DrawSpriteComponentEditorUI(std::string name, flecs::entity entity, VE::Com
 }
 void DrawCamera2DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Camera2DComponent* Camera2DComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(945)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -115,7 +115,7 @@ void DrawCamera2DComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawCamera3DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Camera3DComponent* Camera3DComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(307)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -151,7 +151,7 @@ void DrawCamera3DComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawVEMaterialEditorUI(std::string name, flecs::entity entity, VE::Components::VEMaterial* VEMaterial_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(88)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -183,7 +183,7 @@ void DrawVEMaterialEditorUI(std::string name, flecs::entity entity, VE::Componen
 }
 void DrawModel3DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Model3DComponent* Model3DComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(87)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -209,17 +209,78 @@ void DrawModel3DComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 			EditorElement::FileSystem(Model3DComponent_->modelFilepath, "Model Filepath", Model3DComponent_, VE::Components::ModelOnChange);
 
 
-			VE::Components::VEMaterial* VEMaterial_ = &Model3DComponent_->mat;
-			DrawVEMaterialEditorUI("mat", entity, VEMaterial_, false); 
+			{ImGui::PushID(((std::string)"materials" + (const char*)(int[1])(331)).c_str()); 
+			ImGuiTreeNodeFlags _flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+			bool _open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), _flags, "materials");
+			ImGui::SameLine();
+			ImVec2 plusSize = ImGui::CalcTextSize("+");
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+			if(ImGui::Button("+", {plusSize.x * 4.0f, plusSize.y})){Model3DComponent_->materials.push_back({});}
+			ImGui::PopStyleVar(2);
+			if(_open){
+
+				for(size_t i = 0; i < Model3DComponent_->materials.size(); i++){
+						ImGui::PushID(((std::string)"materials" + (const char*)(size_t[1])i).c_str());
+						ImGuiTreeNodeFlags __flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+						bool __open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), __flags, ((std::string)"materials[" + std::to_string(i) + "]").c_str());
+						ImGui::SameLine();
+					ImVec2 plusSize = ImGui::CalcTextSize("-");
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+					if(ImGui::Button("-", {plusSize.x * 4.0f, plusSize.y})){}
+					ImGui::PopStyleVar(2);
+						if(__open){
+			VE::Components::VEMaterial* VEMaterial_ = &Model3DComponent_->materials[i];
+			DrawVEMaterialEditorUI("materials", entity, VEMaterial_, false); 
 
 
+						ImGui::TreePop();}
+						ImGui::PopID();
+					}
+
+			ImGui::TreePop();
+}
+			ImGui::PopID();}
+			{ImGui::PushID(((std::string)"numbers" + (const char*)(int[1])(227)).c_str()); 
+			ImGuiTreeNodeFlags _flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+			bool _open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), _flags, "numbers");
+			ImGui::SameLine();
+			ImVec2 plusSize = ImGui::CalcTextSize("+");
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+			if(ImGui::Button("+", {plusSize.x * 4.0f, plusSize.y})){Model3DComponent_->numbers.push_back({});}
+			ImGui::PopStyleVar(2);
+			if(_open){
+
+				for(size_t i = 0; i < Model3DComponent_->numbers.size(); i++){
+						ImGui::PushID(((std::string)"numbers" + (const char*)(size_t[1])i).c_str());
+						ImGuiTreeNodeFlags __flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+						bool __open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), __flags, ((std::string)"numbers[" + std::to_string(i) + "]").c_str());
+						ImGui::SameLine();
+					ImVec2 plusSize = ImGui::CalcTextSize("-");
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+					if(ImGui::Button("-", {plusSize.x * 4.0f, plusSize.y})){}
+					ImGui::PopStyleVar(2);
+						if(__open){
+			EditorElement::Int(Model3DComponent_->numbers[i], "Numbers");
+
+
+						ImGui::TreePop();}
+						ImGui::PopID();
+					}
+
+			ImGui::TreePop();
+}
+			ImGui::PopID();}
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
 }
 void DrawUICanvasComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UICanvasComponent* UICanvasComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(300)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -246,7 +307,7 @@ void DrawUICanvasComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawUILabelComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UILabelComponent* UILabelComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(354)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -285,7 +346,7 @@ void DrawUILabelComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 }
 void DrawUIImageComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UIImageComponent* UIImageComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(977)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -318,7 +379,7 @@ void DrawUIImageComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 }
 void DrawUIButtonComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UIButtonComponent* UIButtonComponent_, bool removable)
 {
-	ImGui::PushID(name.c_str());
+	ImGui::PushID((name + (const char*)(int[1])(660)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)

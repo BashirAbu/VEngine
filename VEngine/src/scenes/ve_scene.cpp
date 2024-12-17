@@ -583,14 +583,63 @@ namespace VE
 					*data = (std::string)value;
 				});
 
+		world.component<std::vector<int8_t>>()
+			.opaque(std_vector_support<int8_t>);
+
+		world.component<std::vector<int16_t>>()
+			.opaque(std_vector_support<int16_t>);
+
+		world.component<std::vector<int32_t>>()
+			.opaque(std_vector_support<int32_t>);
+
+		world.component<std::vector<int64_t>>()
+			.opaque(std_vector_support<int64_t>);
+
+
+		world.component<std::vector<uint8_t>>()
+			.opaque(std_vector_support<uint8_t>);
+
+		world.component<std::vector<uint16_t>>()
+			.opaque(std_vector_support<uint16_t>);
+
+		world.component<std::vector<uint32_t>>()
+			.opaque(std_vector_support<uint32_t>);
+
+		world.component<std::vector<uint64_t>>()
+			.opaque(std_vector_support<uint64_t>);
+
+
+
+		world.component<std::vector<float>>()
+			.opaque(std_vector_support<float>);
+
+		world.component<std::vector<double>>()
+			.opaque(std_vector_support<double>);
+
+		world.component<std::vector<std::string>>()
+			.opaque(std_vector_support<std::string>);
+
+		world.component<std::vector<std::filesystem::path>>()
+			.opaque(std_vector_support<std::filesystem::path>);
+
+
 
 		world.component<glm::vec2>().member<float>("x").member<float>("y");
+
+		world.component<std::vector<glm::vec2>>()
+			.opaque(std_vector_support<glm::vec2>);
+
 		
 		world.component<glm::vec3>().member<float>("x").member<float>("y").member<float>("z");
 
+		world.component<std::vector<glm::vec3>>()
+			.opaque(std_vector_support<glm::vec3>);
 
 		world.component<glm::vec4>().member<float>("x").member<float>("y").member<float>("z").member<float>("w");
-		
+
+		world.component<std::vector<glm::vec4>>()
+			.opaque(std_vector_support<glm::vec4>);
+
 
 		world.component<Components::TransformComponent>()
 			.on_set([](flecs::entity e, Components::TransformComponent& tc)
@@ -675,7 +724,11 @@ namespace VE
 			});
 
 
-			world.component<Components::Model3DComponent>().on_set([](flecs::entity e, Components::Model3DComponent& model)
+			world.component<Components::Model3DComponent>().on_add([](flecs::entity e, Components::Model3DComponent& model) 
+				{
+
+				})
+				.on_set([](flecs::entity e, Components::Model3DComponent& model)
 				{
 					model.model = nullptr;
 					model.basicModel = {};

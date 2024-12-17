@@ -366,7 +366,10 @@ namespace VE
 
 
 			VE_PROPERTY(Editor)
-			VEMaterial mat;
+			std::vector<VEMaterial> materials;
+
+			VE_PROPERTY(Editor)
+			std::vector<int> numbers;
 		};
 
 		VE_FUNCTION(Callback)

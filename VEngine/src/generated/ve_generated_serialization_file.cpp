@@ -36,6 +36,8 @@ void Serialize_TransformComponent()
 			else if (!strcmp(member, "localScale")) { return &data->localScale;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::TransformComponent>>().opaque(VE::std_vector_support<VE::Components::TransformComponent>);
 	}
 }
 
@@ -72,6 +74,8 @@ void Serialize_SpriteComponent()
 			else if (!strcmp(member, "shaderPath")) { return &data->shaderPath;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::SpriteComponent>>().opaque(VE::std_vector_support<VE::Components::SpriteComponent>);
 	}
 }
 
@@ -105,6 +109,8 @@ void Serialize_Camera2DComponent()
 			else if (!strcmp(member, "isMain")) { return &data->isMain;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::Camera2DComponent>>().opaque(VE::std_vector_support<VE::Components::Camera2DComponent>);
 	}
 }
 
@@ -141,6 +147,8 @@ void Serialize_Camera3DComponent()
 			else if (!strcmp(member, "isMain")) { return &data->isMain;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::Camera3DComponent>>().opaque(VE::std_vector_support<VE::Components::Camera3DComponent>);
 	}
 }
 
@@ -168,6 +176,8 @@ void Serialize_VEMaterial()
 			else if (!strcmp(member, "value")) { return &data->value;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::VEMaterial>>().opaque(VE::std_vector_support<VE::Components::VEMaterial>);
 	}
 }
 
@@ -181,23 +191,28 @@ void Serialize_Model3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Model3DComponent>* comp = (flecs::component<VE::Components::Model3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath").member<VEMaterial>("mat"))
+		comp->opaque(comp->world().component().member<BasicMesh>("basicMesh").member<std::filesystem::path>("modelFilepath").member<std::vector<VEMaterial>>("materials").member<std::vector<int>>("numbers"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Model3DComponent* data) -> int		{
 		s->member("basicMesh");
 		s->value(data->basicMesh);
 		s->member("modelFilepath");
 		s->value(data->modelFilepath);
-		s->member("mat");
-		s->value(data->mat);
+		s->member("materials");
+		s->value(data->materials);
+		s->member("numbers");
+		s->value(data->numbers);
 			 return 0;
 		}).ensure_member([](VE::Components::Model3DComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "basicMesh")) { return &data->basicMesh;}
 			else if (!strcmp(member, "modelFilepath")) { return &data->modelFilepath;}
-			else if (!strcmp(member, "mat")) { return &data->mat;}
+			else if (!strcmp(member, "materials")) { return &data->materials;}
+			else if (!strcmp(member, "numbers")) { return &data->numbers;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::Model3DComponent>>().opaque(VE::std_vector_support<VE::Components::Model3DComponent>);
 	}
 }
 
@@ -225,6 +240,8 @@ void Serialize_UICanvasComponent()
 			else if (!strcmp(member, "isMain")) { return &data->isMain;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::UI::UICanvasComponent>>().opaque(VE::std_vector_support<VE::Components::UI::UICanvasComponent>);
 	}
 }
 
@@ -264,6 +281,8 @@ void Serialize_UILabelComponent()
 			else if (!strcmp(member, "size")) { return &data->size;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::UI::UILabelComponent>>().opaque(VE::std_vector_support<VE::Components::UI::UILabelComponent>);
 	}
 }
 
@@ -297,6 +316,8 @@ void Serialize_UIImageComponent()
 			else if (!strcmp(member, "renderOrder")) { return &data->renderOrder;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::UI::UIImageComponent>>().opaque(VE::std_vector_support<VE::Components::UI::UIImageComponent>);
 	}
 }
 
@@ -321,6 +342,8 @@ void Serialize_UIButtonComponent()
 			else if (!strcmp(member, "pressTintColor")) { return &data->pressTintColor;}
 		return nullptr;
 		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::UI::UIButtonComponent>>().opaque(VE::std_vector_support<VE::Components::UI::UIButtonComponent>);
 	}
 }
 
