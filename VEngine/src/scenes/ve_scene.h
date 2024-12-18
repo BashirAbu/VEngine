@@ -86,6 +86,8 @@ namespace VE
 
 		std::vector<std::filesystem::path> deferredConstructs;
 
+		int lightCount = 0;
+
 		friend class Editor;
 		friend class SceneManager;
 		friend class Renderer;

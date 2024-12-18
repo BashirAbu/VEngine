@@ -978,18 +978,6 @@ namespace VE
 				ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 			}
 
-			if (c3dc)
-			{
-				if (c3dc->skyboxTexture)
-				{
-					rlDisableBackfaceCulling();
-					rlDisableDepthMask();
-					DrawModel(c3dc->skyboxModel, { 0, 0, 0 }, 1.0f, WHITE);
-					rlEnableBackfaceCulling();
-					rlEnableDepthMask();
-				}
-			}
-
 			engine->sceneManager->currentScene->renderer.RenderQueued3D();
 			DrawGrid(10, 1.0f);
 

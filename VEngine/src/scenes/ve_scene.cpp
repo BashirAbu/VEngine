@@ -4,7 +4,7 @@
 #include "systems/ve_systems.h"
 #include "utils/ve_utils.h"
 #include <thread>
-
+#include <rlgl.h>
 void EngineGeneratedRegistration();
 
 namespace VE 
@@ -26,7 +26,7 @@ namespace VE
 		EngineGeneratedRegistration();
 		OnSharedLibraryEntry(world);
 		//register builtin systems.
-		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::Sprite2DRenderSystem);
+		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Model3DComponent>("Mesh3DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Mesh3DRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent, Components::Camera3DComponent>("Camera3DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera3DSystem);
@@ -583,6 +583,9 @@ namespace VE
 					*data = (std::string)value;
 				});
 
+
+		world.component<Texture>().member<flecs::u32_t>("id").member<flecs::i32_t>("width").member<flecs::i32_t>("height").member<flecs::i32_t>("mipmaps").member<flecs::i32_t>("format");
+		
 		world.component<std::vector<int8_t>>()
 			.opaque(std_vector_support<int8_t>);
 
@@ -692,79 +695,75 @@ namespace VE
 				SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 
 
-				if (!c3dc.skyboxTexturePath.empty())
-				{
-					c3dc.skyboxTexture = AssetsManager::GetSingleton()->LoadTexture(c3dc.skyboxTexturePath);
-					if (c3dc.skyboxTexture)
-					{
-						c3dc.skyboxShader = AssetsManager::GetSingleton()->LoadShader("shaders/skybox.glsl");
-						c3dc.cubemapShader = AssetsManager::GetSingleton()->LoadShader("shaders/cubemap.glsl");
-						Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
-						c3dc.skyboxModel = LoadModelFromMesh(cube);
-
-						c3dc.skyboxModel.materials[0].shader = *c3dc.skyboxShader;
-
-						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "environmentMap"), (int[1])(MATERIAL_MAP_CUBEMAP), SHADER_UNIFORM_INT);
-						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "doGamma"), (int[1])(0), SHADER_UNIFORM_INT);
-						SetShaderValue(c3dc.skyboxModel.materials[0].shader, GetShaderLocation(c3dc.skyboxModel.materials[0].shader, "vflipped"), (int[1])(0), SHADER_UNIFORM_INT);
-
-						SetShaderValue(*c3dc.cubemapShader, GetShaderLocation(*c3dc.cubemapShader, "equirectangularMap"), (int[1])(0), SHADER_UNIFORM_INT);
-
-						Image img = LoadImageFromTexture(*c3dc.skyboxTexture);
-						c3dc.skyboxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-						UnloadImage(img);
-					}
-				}
+				
 
 
 			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
 				{
 					UnloadRenderTexture(c3dc.renderTarget);
-					UnloadModel(c3dc.skyboxModel);
 			});
 
+			
+			
 
 			world.component<Components::Model3DComponent>().on_add([](flecs::entity e, Components::Model3DComponent& model) 
 				{
-
+					
 				})
 				.on_set([](flecs::entity e, Components::Model3DComponent& model)
 				{
 					model.model = nullptr;
 					model.basicModel = {};
-					model.pbrShader = nullptr;
-
-					model.pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
-
-					//(*model.pbrShader).locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation((*model.pbrShader), "albedoMap");
-					//(*model.pbrShader).locs[SHADER_LOC_MAP_METALNESS] = GetShaderLocation((*model.pbrShader), "mraMap");
-					//(*model.pbrShader).locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation((*model.pbrShader), "normalMap");
-					//(*model.pbrShader).locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation((*model.pbrShader), "emissiveMap");
-					//(*model.pbrShader).locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation((*model.pbrShader), "albedoColor");
-					//(*model.pbrShader).locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation((*model.pbrShader), "viewPos");
-
-					//int lightCountLoc = GetShaderLocation((*model.pbrShader), "numOfLights");
-					//int maxLightCount = MAX_LIGHTS;
-					//SetShaderValue((*model.pbrShader), lightCountLoc, &maxLightCount, SHADER_UNIFORM_INT);
 
 					if (!model.modelFilepath.empty())
 					{
-						model.model = AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
+						model.model = VE::AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
 					}
-					if (model.basicMesh != Components::BasicMesh::None)
+					if (model.basicMesh != _Components::BasicMesh::None)
 					{
 						model.basicModel = Components::LoadBasicMesh(model.basicMesh);
-						model.model = &(model.basicModel);
+						model.model = &model.basicModel;
 					}
 
-					if (model.model && model.pbrShader)
+					Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+
+					
+
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_COLOR] = rlGetLocationAttrib(pbrShader->id, "vertexColor");
+
+
+
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = rlGetLocationUniform(pbrShader->id, "mvp");
+					pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "colDiffuse");
+					pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "texture0");
+					
+
+
+					if (model.materials.size() == 0)
 					{
-						for (size_t i = 0; i < model.model->materialCount; i++)
+						model.materials = std::vector<_Components::VEMaterial>(model.model->materialCount);
+					}
+
+
+					for (size_t i = 0; i < model.model->materialCount; i++)
+					{
+						model.materials[i].shader = pbrShader;
+						if (model.materials[i].albedoTexturePath.empty()) 
 						{
-							model.model->materials[i].shader = *model.pbrShader;
+							if (model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture.id > 0)
+							{
+								model.materials[i].albedoTexture = model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture;
+							}
+						}
+						else 
+						{
+							model.materials[i].albedoTexture = *AssetsManager::GetSingleton()->LoadTexture(model.materials[i].albedoTexturePath);
+							model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoTexture;
 						}
 					}
-					
+
 				});
 
 

@@ -70,7 +70,16 @@ namespace VH
 					
 					std::string propertyNamespace;
 					std::string propertyDatatype;
-					std::string full = member["dataType"]["name"];
+					std::string full;
+					if (member["dataType"]["type"] == "pointer")
+					{
+						full = member["dataType"]["baseType"]["name"];
+					}
+					else 
+					{
+						full = member["dataType"]["name"];
+						
+					}
 
 					size_t pos = full.rfind("::");
 

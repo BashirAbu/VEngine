@@ -38,6 +38,8 @@ namespace VE
 
 	void Renderer::RenderQueued3D()
 	{
+		
+
 		for (const auto& m3d : model3DRenderQueue)
 		{
 			DrawModel(**m3d.model, {}, 1.0f, WHITE);
@@ -114,14 +116,7 @@ namespace VE
 					BeginTextureMode(cc.renderTarget);
 					BeginMode3D(cc.camera);
 					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
-					if (cc.skyboxTexture)
-					{
-						rlDisableBackfaceCulling();
-						rlDisableDepthMask();
-						DrawModel(cc.skyboxModel, { 0, 0, 0 }, 1.0f, WHITE);
-						rlEnableBackfaceCulling();
-						rlEnableDepthMask();
-					}
+					
 					RenderQueued3D();
 
 					EndMode3D();

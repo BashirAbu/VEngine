@@ -2,6 +2,7 @@
 #ifdef VE_EDITOR
 #include "ve_defines.h"
 #include <imgui.h>
+#include <raylib.h>
 namespace VE 
 {
 
@@ -25,6 +26,7 @@ namespace VE
 		VE_API void FileSystem(std::filesystem::path& path, std::string label, void* data = nullptr, std::function<void(void* data)> callback = nullptr);
 		VE_API void Checkbox(bool& variable, std::string label, void* data = nullptr, std::function<void(void* data)> callback = nullptr);
 		VE_API void Combo(const char** items, int* currentItem, size_t items_count, std::string label, void* data = nullptr, std::function<void(void* data)> callback = nullptr);
+		VE_API void Image(const ::Texture* texture, std::string lable);
 	}
 
 }

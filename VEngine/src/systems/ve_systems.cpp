@@ -4,6 +4,7 @@
 #include <raymath.h>
 #include <thread>
 #include "ve_input.h"
+#include <rlgl.h>
 namespace VE::Systems
 {
 	void ApplyParentTransform(flecs::entity parent, Components::TransformComponent& parentTC)
@@ -122,15 +123,26 @@ namespace VE::Systems
 
 	
 
+	
+
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
 	{
-		if (model.model && model.pbrShader)
+		if (model.model)
 		{
 			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
 			VE::Renderer::Model3D m3d = {};
 			m3d.model = &model.model;
 			m3d.entity = e;
+
+			for (size_t i = 0; i < model.materials.size(); i++)
+			{
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].color = GLMVec4ToRayColor(model.materials[i].albedoColor);
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].value = model.materials[i].albedoValue;
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoTexture;
+			}
+
+
 			VE::Scene::GetSingleton()->renderer.Submit(m3d);
 		}
 	}

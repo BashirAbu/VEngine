@@ -3,6 +3,7 @@
 #include "platform/ve_platform.h"
 #include "ve_engine.h"
 #include "utils/ve_utils.h"
+#include <rlImGui.h>
 namespace VE
 {
 	namespace EditorElement
@@ -429,6 +430,19 @@ namespace VE
                 }
             }
             ImGui::NextColumn();
+            ImGui::Columns(1);
+        }
+
+        VE_API void Image(const Texture* texture, std::string label)
+        {
+            ImGui::Columns(2, 0, false);
+            ImGui::Text(label.c_str());
+            ImGui::NextColumn();
+            if (texture->id > 0)
+            {
+                rlImGuiImageSize(texture, 100, 100);
+                ImGui::NextColumn();
+            }
             ImGui::Columns(1);
         }
 

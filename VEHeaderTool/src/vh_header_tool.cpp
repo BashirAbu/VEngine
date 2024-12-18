@@ -324,6 +324,11 @@ namespace VH
 			cppSourefile += ");\n";
 
 		}
+		else if (dataType.find("Texture") != std::string::npos)
+		{
+			cppSourefile += "			EditorElement::Image(&" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
+			cppSourefile += ");\n";
+			}
 		else 
 		{
 			for (auto headerFile : headerFiles)
