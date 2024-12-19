@@ -977,7 +977,14 @@ namespace VE
 			{
 				ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 			}
+			
+			
 
+			Shader* pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+			int location = GetShaderLocation(*pbrShader, "viewPosition");
+			glm::vec3 position = {editorCamera3D.position.x, editorCamera3D.position.y, editorCamera3D.position.z};
+			SetShaderValue(*pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+			
 			engine->sceneManager->currentScene->renderer.RenderQueued3D();
 			DrawGrid(10, 1.0f);
 

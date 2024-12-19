@@ -28,6 +28,7 @@ namespace VE
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Model3DComponent>("Mesh3DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Mesh3DRenderSystem);
+		world.system<Components::TransformComponent, Components::LightComponent>("LightRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::LightRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent, Components::Camera3DComponent>("Camera3DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera3DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);
@@ -35,7 +36,7 @@ namespace VE
 
 		world.system<Components::UI::UICanvasComponent>("UICanvasSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::UICanvasSystem);
 		world.system<Components::TransformComponent, Components::UI::UILabelComponent>("UILabelRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UILabelRenderSystem);
-		world.system<Components::TransformComponent, Components::UI::UIImageComponent>("UIImageRenderSystem").kind(OnRender).without<_Components::Disabled>().multi_threaded().each(Systems::UIImageRenderSystem);
+		world.system<Components::TransformComponent, Components::UI::UIImageComponent>("UIImageRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UIImageRenderSystem);
 		world.system<Components::TransformComponent, Components::UI::UIButtonComponent, Components::UI::UIImageComponent>("UIButtonSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::UIButtonSystem);
 
 
@@ -703,7 +704,10 @@ namespace VE
 					UnloadRenderTexture(c3dc.renderTarget);
 			});
 
-			
+			world.component<Components::LightComponent>().on_add([](flecs::entity e, Components::LightComponent& light) 
+				{
+					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+				});
 			
 
 			world.component<Components::Model3DComponent>().on_add([](flecs::entity e, Components::Model3DComponent& model) 
@@ -731,15 +735,19 @@ namespace VE
 
 					pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
 					pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_COLOR] = rlGetLocationAttrib(pbrShader->id, "vertexColor");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(pbrShader->id, "vertexNormal");
+					pbrShader->locs[SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(pbrShader->id, "texture0");
 
+					
 
-
+					pbrShader->locs[SHADER_LOC_MATRIX_MODEL] = rlGetLocationUniform(pbrShader->id, "modelMatrix");
 					pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = rlGetLocationUniform(pbrShader->id, "mvp");
 					pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "colDiffuse");
 					pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "texture0");
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_NORMAL] = rlGetLocationUniform(pbrShader->id, "normalMatrix");
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = rlGetLocationUniform(pbrShader->id, "projectionMatrix");
 					
-
+					
 
 					if (model.materials.size() == 0)
 					{
@@ -750,6 +758,7 @@ namespace VE
 					for (size_t i = 0; i < model.model->materialCount; i++)
 					{
 						model.materials[i].shader = pbrShader;
+						model.model->materials[i].shader = *pbrShader;
 						if (model.materials[i].albedoTexturePath.empty()) 
 						{
 							if (model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture.id > 0)

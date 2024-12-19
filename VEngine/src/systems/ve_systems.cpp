@@ -80,6 +80,14 @@ namespace VE::Systems
 		c3dc.camera.up.x = transformMatrix.m4;
 		c3dc.camera.up.y = transformMatrix.m5;
 		c3dc.camera.up.z = transformMatrix.m6;
+
+		if (c3dc.isMain)
+		{
+			Shader* pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+			int location = GetShaderLocation(*pbrShader, "viewPosition");
+			glm::vec3 position = transform.GetWorldPosition();
+			SetShaderValue(*pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+		}
 	}
 	void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc)
 	{
@@ -119,6 +127,16 @@ namespace VE::Systems
 			tex.shader = sc.shader ? &sc.shader : nullptr;
 			VE::Scene::GetSingleton()->renderer.Submit(tex);
 		}
+	}
+
+	void LightRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::LightComponent& light)
+	{
+		int location = GetShaderLocation(*light.pbrShader, "lightColor");
+		SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.color), SHADER_UNIFORM_VEC4);
+
+		location = GetShaderLocation(*light.pbrShader, "lightPosition");
+		glm::vec3 position = tc.GetWorldPosition();
+		SetShaderValue(*light.pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
 	}
 
 	

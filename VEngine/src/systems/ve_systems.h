@@ -19,7 +19,7 @@ namespace VE
 		void Camera2DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera2DComponent& c2dc);
 		void Camera3DSystem(flecs::entity e, Components::TransformComponent& transform, Components::Camera3DComponent& c3dc);
 		void Sprite2DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::SpriteComponent& sc);
-
+		void LightRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::LightComponent& light);
 		void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model);
 
 

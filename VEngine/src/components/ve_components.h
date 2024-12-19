@@ -326,7 +326,9 @@ namespace VE
 		VE_CLASS(Component)
 		struct LightComponent 
 		{
+			VE_PROPERTY(Editor)
 			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			Shader* pbrShader = nullptr;
 		};
 
 		VE_CLASS(Component)

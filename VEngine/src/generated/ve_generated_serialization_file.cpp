@@ -185,6 +185,32 @@ void Serialize_Camera3DComponent()
 }
 
 
+void Serialize_LightComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "LightComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::LightComponent>* comp = (flecs::component<VE::Components::LightComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<NormalizedColor>("color"))
+		.serialize([](const flecs::serializer* s, const VE::Components::LightComponent* data) -> int		{
+		s->member("color");
+		s->value(data->color);
+			 return 0;
+		}).ensure_member([](VE::Components::LightComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "color")) { return &data->color;}
+		return nullptr;
+		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::LightComponent>>().opaque(VE::std_vector_support<VE::Components::LightComponent>);
+	}
+}
+
+
 void Serialize_Model3DComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -355,6 +381,7 @@ void EngineGeneratedSerialization()
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
 	 Serialize_Camera3DComponent();
+	 Serialize_LightComponent();
 	 Serialize_Model3DComponent();
 	 Serialize_UICanvasComponent();
 	 Serialize_UILabelComponent();
