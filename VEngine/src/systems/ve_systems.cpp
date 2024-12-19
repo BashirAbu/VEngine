@@ -155,9 +155,9 @@ namespace VE::Systems
 
 			for (size_t i = 0; i < model.materials.size(); i++)
 			{
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].color = GLMVec4ToRayColor(model.materials[i].albedoColor);
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].value = model.materials[i].albedoValue;
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoTexture;
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].color = GLMVec4ToRayColor(model.materials[i].albedoMap.color);
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].value = model.materials[i].albedoMap.value;
+				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoMap.texture;
 			}
 
 

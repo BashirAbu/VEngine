@@ -324,7 +324,7 @@ namespace VH
 			cppSourefile += ");\n";
 
 		}
-		else if (dataType.find("Texture") != std::string::npos)
+		else if (dataType == "Texture")
 		{
 			cppSourefile += "			EditorElement::Image(&" + compPTR + "->" + name + (isVector ? "[i]" : "") + ", \"" + formatedName + "\"";
 			cppSourefile += ");\n";
@@ -389,8 +389,8 @@ namespace VH
 							compFullSpacename += sn + "::";
 						}
 
-						cppSourefile += "			" + compFullSpacename + comp.name.name + "* " + comp.name.name + "_ = &" + (isVector? compPTR + "->" + name + "[i];\n" : compPTR + "->" + name + ";\n");
-						cppSourefile += "			Draw" + comp.name.name + "EditorUI(\"" + name + "\", entity, " + comp.name.name + "_" + ", false); \n";
+						cppSourefile += "			" + compFullSpacename + comp.name.name + "* " + name + "_ = &" + (isVector? compPTR + "->" + name + "[i];\n" : compPTR + "->" + name + ";\n");
+						cppSourefile += "			Draw" + comp.name.name + "EditorUI(\"" + name + "\", entity, " + name + "_" + ", false); \n";
 					}
 				}
 			}

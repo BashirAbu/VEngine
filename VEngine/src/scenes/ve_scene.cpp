@@ -759,17 +759,17 @@ namespace VE
 					{
 						model.materials[i].shader = pbrShader;
 						model.model->materials[i].shader = *pbrShader;
-						if (model.materials[i].albedoTexturePath.empty()) 
+						if (model.materials[i].albedoMap.texturePath.empty()) 
 						{
 							if (model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture.id > 0)
 							{
-								model.materials[i].albedoTexture = model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture;
+								model.materials[i].albedoMap.texture = model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture;
 							}
 						}
 						else 
 						{
-							model.materials[i].albedoTexture = *AssetsManager::GetSingleton()->LoadTexture(model.materials[i].albedoTexturePath);
-							model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoTexture;
+							model.materials[i].albedoMap.texture = *AssetsManager::GetSingleton()->LoadTexture(model.materials[i].albedoMap.texturePath);
+							model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoMap.texture;
 						}
 					}
 

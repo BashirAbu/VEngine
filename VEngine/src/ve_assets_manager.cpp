@@ -473,7 +473,11 @@ namespace VE
 		}
 		models.clear();
 
-
+		for (auto shader : shaders)
+		{
+			UnloadShader(shader.second);
+		}
+		shaders.clear();
 
 		scenes.clear();
 		constructs.clear();

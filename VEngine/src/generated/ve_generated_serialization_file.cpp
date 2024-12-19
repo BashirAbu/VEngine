@@ -10,6 +10,41 @@ using namespace VE::Components::UI;
 using namespace VE::_Components;
 
 
+void Serialize_TextureMap()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "TextureMap"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::_Components::TextureMap>* comp = (flecs::component<VE::_Components::TextureMap>*)&compEntity; 
+		comp->opaque(comp->world().component().member<NormalizedColor>("color").member<float>("value").member<std::filesystem::path>("texturePath").member<Texture>("texture"))
+		.serialize([](const flecs::serializer* s, const VE::_Components::TextureMap* data) -> int		{
+		s->member("color");
+		s->value(data->color);
+		s->member("value");
+		s->value(data->value);
+		s->member("texturePath");
+		s->value(data->texturePath);
+		s->member("texture");
+		s->value(data->texture);
+			 return 0;
+		}).ensure_member([](VE::_Components::TextureMap* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "color")) { return &data->color;}
+			else if (!strcmp(member, "value")) { return &data->value;}
+			else if (!strcmp(member, "texturePath")) { return &data->texturePath;}
+			else if (!strcmp(member, "texture")) { return &data->texture;}
+		return nullptr;
+		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::_Components::TextureMap>>().opaque(VE::std_vector_support<VE::_Components::TextureMap>);
+	}
+}
+
+
 void Serialize_VEMaterial()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
@@ -19,24 +54,18 @@ void Serialize_VEMaterial()
 	if(compEntity)
 	{
 		flecs::component<VE::_Components::VEMaterial>* comp = (flecs::component<VE::_Components::VEMaterial>*)&compEntity; 
-		comp->opaque(comp->world().component().member<NormalizedColor>("albedoColor").member<float>("albedoValue").member<std::filesystem::path>("albedoTexturePath").member<Texture>("albedoTexture"))
+		comp->opaque(comp->world().component().member<TextureMap>("albedoMap").member<TextureMap>("specularMap"))
 		.serialize([](const flecs::serializer* s, const VE::_Components::VEMaterial* data) -> int		{
-		s->member("albedoColor");
-		s->value(data->albedoColor);
-		s->member("albedoValue");
-		s->value(data->albedoValue);
-		s->member("albedoTexturePath");
-		s->value(data->albedoTexturePath);
-		s->member("albedoTexture");
-		s->value(data->albedoTexture);
+		s->member("albedoMap");
+		s->value(data->albedoMap);
+		s->member("specularMap");
+		s->value(data->specularMap);
 			 return 0;
 		}).ensure_member([](VE::_Components::VEMaterial* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
-			else if (!strcmp(member, "albedoColor")) { return &data->albedoColor;}
-			else if (!strcmp(member, "albedoValue")) { return &data->albedoValue;}
-			else if (!strcmp(member, "albedoTexturePath")) { return &data->albedoTexturePath;}
-			else if (!strcmp(member, "albedoTexture")) { return &data->albedoTexture;}
+			else if (!strcmp(member, "albedoMap")) { return &data->albedoMap;}
+			else if (!strcmp(member, "specularMap")) { return &data->specularMap;}
 		return nullptr;
 		});
 		flecs::world w = comp->world();
@@ -376,6 +405,7 @@ void Serialize_UIButtonComponent()
 
 void EngineGeneratedSerialization()
 {
+	 Serialize_TextureMap();
 	 Serialize_VEMaterial();
 	 Serialize_TransformComponent();
 	 Serialize_SpriteComponent();
@@ -394,6 +424,7 @@ void EngineGeneratedSerialization()
 
 void EngineGeneratedRegistration()
 {
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::_Components::TextureMap>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::_Components::VEMaterial>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::TransformComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();

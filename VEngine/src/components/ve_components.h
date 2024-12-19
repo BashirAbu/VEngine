@@ -25,16 +25,28 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
+		struct TextureMap 
+		{
+			VE_PROPERTY(Editor)
+			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			float value;
+			VE_PROPERTY(Editor)
+			std::filesystem::path texturePath = "";
+			VE_PROPERTY(Editor)
+			Texture texture = {};
+		};
+
+
+		VE_CLASS(Component)
 		struct VEMaterial 
 		{
 			VE_PROPERTY(Editor)
-			NormalizedColor albedoColor = {1.0f, 1.0f, 1.0f, 1.0f};
+			TextureMap albedoMap;
 			VE_PROPERTY(Editor)
-			float albedoValue;
-			VE_PROPERTY(Editor)
-			std::filesystem::path albedoTexturePath = "";
-			VE_PROPERTY(Editor)
-			Texture albedoTexture = {};
+			TextureMap specularMap;
+
+
 			Shader* shader;
 		};
 
@@ -369,7 +381,7 @@ namespace VE
 			}break;
 			case _Components::BasicMesh::Sphere:
 			{
-				basicModel = LoadModelFromMesh(GenMeshSphere(1.0f, 12, 12));
+				basicModel = LoadModelFromMesh(GenMeshSphere(1.0f, 32, 32));
 			}break;
 			}
 
