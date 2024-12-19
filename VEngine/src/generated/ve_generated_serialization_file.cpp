@@ -54,18 +54,21 @@ void Serialize_VEMaterial()
 	if(compEntity)
 	{
 		flecs::component<VE::_Components::VEMaterial>* comp = (flecs::component<VE::_Components::VEMaterial>*)&compEntity; 
-		comp->opaque(comp->world().component().member<TextureMap>("albedoMap").member<TextureMap>("specularMap"))
+		comp->opaque(comp->world().component().member<TextureMap>("albedoMap").member<TextureMap>("specularMap").member<TextureMap>("ambientOcclusionMap"))
 		.serialize([](const flecs::serializer* s, const VE::_Components::VEMaterial* data) -> int		{
 		s->member("albedoMap");
 		s->value(data->albedoMap);
 		s->member("specularMap");
 		s->value(data->specularMap);
+		s->member("ambientOcclusionMap");
+		s->value(data->ambientOcclusionMap);
 			 return 0;
 		}).ensure_member([](VE::_Components::VEMaterial* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "albedoMap")) { return &data->albedoMap;}
 			else if (!strcmp(member, "specularMap")) { return &data->specularMap;}
+			else if (!strcmp(member, "ambientOcclusionMap")) { return &data->ambientOcclusionMap;}
 		return nullptr;
 		});
 		flecs::world w = comp->world();
@@ -214,28 +217,113 @@ void Serialize_Camera3DComponent()
 }
 
 
-void Serialize_LightComponent()
+void Serialize_DirectionalLightComponent()
 {
 	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
-		if(!strcmp(e.name().c_str(), "LightComponent"))
+		if(!strcmp(e.name().c_str(), "DirectionalLightComponent"))
 			return e;
 		return flecs::entity();	}); 
 	if(compEntity)
 	{
-		flecs::component<VE::Components::LightComponent>* comp = (flecs::component<VE::Components::LightComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<NormalizedColor>("color"))
-		.serialize([](const flecs::serializer* s, const VE::Components::LightComponent* data) -> int		{
+		flecs::component<VE::Components::DirectionalLightComponent>* comp = (flecs::component<VE::Components::DirectionalLightComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<NormalizedColor>("color").member<NormalizedColor>("ambient").member<NormalizedColor>("specular"))
+		.serialize([](const flecs::serializer* s, const VE::Components::DirectionalLightComponent* data) -> int		{
 		s->member("color");
 		s->value(data->color);
+		s->member("ambient");
+		s->value(data->ambient);
+		s->member("specular");
+		s->value(data->specular);
 			 return 0;
-		}).ensure_member([](VE::Components::LightComponent* data, const char* member) -> void*
+		}).ensure_member([](VE::Components::DirectionalLightComponent* data, const char* member) -> void*
 		{
 			if(0){ return nullptr;}
 			else if (!strcmp(member, "color")) { return &data->color;}
+			else if (!strcmp(member, "ambient")) { return &data->ambient;}
+			else if (!strcmp(member, "specular")) { return &data->specular;}
 		return nullptr;
 		});
 		flecs::world w = comp->world();
-		w.component<std::vector<VE::Components::LightComponent>>().opaque(VE::std_vector_support<VE::Components::LightComponent>);
+		w.component<std::vector<VE::Components::DirectionalLightComponent>>().opaque(VE::std_vector_support<VE::Components::DirectionalLightComponent>);
+	}
+}
+
+
+void Serialize_PointLightComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "PointLightComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::PointLightComponent>* comp = (flecs::component<VE::Components::PointLightComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<NormalizedColor>("color").member<NormalizedColor>("ambient").member<NormalizedColor>("specular").member<float>("constant").member<float>("linear").member<float>("quadratic"))
+		.serialize([](const flecs::serializer* s, const VE::Components::PointLightComponent* data) -> int		{
+		s->member("color");
+		s->value(data->color);
+		s->member("ambient");
+		s->value(data->ambient);
+		s->member("specular");
+		s->value(data->specular);
+		s->member("constant");
+		s->value(data->constant);
+		s->member("linear");
+		s->value(data->linear);
+		s->member("quadratic");
+		s->value(data->quadratic);
+			 return 0;
+		}).ensure_member([](VE::Components::PointLightComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "color")) { return &data->color;}
+			else if (!strcmp(member, "ambient")) { return &data->ambient;}
+			else if (!strcmp(member, "specular")) { return &data->specular;}
+			else if (!strcmp(member, "constant")) { return &data->constant;}
+			else if (!strcmp(member, "linear")) { return &data->linear;}
+			else if (!strcmp(member, "quadratic")) { return &data->quadratic;}
+		return nullptr;
+		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::PointLightComponent>>().opaque(VE::std_vector_support<VE::Components::PointLightComponent>);
+	}
+}
+
+
+void Serialize_SpotLightComponent()
+{
+	 flecs::entity compEntity = VE::Scene::GetSingleton()->GetFlecsWorld().query<flecs::Component>().find([](flecs::entity e, flecs::Component& c)	{
+		if(!strcmp(e.name().c_str(), "SpotLightComponent"))
+			return e;
+		return flecs::entity();	}); 
+	if(compEntity)
+	{
+		flecs::component<VE::Components::SpotLightComponent>* comp = (flecs::component<VE::Components::SpotLightComponent>*)&compEntity; 
+		comp->opaque(comp->world().component().member<NormalizedColor>("color").member<NormalizedColor>("ambient").member<NormalizedColor>("specular").member<float>("cutOff").member<float>("outerCutOff"))
+		.serialize([](const flecs::serializer* s, const VE::Components::SpotLightComponent* data) -> int		{
+		s->member("color");
+		s->value(data->color);
+		s->member("ambient");
+		s->value(data->ambient);
+		s->member("specular");
+		s->value(data->specular);
+		s->member("cutOff");
+		s->value(data->cutOff);
+		s->member("outerCutOff");
+		s->value(data->outerCutOff);
+			 return 0;
+		}).ensure_member([](VE::Components::SpotLightComponent* data, const char* member) -> void*
+		{
+			if(0){ return nullptr;}
+			else if (!strcmp(member, "color")) { return &data->color;}
+			else if (!strcmp(member, "ambient")) { return &data->ambient;}
+			else if (!strcmp(member, "specular")) { return &data->specular;}
+			else if (!strcmp(member, "cutOff")) { return &data->cutOff;}
+			else if (!strcmp(member, "outerCutOff")) { return &data->outerCutOff;}
+		return nullptr;
+		});
+		flecs::world w = comp->world();
+		w.component<std::vector<VE::Components::SpotLightComponent>>().opaque(VE::std_vector_support<VE::Components::SpotLightComponent>);
 	}
 }
 
@@ -411,7 +499,9 @@ void EngineGeneratedSerialization()
 	 Serialize_SpriteComponent();
 	 Serialize_Camera2DComponent();
 	 Serialize_Camera3DComponent();
-	 Serialize_LightComponent();
+	 Serialize_DirectionalLightComponent();
+	 Serialize_PointLightComponent();
+	 Serialize_SpotLightComponent();
 	 Serialize_Model3DComponent();
 	 Serialize_UICanvasComponent();
 	 Serialize_UILabelComponent();
@@ -430,7 +520,9 @@ void EngineGeneratedRegistration()
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpriteComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera2DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Camera3DComponent>();
-	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::LightComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::DirectionalLightComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::PointLightComponent>();
+	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::SpotLightComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::Model3DComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UICanvasComponent>();
 	VE::Scene::GetSingleton()->GetFlecsWorld().component<VE::Components::UI::UILabelComponent>();

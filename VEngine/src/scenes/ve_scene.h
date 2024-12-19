@@ -8,7 +8,6 @@
 #include <mutex>
 #include "ve_renderer.h"
 
-#define MAX_LIGHTS 124
 
 namespace VE 
 {

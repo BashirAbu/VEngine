@@ -18,7 +18,7 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##x", &vec.x)) 
+            if (ImGui::DragFloat("##x", &vec.x, 0.1f)) 
             {
                 if (callback)
                 {
@@ -32,7 +32,7 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##y", &vec.y)) 
+            if (ImGui::DragFloat("##y", &vec.y, 0.1f))
             {
                 if (callback)
                 {
@@ -60,7 +60,7 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##x", &vec.x)) 
+            if (ImGui::DragFloat("##x", &vec.x, 0.1f))
             {
                 if (callback)
                 {
@@ -74,7 +74,7 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##y", &vec.y)) 
+            if (ImGui::DragFloat("##y", &vec.y, 0.1f))
             {
                 if (callback)
                 {
@@ -87,7 +87,7 @@ namespace VE
             ImGui::Text("Z");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##z", &vec.z)) 
+            if (ImGui::DragFloat("##z", &vec.z, 0.1f))
             {
                 if (callback)
                 {
@@ -113,7 +113,7 @@ namespace VE
             ImGui::Text("X");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##x", &vec.x)) 
+            if (ImGui::DragFloat("##x", &vec.x, 0.1f))
             {
                 if (callback)
                 {
@@ -127,7 +127,7 @@ namespace VE
             ImGui::Text("Y");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##y", &vec.y)) 
+            if (ImGui::DragFloat("##y", &vec.y, 0.1f))
             {
                 if (callback)
                 {
@@ -140,7 +140,7 @@ namespace VE
             ImGui::Text("Z");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##z", &vec.z)) 
+            if (ImGui::DragFloat("##z", &vec.z, 0.1f))
             {
                 if (callback)
                 {
@@ -153,7 +153,7 @@ namespace VE
             ImGui::Text("W");
             ImGui::SameLine();
             ImGui::PushItemWidth(-1);
-            if (ImGui::DragFloat("##w", &vec.w)) 
+            if (ImGui::DragFloat("##w", &vec.w, 0.1f))
             {
                 if (callback)
                 {
@@ -189,7 +189,7 @@ namespace VE
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), &variable)) 
+            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), &variable, 0.01f))
             {
                 if (callback)
                 {
@@ -205,7 +205,7 @@ namespace VE
             ImGui::Columns(2, 0, false);
             ImGui::Text(label.c_str());
             ImGui::NextColumn();
-            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), (float*)&variable)) 
+            if (ImGui::DragFloat(((std::string)"##" + label).c_str(), (float*)&variable, 0.01f))
             {
                 if (callback)
                 {

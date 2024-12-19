@@ -4,6 +4,9 @@
 #include "ve_engine.h"
 #include "ve_assets_manager.h"
 #include "utils/ve_utils.h"
+
+#define MAX_LIGHTS 10
+
 namespace VE 
 {
 	
@@ -15,6 +18,7 @@ namespace VE
 		struct ConstructTag {};
 		struct Disabled {};
 
+		struct LightTag {};
 
 		VE_ENUM()
 		enum class BasicMesh
@@ -31,12 +35,21 @@ namespace VE
 			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
 			float value;
-			VE_PROPERTY(Editor)
+			VE_PROPERTY(Editor, OnChange = TextureMapTexturePathOnChange)
 			std::filesystem::path texturePath = "";
 			VE_PROPERTY(Editor)
 			Texture texture = {};
 		};
 
+		VE_FUNCTION(Callback)
+		inline void TextureMapTexturePathOnChange (void* data) 
+		{
+			TextureMap* tm = (TextureMap*)data;
+			if (tm)
+			{
+				tm->texture = *VE::AssetsManager::GetSingleton()->LoadTexture(tm->texturePath);
+			}
+		}
 
 		VE_CLASS(Component)
 		struct VEMaterial 
@@ -45,7 +58,8 @@ namespace VE
 			TextureMap albedoMap;
 			VE_PROPERTY(Editor)
 			TextureMap specularMap;
-
+			VE_PROPERTY(Editor)
+			TextureMap ambientOcclusionMap;
 
 			Shader* shader;
 		};
@@ -334,12 +348,56 @@ namespace VE
 		}
 
 
+		enum class LightType
+		{
+			Directional = 0,
+			Point = 1,
+			Spot = 2
+		};
 
 		VE_CLASS(Component)
-		struct LightComponent 
+		struct DirectionalLightComponent
 		{
 			VE_PROPERTY(Editor)
 			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+			Shader* pbrShader = nullptr;
+		};
+
+		VE_CLASS(Component)
+		struct PointLightComponent
+		{
+			VE_PROPERTY(Editor)
+			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			float constant = 1.0f;
+			VE_PROPERTY(Editor)
+			float linear = 0.09f;
+			VE_PROPERTY(Editor)
+			float quadratic = 0.032f;
+			Shader* pbrShader = nullptr;
+		};
+
+		VE_CLASS(Component)
+		struct SpotLightComponent
+		{
+			VE_PROPERTY(Editor)
+			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+			VE_PROPERTY(Editor)
+			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+			VE_PROPERTY(Editor)
+			float cutOff = glm::cos(glm::radians(12.5f));
+			VE_PROPERTY(Editor)
+			float outerCutOff = glm::cos(glm::radians(17.5f));
 			Shader* pbrShader = nullptr;
 		};
 

@@ -129,18 +129,129 @@ namespace VE::Systems
 		}
 	}
 
-	void LightRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::LightComponent& light)
+	void LightRenderSystem(flecs::iter& it)
 	{
-		int location = GetShaderLocation(*light.pbrShader, "lightColor");
-		SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.color), SHADER_UNIFORM_VEC4);
+		int lightCount = it.world().query<_Components::LightTag>().count();
 
-		location = GetShaderLocation(*light.pbrShader, "lightPosition");
-		glm::vec3 position = tc.GetWorldPosition();
-		SetShaderValue(*light.pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+		if (lightCount > MAX_LIGHTS)
+		{
+			return;
+		}
+
+		Shader* pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+
+		int loc = GetShaderLocation(*pbrShader, "lightCount");
+		SetShaderValue(*pbrShader, loc, &lightCount, SHADER_UNIFORM_INT);
+
+		int index = 0;
+		while (it.next()) {
+			for (auto i : it)
+			{
+				flecs::entity e = it.entity(i);
+				Components::TransformComponent& tc = *e.get_mut<Components::TransformComponent>();
+				std::string lightIndexed = "light[" + std::to_string(index) + "]";
+				if (e.has<Components::DirectionalLightComponent>())
+				{
+					Components::DirectionalLightComponent& light = *e.get_mut<Components::DirectionalLightComponent>();
+					int location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".type").c_str());
+					int type = (int)Components::LightType::Directional;
+					SetShaderValue(*light.pbrShader, location, &type, SHADER_UNIFORM_INT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".color").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.color), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".specular").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.specular), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".ambient").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.ambient), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".position").c_str());
+					glm::vec3 position = tc.GetWorldPosition();
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".direction").c_str());
+					glm::vec3 forward = glm::normalize(glm::vec3(tc.__worldMatrix[2]));
+					forward = -forward;
+					glm::vec3 direction = forward;
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(direction), SHADER_UNIFORM_VEC3);
+				}
+				else if (e.has<Components::PointLightComponent>())
+				{
+					Components::PointLightComponent& light = *e.get_mut<Components::PointLightComponent>();
+
+					int location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".type").c_str());
+					int type = (int)Components::LightType::Point;
+					SetShaderValue(*light.pbrShader, location, &type, SHADER_UNIFORM_INT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".constant").c_str());
+					SetShaderValue(*light.pbrShader, location, &light.constant, SHADER_UNIFORM_FLOAT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".linear").c_str());
+					SetShaderValue(*light.pbrShader, location, &light.linear, SHADER_UNIFORM_FLOAT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".quadratic").c_str());
+					SetShaderValue(*light.pbrShader, location, &light.quadratic, SHADER_UNIFORM_FLOAT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".color").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.color), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".specular").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.specular), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".ambient").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.ambient), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".position").c_str());
+					glm::vec3 position = tc.GetWorldPosition();
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+				}
+				else if (e.has<Components::SpotLightComponent>())
+				{
+					Components::SpotLightComponent& light = *e.get_mut<Components::SpotLightComponent>();
+
+					int location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".type").c_str());
+					int type = (int)Components::LightType::Spot;
+					SetShaderValue(*light.pbrShader, location, &type, SHADER_UNIFORM_INT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".color").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.color), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".specular").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.specular), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".ambient").c_str());
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(light.ambient), SHADER_UNIFORM_VEC4);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".position").c_str());
+					glm::vec3 position = tc.GetWorldPosition();
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".direction").c_str());
+					glm::vec3 forward = glm::normalize(glm::vec3(tc.__worldMatrix[2]));
+					forward = -forward;
+					glm::vec3 direction = forward;
+					SetShaderValue(*light.pbrShader, location, glm::value_ptr(direction), SHADER_UNIFORM_VEC3);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".cutOff").c_str());
+					SetShaderValue(*light.pbrShader, location, &light.cutOff, SHADER_UNIFORM_FLOAT);
+
+					location = GetShaderLocation(*light.pbrShader, (lightIndexed + ".outerCutOff").c_str());
+					SetShaderValue(*light.pbrShader, location, &light.outerCutOff, SHADER_UNIFORM_FLOAT);
+				}
+
+				index++;
+			}
+		}
 	}
 
 	
-
+	void SetShaderMaterialValue(_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)
+	{
+		rayMaterialMap.color = GLMVec4ToRayColor(textureMap.color);
+		rayMaterialMap.value = textureMap.value;
+		rayMaterialMap.texture = textureMap.texture;
+	}
 	
 
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
@@ -155,9 +266,11 @@ namespace VE::Systems
 
 			for (size_t i = 0; i < model.materials.size(); i++)
 			{
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].color = GLMVec4ToRayColor(model.materials[i].albedoMap.color);
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].value = model.materials[i].albedoMap.value;
-				model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoMap.texture;
+				SetShaderMaterialValue(model.materials[i].albedoMap, model.model->materials[i].maps[MATERIAL_MAP_ALBEDO]);
+
+				SetShaderMaterialValue(model.materials[i].specularMap, model.model->materials[i].maps[MATERIAL_MAP_SPECULAR]);
+
+				SetShaderMaterialValue(model.materials[i].ambientOcclusionMap, model.model->materials[i].maps[MATERIAL_MAP_OCCLUSION]);
 			}
 
 

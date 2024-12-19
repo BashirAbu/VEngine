@@ -5,6 +5,7 @@
 #include "utils/ve_utils.h"
 #include <thread>
 #include <rlgl.h>
+#include <config.h>
 void EngineGeneratedRegistration();
 
 namespace VE 
@@ -28,7 +29,7 @@ namespace VE
 		//register builtin systems.
 		world.system<Components::TransformComponent, Components::SpriteComponent>("Sprite2DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Sprite2DRenderSystem);
 		world.system<Components::TransformComponent, Components::Model3DComponent>("Mesh3DRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::Mesh3DRenderSystem);
-		world.system<Components::TransformComponent, Components::LightComponent>("LightRenderSystem").kind(OnRender).without<_Components::Disabled>().each(Systems::LightRenderSystem);
+		world.system<_Components::LightTag>("LightRenderSystem").kind(OnRender).without<_Components::Disabled>().run(Systems::LightRenderSystem);
 		world.system<Components::TransformComponent, Components::Camera2DComponent>("Camera2DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera2DSystem);
 		world.system<Components::TransformComponent, Components::Camera3DComponent>("Camera3DSystem").kind(flecs::PostUpdate).without<_Components::Disabled>().each(Systems::Camera3DSystem);
 		world.system<Components::TransformComponent>("TransformSystem").multi_threaded().kind(flecs::PreUpdate).without<_Components::Disabled>().each(Systems::TransformSystem);
@@ -704,8 +705,19 @@ namespace VE
 					UnloadRenderTexture(c3dc.renderTarget);
 			});
 
-			world.component<Components::LightComponent>().on_add([](flecs::entity e, Components::LightComponent& light) 
+			world.component<Components::DirectionalLightComponent>().on_add([](flecs::entity e, Components::DirectionalLightComponent& light)
 				{
+					e.add<_Components::LightTag>();
+					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+				});
+			world.component<Components::PointLightComponent>().on_add([](flecs::entity e, Components::PointLightComponent& light)
+				{
+					e.add<_Components::LightTag>();
+					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+				});
+			world.component<Components::SpotLightComponent>().on_add([](flecs::entity e, Components::SpotLightComponent& light)
+				{
+					e.add<_Components::LightTag>();
 					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 				});
 			
@@ -732,21 +744,45 @@ namespace VE
 					Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 
 					
+					int loc = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = loc;
 
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(pbrShader->id, "vertexNormal");
-					pbrShader->locs[SHADER_LOC_VERTEX_NORMAL] = rlGetLocationAttrib(pbrShader->id, "texture0");
+					loc = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = loc;
+
+					loc = rlGetLocationAttrib(pbrShader->id, "vertexNormal");
+					pbrShader->locs[RL_SHADER_LOC_VERTEX_NORMAL] = loc;
 
 					
+					loc = rlGetLocationUniform(pbrShader->id, "modelMatrix");
+					pbrShader->locs[SHADER_LOC_MATRIX_MODEL] = loc;
 
-					pbrShader->locs[SHADER_LOC_MATRIX_MODEL] = rlGetLocationUniform(pbrShader->id, "modelMatrix");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = rlGetLocationUniform(pbrShader->id, "mvp");
-					pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "colDiffuse");
-					pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = rlGetLocationUniform(pbrShader->id, "texture0");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_NORMAL] = rlGetLocationUniform(pbrShader->id, "normalMatrix");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = rlGetLocationUniform(pbrShader->id, "projectionMatrix");
-					
+					loc = rlGetLocationUniform(pbrShader->id, "mvp");
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "material.albedo.color");
+					pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "albedoTexture");
+					pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "specularTexture");
+					pbrShader->locs[RL_SHADER_LOC_MAP_SPECULAR] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "material.specular.color");
+					pbrShader->locs[RL_SHADER_LOC_COLOR_SPECULAR] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "ambientOcclusionTexture");
+					pbrShader->locs[RL_SHADER_LOC_MAP_OCCLUSION] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "material.ambientOcclusion.color");
+					pbrShader->locs[RL_SHADER_LOC_COLOR_AMBIENT] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "normalMatrix");
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_NORMAL] = loc;
+
+					loc = rlGetLocationUniform(pbrShader->id, "projectionMatrix");
+					pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = loc;
 					
 
 					if (model.materials.size() == 0)
@@ -755,22 +791,31 @@ namespace VE
 					}
 
 
+					std::function<void(_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)> loadTextureMaps = [](_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)
+						{
+						
+							if (textureMap.texturePath.empty())
+							{
+								if (rayMaterialMap.texture.id > 0)
+								{
+									textureMap.texture = rayMaterialMap.texture;
+								}
+							}
+							else
+							{
+								textureMap.texture = *AssetsManager::GetSingleton()->LoadTexture(textureMap.texturePath);
+								rayMaterialMap.texture = textureMap.texture;
+							}
+						};
+
 					for (size_t i = 0; i < model.model->materialCount; i++)
 					{
 						model.materials[i].shader = pbrShader;
 						model.model->materials[i].shader = *pbrShader;
-						if (model.materials[i].albedoMap.texturePath.empty()) 
-						{
-							if (model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture.id > 0)
-							{
-								model.materials[i].albedoMap.texture = model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture;
-							}
-						}
-						else 
-						{
-							model.materials[i].albedoMap.texture = *AssetsManager::GetSingleton()->LoadTexture(model.materials[i].albedoMap.texturePath);
-							model.model->materials[i].maps[MATERIAL_MAP_ALBEDO].texture = model.materials[i].albedoMap.texture;
-						}
+
+						loadTextureMaps(model.materials[i].albedoMap, model.model->materials[i].maps[MATERIAL_MAP_ALBEDO]);
+						loadTextureMaps(model.materials[i].specularMap, model.model->materials[i].maps[MATERIAL_MAP_SPECULAR]);
+						loadTextureMaps(model.materials[i].ambientOcclusionMap, model.model->materials[i].maps[MATERIAL_MAP_OCCLUSION]);
 					}
 
 				});
