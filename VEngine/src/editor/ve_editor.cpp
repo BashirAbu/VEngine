@@ -984,7 +984,14 @@ namespace VE
 			int location = GetShaderLocation(*pbrShader, "viewPosition");
 			glm::vec3 position = {editorCamera3D.position.x, editorCamera3D.position.y, editorCamera3D.position.z};
 			SetShaderValue(*pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
-			
+			if (c3dc->skyboxTexture.id > 0)
+			{
+				rlDisableBackfaceCulling();
+				rlDisableDepthMask();
+				DrawModel(c3dc->cubeMapModel, { 0, 0, 0 }, 1.0f, WHITE);
+				rlEnableBackfaceCulling();
+				rlEnableDepthMask();
+			}
 			engine->sceneManager->currentScene->renderer.RenderQueued3D();
 			DrawGrid(10, 1.0f);
 

@@ -191,7 +191,7 @@ void Serialize_Camera3DComponent()
 	if(compEntity)
 	{
 		flecs::component<VE::Components::Camera3DComponent>* comp = (flecs::component<VE::Components::Camera3DComponent>*)&compEntity; 
-		comp->opaque(comp->world().component().member<glm::vec2>("renderTargetSize").member<NormalizedColor>("backgroundColor").member<float>("zoom").member<bool>("isMain"))
+		comp->opaque(comp->world().component().member<glm::vec2>("renderTargetSize").member<NormalizedColor>("backgroundColor").member<float>("zoom").member<bool>("isMain").member<std::filesystem::path>("skyboxTexturePath").member<Texture>("skyboxTexture"))
 		.serialize([](const flecs::serializer* s, const VE::Components::Camera3DComponent* data) -> int		{
 		s->member("renderTargetSize");
 		s->value(data->renderTargetSize);
@@ -201,6 +201,10 @@ void Serialize_Camera3DComponent()
 		s->value(data->zoom);
 		s->member("isMain");
 		s->value(data->isMain);
+		s->member("skyboxTexturePath");
+		s->value(data->skyboxTexturePath);
+		s->member("skyboxTexture");
+		s->value(data->skyboxTexture);
 			 return 0;
 		}).ensure_member([](VE::Components::Camera3DComponent* data, const char* member) -> void*
 		{
@@ -209,6 +213,8 @@ void Serialize_Camera3DComponent()
 			else if (!strcmp(member, "backgroundColor")) { return &data->backgroundColor;}
 			else if (!strcmp(member, "zoom")) { return &data->zoom;}
 			else if (!strcmp(member, "isMain")) { return &data->isMain;}
+			else if (!strcmp(member, "skyboxTexturePath")) { return &data->skyboxTexturePath;}
+			else if (!strcmp(member, "skyboxTexture")) { return &data->skyboxTexture;}
 		return nullptr;
 		});
 		flecs::world w = comp->world();

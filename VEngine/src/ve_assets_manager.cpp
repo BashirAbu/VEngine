@@ -327,7 +327,7 @@ namespace VE
 						FILE* generatedShaderFile = fopen(generatedFilePath.generic_string().c_str(), "w");
 						fwrite(shaderSource.c_str(), shaderSource.size() + 1, 1, generatedShaderFile);
 						fclose(generatedShaderFile);
-						std::filesystem::path spirvPath = generatedFilePath.parent_path().string() + "/" + fullpath.stem().string() + "_" + type + ".spv";
+						std::filesystem::path spirvPath = generatedFilePath.parent_path().string() + "/spirv/" + fullpath.stem().string() + "_" + type + ".spv";
 						std::string command = "%VENGINE_DIR%\\glslangValidator\\glslangValidator.exe -G --aml " + generatedFilePath.generic_string() +
 							" -o " + spirvPath.generic_string();
 						system(command.c_str());
@@ -359,8 +359,8 @@ namespace VE
 			std::string fragmentShader = "";
 			std::string vertexShader = "";
 
-			std::string fragSprivFileName = filepath.stem().string() + "_frag.spv";
-			std::string vertSprivFileName = filepath.stem().string() + "_vert.spv";
+			std::string fragSprivFileName = filepath.parent_path().string() + "/spirv/" + filepath.stem().string() + "_frag.spv";
+			std::string vertSprivFileName = filepath.parent_path().string() + "/spirv/" + filepath.stem().string() + "_vert.spv";
 			
 			AssetData fragSprivBinaryUint8 = GetAssetData(fragSprivFileName);
 

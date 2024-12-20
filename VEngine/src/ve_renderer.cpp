@@ -117,6 +117,15 @@ namespace VE
 					BeginMode3D(cc.camera);
 					ClearBackground(GLMVec4ToRayColor(cc.backgroundColor));
 					
+					if (cc.skyboxTexture.id > 0)
+					{
+						rlDisableBackfaceCulling();
+						rlDisableDepthMask();
+						DrawModel(cc.cubeMapModel, { 0, 0, 0 }, 1.0f, WHITE);
+						rlEnableBackfaceCulling();
+						rlEnableDepthMask();
+					}
+
 					RenderQueued3D();
 
 					EndMode3D();

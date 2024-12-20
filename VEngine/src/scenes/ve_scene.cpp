@@ -695,10 +695,12 @@ namespace VE
 				e.add<Components::TransformComponent>();
 				c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 				SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-
-
 				
+				c3dc.skyboxTexture = {};
+				c3dc.cubeMapModel = {};
+				c3dc.skyboxShader = nullptr;
 
+				Components::LoadSkymap(&c3dc);
 
 			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
 				{
@@ -749,7 +751,6 @@ namespace VE
 						*basicModel = Components::LoadBasicMesh(model.basicMesh);
 						model.model = basicModel;
 					}
-					TraceLog(LOG_DEBUG, "Number of materials: %d, NumberOfMeshCount: %d", model.model->materialCount, model.model->meshCount);
 
 					Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 

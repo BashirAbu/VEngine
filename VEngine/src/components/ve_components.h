@@ -4,7 +4,7 @@
 #include "ve_engine.h"
 #include "ve_assets_manager.h"
 #include "utils/ve_utils.h"
-
+#include <rlgl.h>
 #define MAX_LIGHTS 10
 
 namespace VE 
@@ -309,9 +309,55 @@ namespace VE
 			float zoom = 1.0f;
 			VE_PROPERTY(Editor, OnChange = Camera3DComponentRenderIsMainOnChange)
 			bool isMain = false;
+			VE_PROPERTY(Editor, OnChange = Camera3DComponentSkyboxTexturePathOnChange)
+			std::filesystem::path skyboxTexturePath = "";
+			VE_PROPERTY(Editor)
+			Texture skyboxTexture = {};
+			Model cubeMapModel = {};
+			Shader* skyboxShader = nullptr;
 		};
 
-		
+		inline void LoadSkymap(Components::Camera3DComponent* camera) 
+		{
+			if (camera)
+			{
+				camera->skyboxTexture = *VE::AssetsManager::GetSingleton()->LoadTexture(camera->skyboxTexturePath);
+				if (!camera->skyboxTexturePath.empty())
+				{
+					camera->skyboxTexture = *VE::AssetsManager::GetSingleton()->LoadTexture(camera->skyboxTexturePath);
+
+					camera->skyboxShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/skybox.glsl");
+
+					int loc = rlGetLocationAttrib(camera->skyboxShader->id, "vertexPosition");
+					camera->skyboxShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = loc;
+
+					loc = GetShaderLocation(*camera->skyboxShader, "projectionMatrix");
+					camera->skyboxShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = loc;
+
+					loc = GetShaderLocation(*camera->skyboxShader, "viewMatrix");
+					camera->skyboxShader->locs[RL_SHADER_LOC_MATRIX_VIEW] = loc;
+					
+
+					loc = GetShaderLocation(*camera->skyboxShader, "skyBox");
+					camera->skyboxShader->locs[RL_SHADER_LOC_MAP_CUBEMAP] = loc;
+
+					camera->cubeMapModel = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
+
+					camera->cubeMapModel.materials[0].shader = *camera->skyboxShader;
+
+					Image skymapImage = LoadImageFromTexture(camera->skyboxTexture);
+					camera->cubeMapModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(skymapImage, CUBEMAP_LAYOUT_AUTO_DETECT);;
+					UnloadImage(skymapImage);
+				}
+			}
+		}
+
+		VE_FUNCTION(Callback)
+		inline void Camera3DComponentSkyboxTexturePathOnChange(void* data) 
+		{
+			Camera3DComponent* camera = (Camera3DComponent*)data;
+			LoadSkymap(camera);
+		}
 
 		VE_FUNCTION(Callback)
 		inline void Camera3DComponentRenderTargetSizeOnChange(void* data)
