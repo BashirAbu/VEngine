@@ -728,8 +728,16 @@ namespace VE
 				})
 				.on_set([](flecs::entity e, Components::Model3DComponent& model)
 				{
+
+					if (model.model)
+					{
+						UnloadModel(*model.model);
+						if (model.basicMesh != _Components::BasicMesh::None)
+						{
+							free(model.model);
+						}
+					}
 					model.model = nullptr;
-					model.basicModel = {};
 
 					if (!model.modelFilepath.empty())
 					{
@@ -737,9 +745,11 @@ namespace VE
 					}
 					if (model.basicMesh != _Components::BasicMesh::None)
 					{
-						model.basicModel = Components::LoadBasicMesh(model.basicMesh);
-						model.model = &model.basicModel;
+						Model* basicModel = (Model*)malloc(sizeof(Model));
+						*basicModel = Components::LoadBasicMesh(model.basicMesh);
+						model.model = basicModel;
 					}
+					TraceLog(LOG_DEBUG, "Number of materials: %d, NumberOfMeshCount: %d", model.model->materialCount, model.model->meshCount);
 
 					Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 
@@ -785,40 +795,18 @@ namespace VE
 					pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = loc;
 					
 
-					if (model.materials.size() == 0)
-					{
-						model.materials = std::vector<_Components::VEMaterial>(model.model->materialCount);
-					}
 
+					Components::LoadModelMaterials(model, pbrShader);
 
-					std::function<void(_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)> loadTextureMaps = [](_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)
+					}).on_remove([](flecs::entity e, Components::Model3DComponent& model) 
 						{
-						
-							if (textureMap.texturePath.empty())
+							if (model.basicMesh != _Components::BasicMesh::None)
 							{
-								if (rayMaterialMap.texture.id > 0)
-								{
-									textureMap.texture = rayMaterialMap.texture;
-								}
+								UnloadModel(*model.model);
+								free(model.model);
+								model.model = nullptr;
 							}
-							else
-							{
-								textureMap.texture = *AssetsManager::GetSingleton()->LoadTexture(textureMap.texturePath);
-								rayMaterialMap.texture = textureMap.texture;
-							}
-						};
-
-					for (size_t i = 0; i < model.model->materialCount; i++)
-					{
-						model.materials[i].shader = pbrShader;
-						model.model->materials[i].shader = *pbrShader;
-
-						loadTextureMaps(model.materials[i].albedoMap, model.model->materials[i].maps[MATERIAL_MAP_ALBEDO]);
-						loadTextureMaps(model.materials[i].specularMap, model.model->materials[i].maps[MATERIAL_MAP_SPECULAR]);
-						loadTextureMaps(model.materials[i].ambientOcclusionMap, model.model->materials[i].maps[MATERIAL_MAP_OCCLUSION]);
-					}
-
-				});
+						});
 
 
 			world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)

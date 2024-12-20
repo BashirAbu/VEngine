@@ -197,7 +197,6 @@ namespace VE
 			AssetData data = GetAssetData(filepath.generic_string());
 			VE_ASSERT(data.size);
 			models[filepath.string()] = LoadModelFromMemory(data.data, data.size, fileName.c_str());
-			//free(data.data);
 #endif
 
 			return &models[filepath.string()];
@@ -378,6 +377,7 @@ namespace VE
 			{
 				std::vector<uint32_t> vertexSprivBinaryUint32(vertexSprivBinaryUint8.size / sizeof(uint32_t));
 				memcpy(vertexSprivBinaryUint32.data(), vertexSprivBinaryUint8.data, vertexSprivBinaryUint8.size);
+				free(fragSprivBinaryUint8.data);
 				SpirvToGLSL(vertexSprivBinaryUint32, vertexShader);
 			}
 			shaders[filepath.string()] = ::LoadShaderFromMemory(vertexShader.empty() ? NULL : vertexShader.c_str(), fragmentShader.empty() ? NULL : fragmentShader.c_str());

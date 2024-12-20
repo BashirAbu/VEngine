@@ -258,13 +258,14 @@ namespace VE::Systems
 	{
 		if (model.model)
 		{
+			TraceLog(LOG_DEBUG, "Number of materials: %d, NumberOfMeshCount: %d", model.model->materialCount, model.model->meshCount);
 			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
 			VE::Renderer::Model3D m3d = {};
 			m3d.model = &model.model;
 			m3d.entity = e;
 
-			for (size_t i = 0; i < model.materials.size(); i++)
+			for (int i = 0; i < model.materials.size(); i++)
 			{
 				SetShaderMaterialValue(model.materials[i].albedoMap, model.model->materials[i].maps[MATERIAL_MAP_ALBEDO]);
 

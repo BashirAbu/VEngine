@@ -406,7 +406,6 @@ namespace VE
 		{
 			VE_PROPERTY(Editor, OnChange = BasicModelOnChange)
 			_Components::BasicMesh basicMesh = _Components::BasicMesh::None;
-			Model basicModel = {};
 			Model* model = nullptr;
 			VE_PROPERTY(Editor, OnChange = ModelOnChange)
 			std::filesystem::path modelFilepath = "";
@@ -446,6 +445,42 @@ namespace VE
 			return basicModel;
 		}
 
+		inline void LoadModelMaterials(Model3DComponent& model, Shader* shader) 
+		{
+			if ((int)model.materials.size() != model.model->materialCount)
+			{
+				model.materials = std::vector<_Components::VEMaterial>(model.model->materialCount);
+			}
+
+
+			std::function<void(_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)> loadTextureMaps = [](_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)
+				{
+
+					if (textureMap.texturePath.empty())
+					{
+						if (rayMaterialMap.texture.id > 0)
+						{
+							textureMap.texture = rayMaterialMap.texture;
+						}
+					}
+					else
+					{
+						textureMap.texture = *AssetsManager::GetSingleton()->LoadTexture(textureMap.texturePath);
+						rayMaterialMap.texture = textureMap.texture;
+					}
+				};
+
+			for (size_t i = 0; i < model.model->materialCount; i++)
+			{
+				model.materials[i].shader = shader;
+				model.model->materials[i].shader = *shader;
+
+				loadTextureMaps(model.materials[i].albedoMap, model.model->materials[i].maps[MATERIAL_MAP_ALBEDO]);
+				loadTextureMaps(model.materials[i].specularMap, model.model->materials[i].maps[MATERIAL_MAP_SPECULAR]);
+				loadTextureMaps(model.materials[i].ambientOcclusionMap, model.model->materials[i].maps[MATERIAL_MAP_OCCLUSION]);
+			}
+		}
+
 		VE_FUNCTION(Callback)
 		inline void BasicModelOnChange(void* data)
 		{
@@ -455,13 +490,22 @@ namespace VE
 
 			if (comp->basicMesh != _Components::BasicMesh::None)
 			{
-				if (IsModelValid(comp->basicModel)) 
+				if (comp->model)
 				{
-					UnloadModel(comp->basicModel);
+					if (IsModelValid(*comp->model))
+					{
+						UnloadModel(*comp->model);
+					}
 				}
-
-				comp->basicModel = LoadBasicMesh(comp->basicMesh);
-				comp->model = &comp->basicModel;
+				else 
+				{
+					comp->model = (Model*)malloc(sizeof(Model));
+				}
+				
+				memset(comp->model, 0, sizeof(Model));
+				Model temp = LoadBasicMesh(comp->basicMesh);
+				memcpy(comp->model, &temp, sizeof(Model));
+				LoadModelMaterials(*comp, AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl"));
 			}
 		}
 		
