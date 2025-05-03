@@ -63,7 +63,7 @@ release_dist_engine_defines =
 --utfcpp include dirs
 utfcpp_include_dirs = {"VEngine/third_party/utfcpp/source/"}
 --raylib include dirs
-raylib_include_dirs = {"VEngine/third_party/raylib/src/"}
+raylib_include_dirs = {"VEngine/third_party/raylib/src/", "VEngine/third_party/raylib/src/external"}
 --glm include dirs.
 glm_include_dirs = {"VEngine/third_party/glm/"}
 --freetype include files.

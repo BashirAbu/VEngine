@@ -13,7 +13,7 @@
 #include <raymath.h>
 #include <rlgl.h>
 #include <mutex>
-namespace VE 
+namespace VE
 {
 	std::vector<std::string>* logs = nullptr;
 	std::mutex logsMutex;
@@ -203,7 +203,7 @@ namespace VE
 		ImGuiIO& io = (ImGui::GetIO());
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable docking
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
-		
+
 		SetDarkThemeColors();
 		static const ImWchar ranges[] =
 		{
@@ -229,7 +229,7 @@ namespace VE
 
 		editorCamera3D = {};
 		editorCamera3D.fovy = 45.0f;
-		editorCamera3D.position = Vector3{0.0f, 10.0f, 10.0f};
+		editorCamera3D.position = Vector3{ 0.0f, 10.0f, 10.0f };
 		editorCamera3D.projection = CAMERA_PERSPECTIVE;
 		editorCamera3D.target = {};
 		editorCamera3D.up = { 0.0f, 1.0f, 0.0f };
@@ -240,7 +240,7 @@ namespace VE
 
 		colorPickingShader = LoadShader(0, "resources/shaders/color_picking_shader.fs");
 	}
-	Editor::~Editor() 
+	Editor::~Editor()
 	{
 		UnloadShader(colorPickingShader);
 		UnloadRenderTexture(editorCameraRenderTarget);
@@ -290,7 +290,7 @@ namespace VE
 		UpdateEditor(GetFrameTime());
 	}
 
-	void Editor::AddChildrenNode(flecs::entity child) 
+	void Editor::AddChildrenNode(flecs::entity child)
 	{
 		ImGuiTreeNodeFlags flags = selectedEntity == (child) ? ImGuiTreeNodeFlags_Selected : 0 | ImGuiTreeNodeFlags_OpenOnArrow;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(child)), flags, child.name().c_str());
@@ -318,7 +318,7 @@ namespace VE
 					{
 						if (possibleParent == possibleChild)
 						{
-							result =  true;
+							result = true;
 						}
 						possibleParent.children([&](flecs::entity c)
 							{
@@ -440,7 +440,7 @@ namespace VE
 						relations[(std::string)entJson["name"]] = parentName;
 						entJson.erase("parent");
 					}
-					else 
+					else
 					{
 						root["root"] = entJson["name"];
 					}
@@ -455,7 +455,7 @@ namespace VE
 				constructFile << constructJsonWrapper;
 
 				constructFile.close();
-				
+
 			}
 			if (ImGui::MenuItem("Duplicate"))
 			{
@@ -498,7 +498,7 @@ namespace VE
 		}
 		flecs::query sceneEntitiesQuery = engine->sceneManager->currentScene->world.query_builder().with<_Components::SceneEntityTag>().build();
 		engine->sceneManager->currentScene->world.defer_begin();
-		sceneEntitiesQuery.each([&](flecs::entity e) 
+		sceneEntitiesQuery.each([&](flecs::entity e)
 			{
 				std::string name = e.name().c_str();
 				AddEntityNode(e);
@@ -533,12 +533,12 @@ namespace VE
 		}
 
 
-		while (!addEntities.empty()) 
+		while (!addEntities.empty())
 		{
 			engine->sceneManager->currentScene->AddEntity(addEntities.front());
 			addEntities.pop();
 		}
-		while (!cloneEntities.empty()) 
+		while (!cloneEntities.empty())
 		{
 			engine->sceneManager->currentScene->CloneEntity(cloneEntities.front());
 			cloneEntities.pop();
@@ -579,7 +579,7 @@ namespace VE
 					engine->sceneManager->UnloadScene();
 					engine->sceneManager->currentScene = new Scene(SceneType::Scene2D);
 					selectedEntity = flecs::entity();
-					
+
 				}
 				if (ImGui::MenuItem("3D scene"))
 				{
@@ -602,10 +602,10 @@ namespace VE
 		float buttonWidth = ImGui::CalcTextSize("Start").x + ImGui::CalcTextSize("Reload Project").x + ImGui::GetStyle().ItemSpacing.x * 4;
 		float spacing = (menuBarWidth - buttonWidth) / 2.0f;
 		ImGui::SameLine(spacing);
-		
+
 		if (engine->sceneManager->mode == SceneMode::Editor)
 		{
-			
+
 			if (ImGui::Button("Start"))
 			{
 				engine->sceneManager->SaveScene();
@@ -615,7 +615,7 @@ namespace VE
 					engine->sceneManager->mode = SceneMode::Game;
 
 					reloadScenePath = engine->sceneManager->currentScene->scenePath;
-					
+
 					engine->sceneManager->LoadScene(reloadScenePath);
 					ImGui::SetWindowFocus("GameViewport");
 					selectedEntity = engine->sceneManager->currentScene->_LookupEntity(tempSelecetedEntity.c_str());
@@ -650,7 +650,7 @@ namespace VE
 		}
 		ImGui::EndMainMenuBar();
 	}
-	
+
 	void Editor::DrawInspector()
 	{
 		ImGui::Begin("Inspector");
@@ -666,12 +666,12 @@ namespace VE
 
 			enableChildren = [&](flecs::entity e, bool enable) -> void
 				{
-					
+
 					if (!enable)
 					{
 						e.add< _Components::Disabled>();
 					}
-					else 
+					else
 					{
 						e.remove< _Components::Disabled>();
 					}
@@ -690,7 +690,7 @@ namespace VE
 						});
 				};
 
-		
+
 			if (!enabled && !selectedEntity.has<_Components::Disabled>())
 			{
 				selectedEntity.world().defer_begin();
@@ -736,26 +736,26 @@ namespace VE
 					saveName = false;
 				}
 			}
-			else 
+			else
 			{
 				entityName = selectedEntity.name().c_str();
 			}
-			
+
 			ImGui::Separator();
 
 			engine->sceneManager->currentScene->world.defer_begin();
-			selectedEntity.each([&](flecs::id compId) 
-			{
-				if (compId.is_entity())
+			selectedEntity.each([&](flecs::id compId)
 				{
-					if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
+					if (compId.is_entity())
 					{
-						DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
-						ProjectDrawComponentElements(compId.entity().name().c_str(), selectedEntity);
-						ImGui::Separator();
+						if (engine->sceneManager->currentScene->componentsTable.find(compId.entity().name().c_str()) != engine->sceneManager->currentScene->componentsTable.end())
+						{
+							DrawComponentElements(compId.entity().name().c_str(), selectedEntity);
+							ProjectDrawComponentElements(compId.entity().name().c_str(), selectedEntity);
+							ImGui::Separator();
+						}
 					}
-				}
-			});
+				});
 			engine->sceneManager->currentScene->world.defer_end();
 
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -774,7 +774,7 @@ namespace VE
 			}
 			if (ImGui::BeginPopup("Add Component"))
 			{
-				for (auto comp : engine->sceneManager->currentScene->componentsTable) 
+				for (auto comp : engine->sceneManager->currentScene->componentsTable)
 				{
 					if (!comp.first.empty())
 					{
@@ -802,7 +802,7 @@ namespace VE
 					{
 						s->enable();
 					}
-					else 
+					else
 					{
 						s->disable();
 					}
@@ -834,7 +834,7 @@ namespace VE
 		ImGui::Begin("SceneViewport");
 		//Tools bar
 		ImGui::Columns(4, 0, false);
-		const char* items[] = {"2D", "3D"};
+		const char* items[] = { "2D", "3D" };
 		ImGui::Text("View");
 		ImGui::SameLine();
 		ImGui::Combo("##View", (int*)&cameraMode, items, IM_ARRAYSIZE(items));
@@ -843,7 +843,7 @@ namespace VE
 		sceneViewportFocused = ImGui::IsWindowFocused();
 		isSceneViewHovered = ImGui::IsWindowHovered();
 		ImVec2 vec2 = ImGui::GetContentRegionAvail();
-		sceneViewportSize = *(glm::vec2*) & vec2;
+		sceneViewportSize = *(glm::vec2*)&vec2;
 		vec2 = ImGui::GetCursorScreenPos();
 		sceneViewportPosition = *(glm::vec2*)&vec2;
 
@@ -977,14 +977,14 @@ namespace VE
 			{
 				ClearBackground(GLMVec4ToRayColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 			}
-			
-			
+
+
 
 			Shader* pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 			int location = GetShaderLocation(*pbrShader, "viewPosition");
-			glm::vec3 position = {editorCamera3D.position.x, editorCamera3D.position.y, editorCamera3D.position.z};
+			glm::vec3 position = { editorCamera3D.position.x, editorCamera3D.position.y, editorCamera3D.position.z };
 			SetShaderValue(*pbrShader, location, glm::value_ptr(position), SHADER_UNIFORM_VEC3);
-			if (c3dc->skyboxTexture.id > 0)
+			if (c3dc && c3dc->skyboxTexture.id > 0)
 			{
 				rlDisableBackfaceCulling();
 				rlDisableDepthMask();
@@ -1008,7 +1008,7 @@ namespace VE
 		if (selectedEntity)
 		{
 			Components::TransformComponent* tc = selectedEntity.get_mut<Components::TransformComponent>();
-			if (tc) 
+			if (tc)
 			{
 				if (cameraMode == CameraMode::CAMERA2D)
 				{
@@ -1021,7 +1021,7 @@ namespace VE
 				ImGuizmo::SetDrawlist();
 
 				ImGuizmo::SetRect(sceneViewportPosition.x, sceneViewportPosition.y, sceneViewportSize.x, sceneViewportSize.y);
-				
+
 
 				glm::mat4 transformMatrix = tc->__worldMatrix;
 				Matrix cameraViewMatrix;
@@ -1029,7 +1029,7 @@ namespace VE
 				if (cameraMode == CameraMode::CAMERA2D)
 				{
 					cameraViewMatrix = GetCameraMatrix2D(editorCamera2D);
-					
+
 					projectionMatrix = MatrixOrtho(0.0f, sceneViewportSize.x, sceneViewportSize.y, 0.0f, 0.1, 100.0f);
 				}
 				else if (cameraMode == CameraMode::CAMERA3D)
@@ -1040,7 +1040,7 @@ namespace VE
 					glm::vec3 up = { editorCamera3D.up.x, editorCamera3D.up.y, editorCamera3D.up.z };
 					lookAt = glm::lookAt(eye, center, up);
 					cameraViewMatrix = GlmMat4ToRaylibMatrix(lookAt);
-					
+
 					projectionMatrix = MatrixPerspective(editorCamera3D.fovy * DEG2RAD, sceneViewportSize.x / sceneViewportSize.y, 0.1f, 100.0f);
 				}
 				ImGuizmo::Manipulate(MatrixToFloat(cameraViewMatrix), MatrixToFloat(projectionMatrix), ImGuizmo::TRANSLATE | ImGuizmo::SCALE | ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transformMatrix));
@@ -1055,7 +1055,7 @@ namespace VE
 					glm::quat rot;
 
 
-					glm::decompose(selectedEntity.parent()? glm::inverse(selectedEntity.parent().get_mut<Components::TransformComponent>()->__worldMatrix) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
+					glm::decompose(selectedEntity.parent() ? glm::inverse(selectedEntity.parent().get_mut<Components::TransformComponent>()->__worldMatrix) * transformMatrix : transformMatrix, scl, rot, pos, skew, pres);
 					glm::vec3 eulerAngles = glm::eulerAngles(rot);
 					eulerAngles = glm::degrees(eulerAngles);
 
@@ -1079,8 +1079,8 @@ namespace VE
 		gameViewportFocused = ImGui::IsWindowFocused();
 
 		flecs::query cameras = engine->sceneManager->currentScene->world.query<Components::Camera2DComponent>();
-		
-		
+
+
 		ImVec2 area = ImGui::GetContentRegionAvail();
 
 		const Texture mainRenderTexture = engine->sceneManager->currentScene->renderer.mainRenderTarget.texture;
@@ -1133,8 +1133,8 @@ namespace VE
 					editorCamera2D.target.x = editorCamera2D.target.x + delta.x;
 					editorCamera2D.target.y = editorCamera2D.target.y + delta.y;
 				}
-				float wheel =  GetMouseWheelMove();
-				
+				float wheel = GetMouseWheelMove();
+
 				if (wheel)
 				{
 					editorCamera2D.offset = Vector2{ sceneViewportMousePos.x, sceneViewportMousePos.y };
@@ -1144,7 +1144,7 @@ namespace VE
 					editorCamera2D.zoom = glm::clamp(editorCamera2D.zoom * scaleFactor, 0.005f, 64.0f);
 				}
 			}
-			else if (cameraMode == CameraMode::CAMERA3D) 
+			else if (cameraMode == CameraMode::CAMERA3D)
 			{
 				float mouseWheelDelta = GetMouseWheelMove();
 
@@ -1159,9 +1159,9 @@ namespace VE
 				Vector3 right = Vector3CrossProduct(forward, editorCamera3D.up);
 				right = Vector3Normalize(right);
 
-				if(ImGui::IsKeyDown(ImGuiKey_W))
+				if (ImGui::IsKeyDown(ImGuiKey_W))
 				{
-					
+
 					editorCamera3D.position = Vector3Add(editorCamera3D.position, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
 					editorCamera3D.target = Vector3Add(editorCamera3D.target, Vector3Scale(forward, editorCameraMoveSpeed * deltaTime));
 				}
@@ -1188,7 +1188,7 @@ namespace VE
 				{
 					Vector2 mouseDelta = GetMouseDelta();
 
-					editorCamera3D.position = Vector3Subtract(editorCamera3D.position, Vector3Scale(right, mouseDelta.x  * deltaTime));
+					editorCamera3D.position = Vector3Subtract(editorCamera3D.position, Vector3Scale(right, mouseDelta.x * deltaTime));
 					editorCamera3D.target = Vector3Subtract(editorCamera3D.target, Vector3Scale(right, mouseDelta.x * deltaTime));
 				}
 
@@ -1279,7 +1279,7 @@ namespace VE
 								oldShaders.push_back((*m3d.model)->materials[i].shader);
 								(*m3d.model)->materials[i].shader = colorPickingShader;
 							}
-						
+
 							float id = (float)((int)m3d.entity);
 							SetShaderValue(colorPickingShader, idUniformLoc, (const void*)&id, SHADER_UNIFORM_FLOAT);
 							DrawModel((**m3d.model), {}, 1.0f, WHITE);
@@ -1309,7 +1309,7 @@ namespace VE
 				{
 					selectedEntity = engine->sceneManager->currentScene->_LookupEntity((flecs::entity)(int)id);
 				}
-				else 
+				else
 				{
 					selectedEntity = flecs::entity();
 				}
@@ -1364,7 +1364,7 @@ namespace VE
 			ImGui::TextColored(color, log.c_str());
 		}
 		ImGui::PopFont();
-		if (scrollToBottom) 
+		if (scrollToBottom)
 		{
 			ImGui::SetScrollHereY(1.0f);
 			scrollToBottom = false;
@@ -1384,7 +1384,7 @@ namespace VE
 		{
 			logs = new std::vector<std::string>();
 		}
-		if (logs->size() > 50) 
+		if (logs->size() > 50)
 		{
 			logs->erase(logs->begin());
 		}
