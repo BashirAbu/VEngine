@@ -8,7 +8,7 @@
 #include <config.h>
 void EngineGeneratedRegistration();
 
-namespace VE 
+namespace VE
 {
 	Scene* Scene::singleton = nullptr;
 	Scene::Scene(SceneType type, std::string flecsJson) : renderer(this)
@@ -21,7 +21,7 @@ namespace VE
 
 		//register builtin components.
 		ManualComponentRegisteration();
-		
+
 		OnRender = world.entity("OnRender").add(flecs::PostUpdate);
 
 		EngineGeneratedRegistration();
@@ -62,7 +62,7 @@ namespace VE
 
 		flecs::query regSystems = world.query_builder().with(flecs::System).build();
 		world.defer_begin();
-		regSystems.each([&](flecs::entity e) 
+		regSystems.each([&](flecs::entity e)
 			{
 				std::string path = e.path().c_str();
 				if (!strstr(path.c_str(), "::flecs::"))
@@ -80,7 +80,7 @@ namespace VE
 		world.set_threads(numberOfThreads);
 
 		updatePipeline = world.pipeline().with(flecs::System).without(OnRender).build().set_name("UpdatePipeline");
-			
+
 		renderPipeline = world.pipeline().with(flecs::System).with(OnRender).build().set_name("RenderPipeline");
 
 	}
@@ -99,19 +99,19 @@ namespace VE
 
 		flecs::query q = world.query_builder().with(flecs::System).build();
 
-		transformSystem = q.find([](flecs::entity e) 
+		transformSystem = q.find([](flecs::entity e)
 			{
 				return (std::string)"TransformSystem" == e.name().c_str();
 			});
 
 		flecs::system* system = (flecs::system*)&transformSystem;
 		system->run();
+
 	}
 	void Scene::Update()
 	{
 		renderer.BeginFrame();
 		world.set_pipeline(updatePipeline);
-
 
 		world.progress();
 
@@ -140,7 +140,7 @@ namespace VE
 				{
 					camera2D = e.get_mut<Components::Camera2DComponent>();
 				}
-				else if (e.has<Components::Camera3DComponent>()) 
+				else if (e.has<Components::Camera3DComponent>())
 				{
 					camera3D = e.get_mut<Components::Camera3DComponent>();
 				}
@@ -156,7 +156,7 @@ namespace VE
 						camera3D->isMain = true;
 					}
 				}
-				else 
+				else
 				{
 					if (camera2D)
 					{
@@ -175,7 +175,7 @@ namespace VE
 
 		flecs::query cameras = world.query_builder().with<Components::Camera2DComponent>().oper(flecs::Or).with<Components::Camera3DComponent>().build();
 
-		mainCamera =  cameras.find([&](flecs::entity e)
+		mainCamera = cameras.find([&](flecs::entity e)
 			{
 				Components::Camera2DComponent* camera2D = nullptr;
 				Components::Camera3DComponent* camera3D = nullptr;
@@ -255,7 +255,7 @@ namespace VE
 
 					if (hasChildChildren)
 					{
-						
+
 						std::function<void(flecs::entity, std::string&)> serializeChildren;
 
 						serializeChildren = [&](flecs::entity child, std::string& entityJson)
@@ -272,7 +272,7 @@ namespace VE
 
 										if (hasChildChildren)
 										{
-											serializeChildren(child, entityJson); 
+											serializeChildren(child, entityJson);
 										}
 										entityJson += (std::string)child.to_json().c_str() + (std::string)",";
 									});
@@ -303,7 +303,7 @@ namespace VE
 		entity.children([&](flecs::entity child)
 			{
 				flecs::entity cloneChild = child.clone(true);
-				std::string cloneChildName = GenUniqueName( (std::string)child.name().c_str() + "Clone");
+				std::string cloneChildName = GenUniqueName((std::string)child.name().c_str() + "Clone");
 				cloneChild.set_name(cloneChildName.c_str());
 				cloneChild.remove(flecs::ChildOf, entity);
 				cloneChild.child_of(cloneParent);
@@ -319,7 +319,7 @@ namespace VE
 		std::string cloneName = std::string(entity.name().c_str()) + "Clone";
 		clone.set_name(GenUniqueName(cloneName).c_str());
 		if (entity.parent())
-		{	
+		{
 			//use this line of you want duplicated entity to remove its parent.
 			//clone.remove(flecs::ChildOf, entity.parent());
 		}
@@ -428,7 +428,7 @@ namespace VE
 		}
 	}
 
-	flecs::entity Scene::_LookupEntity(std::string name) 
+	flecs::entity Scene::_LookupEntity(std::string name)
 	{
 		flecs::entity ent = flecs::entity();
 
@@ -451,14 +451,14 @@ namespace VE
 			});
 		return ent;
 	}
-	
+
 	std::string Scene::GenUniqueName(std::string name)
 	{
 		if (!_LookupEntity(name))
 		{
 			return name;
 		}
-		else 
+		else
 		{
 			std::string uniqueName = name;
 			std::string temp = name;
@@ -476,7 +476,10 @@ namespace VE
 	{
 		std::string constructJsonString = "";
 #ifdef VE_EDITOR
-		std::fstream constructFile(GetFullPath(constructFilePath));
+		std::filesystem::path fullpath = GetFullPath(constructFilePath).generic_string();
+
+		std::fstream constructFile(fullpath);
+
 		std::stringstream ss;
 		ss << constructFile.rdbuf();
 		constructJsonString = ss.str();
@@ -486,10 +489,10 @@ namespace VE
 
 		nlohmann::ordered_json constJson = nlohmann::ordered_json::parse(constructJsonString);
 		std::string rootName = constJson["root"];
-				
+
 		//Check if entity with same name as construct exist.
 		flecs::entity root = _LookupEntity(rootName);
-		
+
 		flecs::entity existingEnt = flecs::entity();
 
 		//Entity with same name exist.
@@ -499,7 +502,7 @@ namespace VE
 			existingEnt.set_name((rootName + "_").c_str());
 		}
 
-		struct Node 
+		struct Node
 		{
 			flecs::entity e;
 			std::string name;
@@ -545,7 +548,7 @@ namespace VE
 			});
 		Node rootNode = *it;
 		root = rootNode.e;
-		
+
 		if (existingEnt)
 		{
 			root.set_name(GenUniqueName(rootName + "_").c_str());
@@ -555,7 +558,7 @@ namespace VE
 	}
 
 
-	
+
 
 
 	//Serialization stuff
@@ -587,7 +590,7 @@ namespace VE
 
 
 		world.component<Texture>().member<flecs::u32_t>("id").member<flecs::i32_t>("width").member<flecs::i32_t>("height").member<flecs::i32_t>("mipmaps").member<flecs::i32_t>("format");
-		
+
 		world.component<std::vector<int8_t>>()
 			.opaque(std_vector_support<int8_t>);
 
@@ -634,7 +637,7 @@ namespace VE
 		world.component<std::vector<glm::vec2>>()
 			.opaque(std_vector_support<glm::vec2>);
 
-		
+
 		world.component<glm::vec3>().member<float>("x").member<float>("y").member<float>("z");
 
 		world.component<std::vector<glm::vec3>>()
@@ -661,18 +664,18 @@ namespace VE
 				e.add<Components::TransformComponent>();
 			})
 			.on_set([](flecs::entity e, Components::SpriteComponent& sc)
-			{
-				sc.texture = nullptr;
-				if (!sc.texturePath.empty())
 				{
-					sc.texture = AssetsManager::GetSingleton()->LoadTexture(sc.texturePath);
-				}
-				sc.shader = nullptr;
-				if (!sc.shaderPath.empty())
-				{
-					sc.shader = AssetsManager::GetSingleton()->LoadShader(sc.shaderPath);
-				}
-			});
+					sc.texture = nullptr;
+					if (!sc.texturePath.empty())
+					{
+						sc.texture = AssetsManager::GetSingleton()->LoadTexture(sc.texturePath);
+					}
+					sc.shader = nullptr;
+					if (!sc.shaderPath.empty())
+					{
+						sc.shader = AssetsManager::GetSingleton()->LoadShader(sc.shaderPath);
+					}
+				});
 
 		world.component<Components::Camera2DComponent>().on_add([](flecs::entity e, Components::Camera2DComponent& c2dc)
 			{
@@ -685,183 +688,183 @@ namespace VE
 				{
 					UnloadRenderTexture(c2dc.renderTarget);
 				});
-		world.component<Components::Camera3DComponent>().on_set([](flecs::entity e, Components::Camera3DComponent& c3dc)
-			{
-				c3dc.camera.fovy = 45.0f;
-				c3dc.camera.projection = CAMERA_PERSPECTIVE;
-				c3dc.camera.target = {};
-				c3dc.camera.up = { 0.0f, 1.0f, 1.0f };
-
-				e.add<Components::TransformComponent>();
-				c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-				SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
-				
-				c3dc.skyboxTexture = {};
-				c3dc.cubeMapModel = {};
-				c3dc.skyboxShader = nullptr;
-
-				Components::LoadSkymap(&c3dc);
-
-			}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
+			world.component<Components::Camera3DComponent>().on_set([](flecs::entity e, Components::Camera3DComponent& c3dc)
 				{
-					UnloadRenderTexture(c3dc.renderTarget);
-			});
+					c3dc.camera.fovy = 45.0f;
+					c3dc.camera.projection = CAMERA_PERSPECTIVE;
+					c3dc.camera.target = {};
+					c3dc.camera.up = { 0.0f, 1.0f, 1.0f };
 
-			world.component<Components::DirectionalLightComponent>().on_add([](flecs::entity e, Components::DirectionalLightComponent& light)
-				{
-					e.add<_Components::LightTag>();
-					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
-				});
-			world.component<Components::PointLightComponent>().on_add([](flecs::entity e, Components::PointLightComponent& light)
-				{
-					e.add<_Components::LightTag>();
-					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
-				});
-			world.component<Components::SpotLightComponent>().on_add([](flecs::entity e, Components::SpotLightComponent& light)
-				{
-					e.add<_Components::LightTag>();
-					light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
-				});
-			
+					e.add<Components::TransformComponent>();
+					c3dc.renderTarget = LoadRenderTexture((int)c3dc.renderTargetSize.x, (int)c3dc.renderTargetSize.y, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+					SetTextureFilter(c3dc.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
 
-			world.component<Components::Model3DComponent>().on_add([](flecs::entity e, Components::Model3DComponent& model) 
-				{
-					
-				})
-				.on_set([](flecs::entity e, Components::Model3DComponent& model)
-				{
+					c3dc.skyboxTexture = {};
+					c3dc.cubeMapModel = {};
+					c3dc.skyboxShader = nullptr;
 
-					if (model.model)
+					Components::LoadSkymap(&c3dc);
+
+				}).on_remove([](flecs::entity e, Components::Camera3DComponent& c3dc)
 					{
-						UnloadModel(*model.model);
-						if (model.basicMesh != _Components::BasicMesh::None)
+						UnloadRenderTexture(c3dc.renderTarget);
+					});
+
+				world.component<Components::DirectionalLightComponent>().on_add([](flecs::entity e, Components::DirectionalLightComponent& light)
+					{
+						e.add<_Components::LightTag>();
+						light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+					});
+				world.component<Components::PointLightComponent>().on_add([](flecs::entity e, Components::PointLightComponent& light)
+					{
+						e.add<_Components::LightTag>();
+						light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+					});
+				world.component<Components::SpotLightComponent>().on_add([](flecs::entity e, Components::SpotLightComponent& light)
+					{
+						e.add<_Components::LightTag>();
+						light.pbrShader = VE::AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
+					});
+
+
+				world.component<Components::Model3DComponent>().on_add([](flecs::entity e, Components::Model3DComponent& model)
+					{
+
+					})
+					.on_set([](flecs::entity e, Components::Model3DComponent& model)
 						{
-							free(model.model);
-						}
-					}
-					model.model = nullptr;
 
-					if (!model.modelFilepath.empty())
-					{
-						model.model = VE::AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
-					}
-					if (model.basicMesh != _Components::BasicMesh::None)
-					{
-						Model* basicModel = (Model*)malloc(sizeof(Model));
-						*basicModel = Components::LoadBasicMesh(model.basicMesh);
-						model.model = basicModel;
-					}
-
-					Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
-
-					
-					int loc = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = loc;
-
-					loc = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = loc;
-
-					loc = rlGetLocationAttrib(pbrShader->id, "vertexNormal");
-					pbrShader->locs[RL_SHADER_LOC_VERTEX_NORMAL] = loc;
-
-					
-					loc = rlGetLocationUniform(pbrShader->id, "modelMatrix");
-					pbrShader->locs[SHADER_LOC_MATRIX_MODEL] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "mvp");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "material.albedo.color");
-					pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "albedoTexture");
-					pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "specularTexture");
-					pbrShader->locs[RL_SHADER_LOC_MAP_SPECULAR] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "material.specular.color");
-					pbrShader->locs[RL_SHADER_LOC_COLOR_SPECULAR] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "ambientOcclusionTexture");
-					pbrShader->locs[RL_SHADER_LOC_MAP_OCCLUSION] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "material.ambientOcclusion.color");
-					pbrShader->locs[RL_SHADER_LOC_COLOR_AMBIENT] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "normalMatrix");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_NORMAL] = loc;
-
-					loc = rlGetLocationUniform(pbrShader->id, "projectionMatrix");
-					pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = loc;
-					
-
-
-					Components::LoadModelMaterials(model, pbrShader);
-
-					}).on_remove([](flecs::entity e, Components::Model3DComponent& model) 
-						{
-							if (model.basicMesh != _Components::BasicMesh::None)
+							if (model.model)
 							{
 								UnloadModel(*model.model);
-								free(model.model);
-								model.model = nullptr;
+								if (model.basicMesh != _Components::BasicMesh::None)
+								{
+									free(model.model);
+								}
 							}
-						});
+							model.model = nullptr;
+
+							if (!model.modelFilepath.empty())
+							{
+								model.model = VE::AssetsManager::GetSingleton()->LoadModel(model.modelFilepath);
+							}
+							if (model.basicMesh != _Components::BasicMesh::None)
+							{
+								Model* basicModel = (Model*)malloc(sizeof(Model));
+								*basicModel = Components::LoadBasicMesh(model.basicMesh);
+								model.model = basicModel;
+							}
+
+							Shader* pbrShader = AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl");
 
 
-			world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)
-				{
-					lb.texturePtr = nullptr;
-					lb.texture = {};
-					lb.font = nullptr;
+							int loc = rlGetLocationAttrib(pbrShader->id, "vertexPosition");
+							pbrShader->locs[RL_SHADER_LOC_VERTEX_POSITION] = loc;
 
-					if (!lb.fontFilepath.empty())
-					{
-						lb.font = AssetsManager::GetSingleton()->LoadFont(lb.fontFilepath, (int)lb.size);
-						lb.texture = RaylibGetTextureFromText_UTF8(lb.font, lb.text);
-						lb.texturePtr = &lb.texture;
-					}
-				})
-				.on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
-				{
-					if (lb.texturePtr)
-					{
-						UnloadTexture(*lb.texturePtr);
-					}
-					if (lb.font)
-					{
-						delete lb.font;
-						lb.font = nullptr;
-					}
-				});
+							loc = rlGetLocationAttrib(pbrShader->id, "vertexTexCoord");
+							pbrShader->locs[RL_SHADER_LOC_VERTEX_TEXCOORD01] = loc;
 
-			world.component<Components::UI::UIImageComponent>().on_set([](flecs::entity e, Components::UI::UIImageComponent& img)
-				{
-					img.texture = nullptr;
-					if (!img.imageFilepath.empty())
-					{
-						img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
-					}
-				});
+							loc = rlGetLocationAttrib(pbrShader->id, "vertexNormal");
+							pbrShader->locs[RL_SHADER_LOC_VERTEX_NORMAL] = loc;
 
-			world.component<Components::UI::UIButtonComponent>().on_add([](flecs::entity e, Components::UI::UIButtonComponent) 
-				{
-					e.add<Components::UI::UIImageComponent>();
-				}).on_set([](flecs::entity e, Components::UI::UIButtonComponent)
-				{
-						Components::UI::UIImageComponent& img = *e.get_mut<Components::UI::UIImageComponent>();
 
-						img.texture = nullptr;
+							loc = rlGetLocationUniform(pbrShader->id, "modelMatrix");
+							pbrShader->locs[SHADER_LOC_MATRIX_MODEL] = loc;
 
-						if (!img.imageFilepath.empty())
-						{
-							img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
-						}
+							loc = rlGetLocationUniform(pbrShader->id, "mvp");
+							pbrShader->locs[RL_SHADER_LOC_MATRIX_MVP] = loc;
 
-				});
+							loc = rlGetLocationUniform(pbrShader->id, "material.albedo.color");
+							pbrShader->locs[RL_SHADER_LOC_COLOR_DIFFUSE] = loc;
 
-		world.component<_Components::SceneEntityTag>();
-		world.component<_Components::SceneEntityUITag>();
+							loc = rlGetLocationUniform(pbrShader->id, "albedoTexture");
+							pbrShader->locs[RL_SHADER_LOC_MAP_DIFFUSE] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "specularTexture");
+							pbrShader->locs[RL_SHADER_LOC_MAP_SPECULAR] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "material.specular.color");
+							pbrShader->locs[RL_SHADER_LOC_COLOR_SPECULAR] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "ambientOcclusionTexture");
+							pbrShader->locs[RL_SHADER_LOC_MAP_OCCLUSION] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "material.ambientOcclusion.color");
+							pbrShader->locs[RL_SHADER_LOC_COLOR_AMBIENT] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "normalMatrix");
+							pbrShader->locs[RL_SHADER_LOC_MATRIX_NORMAL] = loc;
+
+							loc = rlGetLocationUniform(pbrShader->id, "projectionMatrix");
+							pbrShader->locs[RL_SHADER_LOC_MATRIX_PROJECTION] = loc;
+
+
+
+							Components::LoadModelMaterials(model, pbrShader);
+
+						}).on_remove([](flecs::entity e, Components::Model3DComponent& model)
+							{
+								if (model.basicMesh != _Components::BasicMesh::None)
+								{
+									UnloadModel(*model.model);
+									free(model.model);
+									model.model = nullptr;
+								}
+							});
+
+
+						world.component<Components::UI::UILabelComponent>().on_set([](flecs::entity e, Components::UI::UILabelComponent& lb)
+							{
+								lb.texturePtr = nullptr;
+								lb.texture = {};
+								lb.font = nullptr;
+
+								if (!lb.fontFilepath.empty())
+								{
+									lb.font = AssetsManager::GetSingleton()->LoadFont(lb.fontFilepath, (int)lb.size);
+									lb.texture = RaylibGetTextureFromText_UTF8(lb.font, lb.text);
+									lb.texturePtr = &lb.texture;
+								}
+							})
+							.on_remove([](flecs::entity e, Components::UI::UILabelComponent& lb)
+								{
+									if (lb.texturePtr)
+									{
+										UnloadTexture(*lb.texturePtr);
+									}
+									if (lb.font)
+									{
+										delete lb.font;
+										lb.font = nullptr;
+									}
+								});
+
+						world.component<Components::UI::UIImageComponent>().on_set([](flecs::entity e, Components::UI::UIImageComponent& img)
+							{
+								img.texture = nullptr;
+								if (!img.imageFilepath.empty())
+								{
+									img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
+								}
+							});
+
+						world.component<Components::UI::UIButtonComponent>().on_add([](flecs::entity e, Components::UI::UIButtonComponent)
+							{
+								e.add<Components::UI::UIImageComponent>();
+							}).on_set([](flecs::entity e, Components::UI::UIButtonComponent)
+								{
+									Components::UI::UIImageComponent& img = *e.get_mut<Components::UI::UIImageComponent>();
+
+									img.texture = nullptr;
+
+									if (!img.imageFilepath.empty())
+									{
+										img.texture = AssetsManager::GetSingleton()->LoadTexture(img.imageFilepath);
+									}
+
+								});
+
+							world.component<_Components::SceneEntityTag>();
+							world.component<_Components::SceneEntityUITag>();
 	}
 }

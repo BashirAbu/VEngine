@@ -9,7 +9,7 @@ namespace VE::Systems
 {
 	void ApplyParentTransform(flecs::entity parent, Components::TransformComponent& parentTC)
 	{
-		parent.children([&](flecs::entity child) 
+		parent.children([&](flecs::entity child)
 			{
 				glm::mat4 parentWorldTransformMatrix = parentTC.__worldMatrix;
 				Components::TransformComponent& childTC = *child.get_mut<Components::TransformComponent>();
@@ -45,7 +45,7 @@ namespace VE::Systems
 			tc.__worldMatrix = tc.__localMatrix;
 			tc.__worldPosition = tc.localPosition;
 			tc.__worldRotation = tc.localRotation;
-			tc.__worldScale= tc.localScale;
+			tc.__worldScale = tc.localScale;
 		}
 		//root entity only
 		if (!e.parent() && hasChildren)
@@ -74,7 +74,7 @@ namespace VE::Systems
 			-transformMatrix.m9,
 			-transformMatrix.m10
 		};
-		
+
 		c3dc.camera.target = Vector3Add(c3dc.camera.position, forward);
 
 		c3dc.camera.up.x = transformMatrix.m4;
@@ -245,20 +245,20 @@ namespace VE::Systems
 		}
 	}
 
-	
+
 	void SetShaderMaterialValue(_Components::TextureMap& textureMap, MaterialMap& rayMaterialMap)
 	{
 		rayMaterialMap.color = GLMVec4ToRayColor(textureMap.color);
 		rayMaterialMap.value = textureMap.value;
 		rayMaterialMap.texture = textureMap.texture;
 	}
-	
+
 
 	void Mesh3DRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::Model3DComponent& model)
 	{
 		if (model.model)
 		{
-			TraceLog(LOG_DEBUG, "Number of materials: %d, NumberOfMeshCount: %d", model.model->materialCount, model.model->meshCount);
+			//TraceLog(LOG_DEBUG, "Number of materials: %d, NumberOfMeshCount: %d", model.model->materialCount, model.model->meshCount);
 			model.model->transform = GlmMat4ToRaylibMatrix(tc.__worldMatrix);
 
 			VE::Renderer::Model3D m3d = {};
@@ -306,7 +306,7 @@ namespace VE::Systems
 	}
 	void UIImageRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UIImageComponent& img)
 	{
-		
+
 		if (img.texture)
 		{
 			Rectangle src, dest;
@@ -347,9 +347,12 @@ namespace VE::Systems
 
 	void UILabelRenderSystem(flecs::entity e, Components::TransformComponent& tc, Components::UI::UILabelComponent& label)
 	{
-		
 		if (label.font)
 		{
+			if (label.oldText != label.text)
+			{
+				label.texture = RaylibGetTextureFromText_UTF8(label.font, label.text);
+			}
 
 			Rectangle src, dest;
 			src.x = 0.0f;
@@ -381,6 +384,7 @@ namespace VE::Systems
 			l2d.entity = e;
 			l2d.renderOrder = label.renderOrder;
 			VE::Scene::GetSingleton()->renderer.SubmitUI(l2d);
+			label.oldText = label.text;
 		}
 	}
 
@@ -390,14 +394,14 @@ namespace VE::Systems
 		//get main canvas.
 		flecs::query qCanvas = e.world().query<VE::Components::UI::UICanvasComponent>();
 
-		flecs::entity canvasEntity = qCanvas.find([](flecs::entity e, VE::Components::UI::UICanvasComponent& canvas) 
+		flecs::entity canvasEntity = qCanvas.find([](flecs::entity e, VE::Components::UI::UICanvasComponent& canvas)
 			{
 				return canvas.isMain;
 			});
 		if (canvasEntity)
 		{
 			VE::Components::UI::UICanvasComponent* canvas = canvasEntity.get_mut<VE::Components::UI::UICanvasComponent>();
-			flecs::entity cameraEntity =  VE::Scene::GetSingleton()->GetMainCamera();
+			flecs::entity cameraEntity = VE::Scene::GetSingleton()->GetMainCamera();
 
 			if (canvas)
 			{
@@ -406,7 +410,7 @@ namespace VE::Systems
 					mousePos.y / VE::Scene::GetSingleton()->renderer.GetMainRenderTarget().texture.height);
 				vMousePos = glm::vec2(vMousePos.x * canvas->canvasSize.x, vMousePos.y * canvas->canvasSize.y);
 
-				if (img.texture) 
+				if (img.texture)
 				{
 					Rectangle rect = {};
 					rect.x = tc.GetWorldPosition().x - img.origin.x * img.texture->width;
@@ -414,14 +418,14 @@ namespace VE::Systems
 					rect.y = tc.GetWorldPosition().y - img.origin.y * img.texture->height;
 					rect.height = img.texture->height * tc.GetWorldScale().x;
 
-					Vector2 point = {vMousePos.x, vMousePos.y};
+					Vector2 point = { vMousePos.x, vMousePos.y };
 					if (CheckCollisionPointRec(point, rect))
 					{
 						if (VE::Input::IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 						{
 							button.__down = true;
 						}
-						else 
+						else
 						{
 							button.__down = false;
 						}
@@ -440,7 +444,7 @@ namespace VE::Systems
 							}
 						}
 					}
-					else 
+					else
 					{
 						button.__down = false;
 
@@ -449,7 +453,7 @@ namespace VE::Systems
 			}
 		}
 
-		if (!button.__down) 
+		if (!button.__down)
 		{
 			img.tintColor = button.imgTintColor;
 		}

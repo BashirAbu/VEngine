@@ -10,145 +10,145 @@
 
 int main(int argc, char** argv)
 {
-    std::filesystem::path projectPath = argv[1];
-    HeaderDesc headerDesc = {};
-    
-    int64_t offset = 0;
-    std::vector<std::filesystem::path> assetsFullPath;
+	std::filesystem::path projectPath = argv[1];
+	HeaderDesc headerDesc = {};
 
-    for (auto file : std::filesystem::recursive_directory_iterator(projectPath))
-    {
-        if (file.is_regular_file())
-        {
-            if (file.path().extension().string() == (std::string)".VEProject")
-            {
-                FILE* assetFile = fopen(file.path().generic_string().c_str(), "rb");
-                if (!assetFile)
-                {
-                    std::cerr << "Failed to open file: " << file.path().generic_string() << std::endl;
-                }
+	int64_t offset = 0;
+	std::vector<std::filesystem::path> assetsFullPath;
 
-                if (fseek(assetFile, 0, SEEK_END) != 0)
-                {
-                    std::cerr << "Failed to read size of file: " << file.path().generic_string() << std::endl;
-                }
+	for (auto file : std::filesystem::recursive_directory_iterator(projectPath))
+	{
+		if (file.is_regular_file())
+		{
+			if (file.path().extension().string() == (std::string)".VEProject")
+			{
+				FILE* assetFile = fopen(file.path().generic_string().c_str(), "rb");
+				if (!assetFile)
+				{
+					std::cerr << "Failed to open file: " << file.path().generic_string() << std::endl;
+				}
 
-
-                size_t fileSize = ftell(assetFile);
-                fclose(assetFile);
+				if (fseek(assetFile, 0, SEEK_END) != 0)
+				{
+					std::cerr << "Failed to read size of file: " << file.path().generic_string() << std::endl;
+				}
 
 
-                AssetHeader header = {};
-                std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), projectPath.generic_string());
-                assert(relativePath.generic_string().size() < sizeof(header.name));
-                strcpy(header.name, relativePath.generic_string().c_str());
-                header.size = fileSize;
-                header.offset = offset;
-                headerDesc.headers.push_back(header);
-
-                std::cout << file.path().filename() << std::endl;
-                offset += fileSize;
-                assetsFullPath.push_back(file.path());
-
-                break;
-            }
-        }
-    }
+				size_t fileSize = ftell(assetFile);
+				fclose(assetFile);
 
 
-    for (auto file : std::filesystem::recursive_directory_iterator((projectPath / "assets")))
-    {
-        if (file.is_regular_file())
-        {
-            FILE* assetFile = fopen(file.path().generic_string().c_str(), "rb");
-            if (!assetFile)
-            {
-                std::cerr << "Failed to open file: " << file.path().generic_string() << std::endl;
-            }
-            
-            if (fseek(assetFile, 0, SEEK_END) != 0)
-            {
-                std::cerr << "Failed to read size of file: " << file.path().generic_string() << std::endl;
-            }
+				AssetHeader header = {};
+				std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), projectPath.generic_string());
+				assert(relativePath.generic_string().size() < sizeof(header.name));
+				strcpy(header.name, relativePath.generic_string().c_str());
+				header.size = fileSize;
+				header.offset = offset;
+				headerDesc.headers.push_back(header);
+
+				std::cout << file.path().filename() << std::endl;
+				offset += fileSize;
+				assetsFullPath.push_back(file.path());
+
+				break;
+			}
+		}
+	}
 
 
-            size_t fileSize = ftell(assetFile);
-            fclose(assetFile);
+	for (auto file : std::filesystem::recursive_directory_iterator((projectPath / "assets")))
+	{
+		if (file.is_regular_file())
+		{
+			FILE* assetFile = fopen(file.path().generic_string().c_str(), "rb");
+			if (!assetFile)
+			{
+				std::cerr << "Failed to open file: " << file.path().generic_string() << std::endl;
+			}
+
+			if (fseek(assetFile, 0, SEEK_END) != 0)
+			{
+				std::cerr << "Failed to read size of file: " << file.path().generic_string() << std::endl;
+			}
 
 
-            AssetHeader header = {};
-            std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), (projectPath / "assets").generic_string());
-            assert(relativePath.generic_string().size() < sizeof(header.name));
-            strcpy(header.name, relativePath.generic_string().c_str());
-            header.size = fileSize;
-            header.offset = offset;
-            headerDesc.headers.push_back(header);
-    
-            std::cout << file.path().filename() << std::endl;
-            offset += fileSize;
-            assetsFullPath.push_back(file.path());
-        }
-    }
-    
-    int64_t headerDescSize = sizeof(AssetHeader) * headerDesc.headers.size();
-
-    FILE* dataFile = fopen("data.VEData", "wb");
+			size_t fileSize = ftell(assetFile);
+			fclose(assetFile);
 
 
-    assert(fwrite(&headerDescSize, sizeof(headerDescSize), 1, dataFile));
-    
-    for (size_t i = 0; i < headerDesc.headers.size(); i++)
-    {
-        assert(fwrite(headerDesc.headers[i].name, sizeof(headerDesc.headers[i].name), 1, dataFile));
-        assert(fwrite(&headerDesc.headers[i].size, sizeof(headerDesc.headers[i].size), 1, dataFile));
-        assert(fwrite(&headerDesc.headers[i].offset, sizeof(headerDesc.headers[i].offset), 1, dataFile));
-    }
-    
-    for (size_t i = 0; i < assetsFullPath.size(); i++)
-    {
-        FILE* assetFile = fopen(assetsFullPath[i].generic_string().c_str(), "rb");
-        
-        std::vector <char> buffer(headerDesc.headers[i].size);
-        fread(buffer.data(), buffer.size(), 1, assetFile);
-        fclose(assetFile);
-        assert(fwrite(buffer.data(), buffer.size(), 1, dataFile));
-        
-    }
-    fclose(dataFile);
+			AssetHeader header = {};
+			std::filesystem::path relativePath = std::filesystem::relative(file.path().generic_string(), (projectPath / "assets").generic_string());
+			assert(relativePath.generic_string().size() < sizeof(header.name));
+			strcpy(header.name, relativePath.generic_string().c_str());
+			header.size = fileSize;
+			header.offset = offset;
+			headerDesc.headers.push_back(header);
+
+			std::cout << file.path().filename() << std::endl;
+			offset += fileSize;
+			assetsFullPath.push_back(file.path());
+		}
+	}
+
+	int64_t headerDescSize = sizeof(AssetHeader) * headerDesc.headers.size();
+
+	FILE* dataFile = fopen("data.VEData", "wb");
 
 
-    //try get data.
+	assert(fwrite(&headerDescSize, sizeof(headerDescSize), 1, dataFile));
 
-    //FILE* data = fopen("data.VEData", "rb");
+	for (size_t i = 0; i < headerDesc.headers.size(); i++)
+	{
+		assert(fwrite(headerDesc.headers[i].name, sizeof(headerDesc.headers[i].name), 1, dataFile));
+		assert(fwrite(&headerDesc.headers[i].size, sizeof(headerDesc.headers[i].size), 1, dataFile));
+		assert(fwrite(&headerDesc.headers[i].offset, sizeof(headerDesc.headers[i].offset), 1, dataFile));
+	}
 
-    //int64_t headerDescSize = 0;
+	for (size_t i = 0; i < assetsFullPath.size(); i++)
+	{
+		FILE* assetFile = fopen(assetsFullPath[i].generic_string().c_str(), "rb");
 
-    //fread(&headerDescSize, sizeof(headerDescSize), 1, data);
+		std::vector <char> buffer(headerDesc.headers[i].size);
+		fread(buffer.data(), buffer.size(), 1, assetFile);
+		fclose(assetFile);
+		fwrite(buffer.data(), buffer.size(), 1, dataFile);
 
-    //int64_t sizeOfSingleHeader = sizeof(AssetHeader);
-
-    //int64_t numberOfAssets = headerDescSize / sizeOfSingleHeader;
-
-    //for (size_t i = 0; i < numberOfAssets; i++)
-    //{
-    //    AssetHeader header = {};
-    //    fread(&header, sizeof(header), 1, data);
-    //    std::cout << header.name << std::endl;
+	}
+	fclose(dataFile);
 
 
-    //    if (strstr(header.name, "health"))
-    //    {
-    //        std::vector<uint8_t> buf(header.size, 0);
-    //        fseek(data, headerDescSize + 8, SEEK_SET);
-    //        fseek(data, header.offset, SEEK_CUR);
+	//try get data.
 
-    //        fread(buf.data(), buf.size(), 1, data);
+	//FILE* data = fopen("data.VEData", "rb");
 
-    //        std::cout << buf.data() << std::endl;
+	//int64_t headerDescSize = 0;
 
-    //    }
-    //    
-    //}
-    //fclose(data);
-    return 0;
+	//fread(&headerDescSize, sizeof(headerDescSize), 1, data);
+
+	//int64_t sizeOfSingleHeader = sizeof(AssetHeader);
+
+	//int64_t numberOfAssets = headerDescSize / sizeOfSingleHeader;
+
+	//for (size_t i = 0; i < numberOfAssets; i++)
+	//{
+	//    AssetHeader header = {};
+	//    fread(&header, sizeof(header), 1, data);
+	//    std::cout << header.name << std::endl;
+
+
+	//    if (strstr(header.name, "health"))
+	//    {
+	//        std::vector<uint8_t> buf(header.size, 0);
+	//        fseek(data, headerDescSize + 8, SEEK_SET);
+	//        fseek(data, header.offset, SEEK_CUR);
+
+	//        fread(buf.data(), buf.size(), 1, data);
+
+	//        std::cout << buf.data() << std::endl;
+
+	//    }
+	//    
+	//}
+	//fclose(data);
+	return 0;
 }

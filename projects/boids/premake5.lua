@@ -1,4 +1,4 @@
---include (os.getenv("VENGINE_DIR") .. "/premake/premake-emscripten/emscripten.lua")
+include (os.getenv("VENGINE_DIR") .. "/premake/premake-emscripten/emscripten.lua")
 include (os.getenv("VENGINE_DIR") .. "/premake/premake-cmake/cmake.lua")
 
 local ve_engine_path = os.getenv("VENGINE_DIR")
@@ -60,34 +60,34 @@ project "project"
             "{CHDIR} %{cfg.buildtarget.directory}",
             os.getenv("VENGINE_DIR") .. "/bin/Release_windows_x86_64/VEAssetsPackager/VEAssetsPackager %{prj.location}",
         }
---    filter "system:emscripten"
---        architecture "wasm32" 
---        system "emscripten"
---        buildoptions 
---        {   
---            "-sUSE_PTHREADS=1",
---            "-msimd128",
---        }
---        linkoptions
---        {
---            "-o %{cfg.buildtarget.directory}/" .. targetName .. ".html",
---            "-sWASM=1",
---            "-sUSE_GLFW=3",
---            "--preload-file %{cfg.buildtarget.directory}/data.VEData@./data.VEData",
---            "-s STACK_SIZE=4194304",
---            "-sALLOW_MEMORY_GROWTH"
---        }
---        defines
---        {
---            "GRAPHICS_API_OPENGL_ES2",
---            "VE_WEB",
---            "PLATFORM_WEB",
---        }
---    filter {"files:*.c", "system:emscripten"}
---        buildoptions 
---        {  
---            "--std:c++20"
---        }
+    filter "system:emscripten"
+        architecture "wasm32" 
+        system "emscripten"
+        buildoptions 
+        {   
+            "-sUSE_PTHREADS=1",
+            "-msimd128",
+        }
+        linkoptions
+        {
+            "-o %{cfg.buildtarget.directory}/" .. targetName .. ".html",
+            "-sWASM=1",
+            "-sUSE_GLFW=3",
+            "--preload-file %{cfg.buildtarget.directory}/data.VEData@./data.VEData",
+            "-s STACK_SIZE=4194304",
+            "-sALLOW_MEMORY_GROWTH"
+        }
+        defines
+        {
+            "GRAPHICS_API_OPENGL_ES2",
+            "VE_WEB",
+            "PLATFORM_WEB",
+        }
+    filter {"files:*.c", "system:emscripten"}
+        buildoptions 
+        {  
+            "--std:c++20"
+        }
 
         
     

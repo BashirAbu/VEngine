@@ -5,13 +5,13 @@
 #include <locale>
 #include "ShapingEngine.hpp"
 #include "utf8.h"
-namespace VE 
+namespace VE
 {
 
-    Color GLMVec4ToRayColor(glm::vec4 color)
-    {
-        return Color{ uint8_t(color.r * 255.0f), uint8_t(color.g * 255.0f), uint8_t(color.b * 255.0f), uint8_t(color.a * 255.0f) };
-    }
+	Color GLMVec4ToRayColor(glm::vec4 color)
+	{
+		return Color{ uint8_t(color.r * 255.0f), uint8_t(color.g * 255.0f), uint8_t(color.b * 255.0f), uint8_t(color.a * 255.0f) };
+	}
 
 
 	Matrix GlmMat4ToRaylibMatrix(const glm::mat4& glmMatrix) {
@@ -34,35 +34,35 @@ namespace VE
 		);
 	}
 
-    
-    std::filesystem::path GetRelativePath(std::filesystem::path path)
-    {
-        return path.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
-    }
-    std::filesystem::path GetFullPath(std::filesystem::path path)
-    {
-        return Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/assets/" + path.string();
-    }
-    VE_API void RaylibDrawTexturTargeteLetterBox(RenderTexture renderTarget, glm::vec2 screenSize)
-    {
-        float scale = glm::min(screenSize.x / renderTarget.texture.width, screenSize.y / renderTarget.texture.height);
+
+	std::filesystem::path GetRelativePath(std::filesystem::path path)
+	{
+		return path.lexically_relative(Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().generic_string() + "/assets");
+	}
+	std::filesystem::path GetFullPath(std::filesystem::path path)
+	{
+		return Engine::GetSingleton()->GetDesc()->projectDetails.path.parent_path().string() + "/assets/" + path.string();
+	}
+	VE_API void RaylibDrawTexturTargeteLetterBox(RenderTexture renderTarget, glm::vec2 screenSize)
+	{
+		float scale = glm::min(screenSize.x / renderTarget.texture.width, screenSize.y / renderTarget.texture.height);
 
 
-        DrawTexturePro(renderTarget.texture, {0.0f, 0.0f, (float) renderTarget.texture.width, (float) -renderTarget.texture.height},
-            {(screenSize.x - (renderTarget.texture.width * scale)) * .5f, (screenSize.y - (renderTarget.texture.height * scale)) * .5f, renderTarget.texture.width * scale, renderTarget.texture.height * scale }
-        , {0.0f, 0.0f}, 0.0f, WHITE);
-    }
-    VE_API Texture RaylibGetTextureFromText_UTF8(Font* font, std::string text, float spacing)
-    {
-        Texture result = {};
+		DrawTexturePro(renderTarget.texture, { 0.0f, 0.0f, (float)renderTarget.texture.width, (float)-renderTarget.texture.height },
+			{ (screenSize.x - (renderTarget.texture.width * scale)) * .5f, (screenSize.y - (renderTarget.texture.height * scale)) * .5f, renderTarget.texture.width * scale, renderTarget.texture.height * scale }
+		, { 0.0f, 0.0f }, 0.0f, WHITE);
+	}
+	VE_API Texture RaylibGetTextureFromText_UTF8(Font* font, std::string text, float spacing)
+	{
+		Texture result = {};
 
 		std::wstring wideString;
 		utf8::utf8to16(text.begin(), text.end(), std::back_inserter(wideString));
-		std::string processedString = ShapingEngine::render(wideString, true, true);
-		wideString = L"";
-		utf8::utf8to16(processedString.begin(), processedString.end(), std::back_inserter(wideString));
+		//std::string processedString = ShapingEngine::render(wideString, true, true);
+		//wideString = L"";
+		//utf8::utf8to16(processedString.begin(), processedString.end(), std::back_inserter(wideString));
 
-		
+
 
 		std::vector<Glyph> glyphs;
 		int32_t imageWidth = 0;
@@ -75,12 +75,12 @@ namespace VE
 			glyphs.push_back(g);
 			imageHeight = glm::max(imageHeight, g.height);
 			baseline = glm::max(baseline, g.bearingY);
-			imageWidth += (g.bearingX > 0? g.bearingX : 0) + g.advance;
+			imageWidth += (g.bearingX > 0 ? g.bearingX : 0) + g.advance;
 		}
 
 		imageHeight += baseline;
 
-		
+
 		uint32_t* imgBuffer = (uint32_t*)malloc(imageWidth * imageHeight * sizeof(uint32_t));
 		memset(imgBuffer, 0, imageWidth * imageHeight * sizeof(uint32_t));
 		int32_t xOffset = 0;
@@ -116,6 +116,6 @@ namespace VE
 		SetTextureFilter(result, TEXTURE_FILTER_BILINEAR);
 		SetTextureWrap(result, TEXTURE_WRAP_CLAMP);
 
-        return result;
-    }
+		return result;
+	}
 }

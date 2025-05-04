@@ -16,7 +16,7 @@ using namespace VE::Components::UI;
 
 void DrawTextureMapEditorUI(std::string name, flecs::entity entity, VE::_Components::TextureMap* TextureMap_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(325)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(121)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -49,7 +49,7 @@ void DrawTextureMapEditorUI(std::string name, flecs::entity entity, VE::_Compone
 }
 void DrawVEMaterialEditorUI(std::string name, flecs::entity entity, VE::_Components::VEMaterial* VEMaterial_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(839)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(110)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -82,7 +82,7 @@ void DrawVEMaterialEditorUI(std::string name, flecs::entity entity, VE::_Compone
 }
 void DrawTransformComponentEditorUI(std::string name, flecs::entity entity, VE::Components::TransformComponent* TransformComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(419)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(443)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -112,7 +112,7 @@ void DrawTransformComponentEditorUI(std::string name, flecs::entity entity, VE::
 }
 void DrawSpriteComponentEditorUI(std::string name, flecs::entity entity, VE::Components::SpriteComponent* SpriteComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(725)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(220)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -148,7 +148,7 @@ void DrawSpriteComponentEditorUI(std::string name, flecs::entity entity, VE::Com
 }
 void DrawCamera2DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Camera2DComponent* Camera2DComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(89)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(513)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -181,7 +181,7 @@ void DrawCamera2DComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawCamera3DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Camera3DComponent* Camera3DComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(257)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(553)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -220,7 +220,7 @@ void DrawCamera3DComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawDirectionalLightComponentEditorUI(std::string name, flecs::entity entity, VE::Components::DirectionalLightComponent* DirectionalLightComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(455)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(34)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -250,7 +250,7 @@ void DrawDirectionalLightComponentEditorUI(std::string name, flecs::entity entit
 }
 void DrawPointLightComponentEditorUI(std::string name, flecs::entity entity, VE::Components::PointLightComponent* PointLightComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(373)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(126)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -289,7 +289,7 @@ void DrawPointLightComponentEditorUI(std::string name, flecs::entity entity, VE:
 }
 void DrawSpotLightComponentEditorUI(std::string name, flecs::entity entity, VE::Components::SpotLightComponent* SpotLightComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(615)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(995)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -325,7 +325,7 @@ void DrawSpotLightComponentEditorUI(std::string name, flecs::entity entity, VE::
 }
 void DrawModel3DComponentEditorUI(std::string name, flecs::entity entity, VE::Components::Model3DComponent* Model3DComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(209)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(778)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -351,7 +351,7 @@ void DrawModel3DComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 			EditorElement::FileSystem(Model3DComponent_->modelFilepath, "Model Filepath", Model3DComponent_, VE::Components::ModelOnChange);
 
 
-			{ImGui::PushID(((std::string)"materials" + (const char*)(int[1])(316)).c_str()); 
+			{ImGui::PushID(((std::string)"materials" + (const char*)(int[1])(280)).c_str()); 
 			ImGuiTreeNodeFlags _flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 			bool _open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), _flags, "materials");
 			ImGui::SameLine();
@@ -391,7 +391,7 @@ void DrawModel3DComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 }
 void DrawUICanvasComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UICanvasComponent* UICanvasComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(914)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(98)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -418,7 +418,7 @@ void DrawUICanvasComponentEditorUI(std::string name, flecs::entity entity, VE::C
 }
 void DrawUILabelComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UILabelComponent* UILabelComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(557)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(659)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -457,7 +457,7 @@ void DrawUILabelComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 }
 void DrawUIImageComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UIImageComponent* UIImageComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(543)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(387)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)
@@ -490,7 +490,7 @@ void DrawUIImageComponentEditorUI(std::string name, flecs::entity entity, VE::Co
 }
 void DrawUIButtonComponentEditorUI(std::string name, flecs::entity entity, VE::Components::UI::UIButtonComponent* UIButtonComponent_, bool removable)
 {
-	ImGui::PushID((name + (const char*)(int[1])(414)).c_str()); 
+	ImGui::PushID((name + (const char*)(int[1])(319)).c_str()); 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 		bool open = ImGui::TreeNodeEx((void*)((uint64_t)(entity)), flags, name.c_str());
 		if(removable)

@@ -7,10 +7,10 @@
 #include <rlgl.h>
 #define MAX_LIGHTS 10
 
-namespace VE 
+namespace VE
 {
-	
-	namespace _Components 
+
+	namespace _Components
 	{
 		struct OnRender {};
 		struct SceneEntityTag {};
@@ -21,7 +21,7 @@ namespace VE
 		struct LightTag {};
 
 		VE_ENUM()
-		enum class BasicMesh
+			enum class BasicMesh
 		{
 			None = 0,
 			Cube,
@@ -29,20 +29,20 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
-		struct TextureMap 
+			struct TextureMap
 		{
 			VE_PROPERTY(Editor)
-			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			float value;
+				float value;
 			VE_PROPERTY(Editor, OnChange = TextureMapTexturePathOnChange)
-			std::filesystem::path texturePath = "";
+				std::filesystem::path texturePath = "";
 			VE_PROPERTY(Editor)
-			Texture texture = {};
+				Texture texture = {};
 		};
 
 		VE_FUNCTION(Callback)
-		inline void TextureMapTexturePathOnChange (void* data) 
+			inline void TextureMapTexturePathOnChange(void* data)
 		{
 			TextureMap* tm = (TextureMap*)data;
 			if (tm)
@@ -52,14 +52,14 @@ namespace VE
 		}
 
 		VE_CLASS(Component)
-		struct VEMaterial 
+			struct VEMaterial
 		{
 			VE_PROPERTY(Editor)
-			TextureMap albedoMap;
+				TextureMap albedoMap;
 			VE_PROPERTY(Editor)
-			TextureMap specularMap;
+				TextureMap specularMap;
 			VE_PROPERTY(Editor)
-			TextureMap ambientOcclusionMap;
+				TextureMap ambientOcclusionMap;
 
 			Shader* shader;
 		};
@@ -70,11 +70,12 @@ namespace VE
 	namespace Components
 	{
 		VE_CLASS(Component)
-		struct TransformComponent
+			struct TransformComponent
 		{
 			TransformComponent() : __localMatrix(1.0f), __worldMatrix(1.0f)
-			{}
-			void SetWorldPosition(glm::vec3 newPosition) 
+			{
+			}
+			void SetWorldPosition(glm::vec3 newPosition)
 			{
 				if (!e.parent())
 				{
@@ -92,7 +93,7 @@ namespace VE
 					localPosition = localPos;
 				}
 			}
-			void SetWorldRotation(glm::vec3 newRotation) 
+			void SetWorldRotation(glm::vec3 newRotation)
 			{
 				if (!e.parent())
 				{
@@ -117,7 +118,7 @@ namespace VE
 					localRotation = glm::degrees(localRotEulerAngles);
 				}
 			}
-			void SetWorldScale(glm::vec3 newScale) 
+			void SetWorldScale(glm::vec3 newScale)
 			{
 				if (!e.parent())
 				{
@@ -144,20 +145,20 @@ namespace VE
 				}
 			}
 
-			glm::vec3 GetWorldPosition() 
+			glm::vec3 GetWorldPosition()
 			{
-				
+
 				if (!e.parent())
 				{
 					return localPosition;
 				}
-				else 
+				else
 				{
 					return __worldPosition;
 				}
 			}
 
-			glm::vec3 GetWorldRotation() 
+			glm::vec3 GetWorldRotation()
 			{
 				if (!e.parent())
 				{
@@ -168,7 +169,7 @@ namespace VE
 					return __worldRotation;
 				}
 			}
-			glm::vec3 GetWorldScale() 
+			glm::vec3 GetWorldScale()
 			{
 				if (!e.parent())
 				{
@@ -176,16 +177,16 @@ namespace VE
 				}
 				else
 				{
-					
+
 					return __worldScale;
 				}
 			}
 			VE_PROPERTY(Editor)
-			glm::vec3 localPosition = {};
+				glm::vec3 localPosition = {};
 			VE_PROPERTY(Editor)
-			glm::vec3 localRotation = {};
+				glm::vec3 localRotation = {};
 			VE_PROPERTY(Editor)
-			glm::vec3 localScale = {1.0f,1.0f,1.0f};
+				glm::vec3 localScale = { 1.0f,1.0f,1.0f };
 			flecs::entity e;
 
 			//internal
@@ -202,26 +203,26 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
-		struct SpriteComponent
+			struct SpriteComponent
 		{
 			VE_PROPERTY(Editor, OnChange = SpriteComponentTextureOnChange)
-			std::filesystem::path texturePath = "";
+				std::filesystem::path texturePath = "";
 			VE_PROPERTY(Editor)
-			glm::vec2 origin = {};
+				glm::vec2 origin = {};
 			VE_PROPERTY(Editor)
-			NormalizedColor tintColor = {1.0f, 1.0f, 1.0f, 1.0f};
+				NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			int32_t renderOrder = 0;
+				int32_t renderOrder = 0;
 			Texture* texture = nullptr;
 
 
 			VE_PROPERTY(Editor, OnChange = SpriteComponentShaderOnChange)
-			std::filesystem::path shaderPath = "";
+				std::filesystem::path shaderPath = "";
 			Shader* shader = nullptr;
 		};
 
 		VE_FUNCTION(Callback);
-		inline void SpriteComponentTextureOnChange(void* data) 
+		inline void SpriteComponentTextureOnChange(void* data)
 		{
 			SpriteComponent* sc = (SpriteComponent*)data;
 
@@ -246,25 +247,25 @@ namespace VE
 		}
 
 		VE_CLASS(Component)
-		struct Camera2DComponent
+			struct Camera2DComponent
 		{
 			Camera2D camera = {};
 			RenderTexture renderTarget = {};
 			VE_PROPERTY(Editor, OnChange = Camera2DComponentRenderTargetSizeOnChange)
-			glm::vec2 renderTargetSize = {(float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
-										  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight};
+				glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+											  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
 			VE_PROPERTY(Editor)
-			NormalizedColor backgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
+				NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			float zoom = 1.0f;
+				float zoom = 1.0f;
 			VE_PROPERTY(Editor, OnChange = Camera2DComponentRenderIsMainOnChange)
-			bool isMain = false;
+				bool isMain = false;
 		};
 
 		VE_FUNCTION(Callback)
-		inline void Camera2DComponentRenderTargetSizeOnChange(void* data) 
+			inline void Camera2DComponentRenderTargetSizeOnChange(void* data)
 		{
-			Camera2DComponent* camera = (Camera2DComponent*) data;
+			Camera2DComponent* camera = (Camera2DComponent*)data;
 			if (camera)
 			{
 				UnloadRenderTexture(camera->renderTarget);
@@ -275,7 +276,7 @@ namespace VE
 		}
 
 		VE_FUNCTION(Callback)
-		inline void Camera2DComponentRenderIsMainOnChange(void* data) 
+			inline void Camera2DComponentRenderIsMainOnChange(void* data)
 		{
 			Camera2DComponent* camera = (Camera2DComponent*)data;
 			if (camera)
@@ -295,29 +296,29 @@ namespace VE
 			}
 		}
 		VE_CLASS(Component)
-		struct Camera3DComponent
+			struct Camera3DComponent
 		{
 			Camera camera = {};
 			RenderTexture renderTarget = {};
 			VE_PROPERTY(Editor, OnChange = Camera3DComponentRenderTargetSizeOnChange)
-			glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
-											  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+				glm::vec2 renderTargetSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+												  (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
 
 			VE_PROPERTY(Editor)
-			NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+				NormalizedColor backgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			float zoom = 1.0f;
+				float zoom = 1.0f;
 			VE_PROPERTY(Editor, OnChange = Camera3DComponentRenderIsMainOnChange)
-			bool isMain = false;
+				bool isMain = false;
 			VE_PROPERTY(Editor, OnChange = Camera3DComponentSkyboxTexturePathOnChange)
-			std::filesystem::path skyboxTexturePath = "";
+				std::filesystem::path skyboxTexturePath = "";
 			VE_PROPERTY(Editor)
-			Texture skyboxTexture = {};
+				Texture skyboxTexture = {};
 			Model cubeMapModel = {};
 			Shader* skyboxShader = nullptr;
 		};
 
-		inline void LoadSkymap(Components::Camera3DComponent* camera) 
+		inline void LoadSkymap(Components::Camera3DComponent* camera)
 		{
 			if (camera)
 			{
@@ -336,7 +337,7 @@ namespace VE
 
 					loc = GetShaderLocation(*camera->skyboxShader, "viewMatrix");
 					camera->skyboxShader->locs[RL_SHADER_LOC_MATRIX_VIEW] = loc;
-					
+
 
 					loc = GetShaderLocation(*camera->skyboxShader, "skyBox");
 					camera->skyboxShader->locs[RL_SHADER_LOC_MAP_CUBEMAP] = loc;
@@ -353,14 +354,14 @@ namespace VE
 		}
 
 		VE_FUNCTION(Callback)
-		inline void Camera3DComponentSkyboxTexturePathOnChange(void* data) 
+			inline void Camera3DComponentSkyboxTexturePathOnChange(void* data)
 		{
 			Camera3DComponent* camera = (Camera3DComponent*)data;
 			LoadSkymap(camera);
 		}
 
 		VE_FUNCTION(Callback)
-		inline void Camera3DComponentRenderTargetSizeOnChange(void* data)
+			inline void Camera3DComponentRenderTargetSizeOnChange(void* data)
 		{
 			Camera3DComponent* camera = (Camera3DComponent*)data;
 			if (camera)
@@ -373,7 +374,7 @@ namespace VE
 		}
 
 		VE_FUNCTION(Callback)
-		inline void Camera3DComponentRenderIsMainOnChange(void* data)
+			inline void Camera3DComponentRenderIsMainOnChange(void* data)
 		{
 			Camera3DComponent* camera = (Camera3DComponent*)data;
 			if (camera)
@@ -402,66 +403,66 @@ namespace VE
 		};
 
 		VE_CLASS(Component)
-		struct DirectionalLightComponent
+			struct DirectionalLightComponent
 		{
 			VE_PROPERTY(Editor)
-			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+				NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 			Shader* pbrShader = nullptr;
 		};
 
 		VE_CLASS(Component)
-		struct PointLightComponent
+			struct PointLightComponent
 		{
 			VE_PROPERTY(Editor)
-			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+				NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			float constant = 1.0f;
+				float constant = 1.0f;
 			VE_PROPERTY(Editor)
-			float linear = 0.09f;
+				float linear = 0.09f;
 			VE_PROPERTY(Editor)
-			float quadratic = 0.032f;
+				float quadratic = 0.032f;
 			Shader* pbrShader = nullptr;
 		};
 
 		VE_CLASS(Component)
-		struct SpotLightComponent
+			struct SpotLightComponent
 		{
 			VE_PROPERTY(Editor)
-			NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+				NormalizedColor ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
 			VE_PROPERTY(Editor)
-			NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+				NormalizedColor specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 			VE_PROPERTY(Editor)
-			float cutOff = glm::cos(glm::radians(12.5f));
+				float cutOff = glm::cos(glm::radians(12.5f));
 			VE_PROPERTY(Editor)
-			float outerCutOff = glm::cos(glm::radians(17.5f));
+				float outerCutOff = glm::cos(glm::radians(17.5f));
 			Shader* pbrShader = nullptr;
 		};
 
 		VE_CLASS(Component)
-		struct Model3DComponent
+			struct Model3DComponent
 		{
 			VE_PROPERTY(Editor, OnChange = BasicModelOnChange)
-			_Components::BasicMesh basicMesh = _Components::BasicMesh::None;
+				_Components::BasicMesh basicMesh = _Components::BasicMesh::None;
 			Model* model = nullptr;
 			VE_PROPERTY(Editor, OnChange = ModelOnChange)
-			std::filesystem::path modelFilepath = "";
+				std::filesystem::path modelFilepath = "";
 			VE_PROPERTY(Editor)
-			std::vector<_Components::VEMaterial> materials;
+				std::vector<_Components::VEMaterial> materials;
 		};
 
 
 		VE_FUNCTION(Callback)
-		inline void ModelOnChange(void* data)
+			inline void ModelOnChange(void* data)
 		{
 			if (!data) return;
 
@@ -491,7 +492,7 @@ namespace VE
 			return basicModel;
 		}
 
-		inline void LoadModelMaterials(Model3DComponent& model, Shader* shader) 
+		inline void LoadModelMaterials(Model3DComponent& model, Shader* shader)
 		{
 			if ((int)model.materials.size() != model.model->materialCount)
 			{
@@ -528,7 +529,7 @@ namespace VE
 		}
 
 		VE_FUNCTION(Callback)
-		inline void BasicModelOnChange(void* data)
+			inline void BasicModelOnChange(void* data)
 		{
 			if (!data) return;
 
@@ -543,55 +544,56 @@ namespace VE
 						UnloadModel(*comp->model);
 					}
 				}
-				else 
+				else
 				{
 					comp->model = (Model*)malloc(sizeof(Model));
 				}
-				
+
 				memset(comp->model, 0, sizeof(Model));
 				Model temp = LoadBasicMesh(comp->basicMesh);
 				memcpy(comp->model, &temp, sizeof(Model));
 				LoadModelMaterials(*comp, AssetsManager::GetSingleton()->LoadShader("shaders/pbr.glsl"));
 			}
 		}
-		
+
 
 		namespace UI
 		{
 			VE_CLASS(Component)
-			struct UICanvasComponent 
+				struct UICanvasComponent
 			{
 				RenderTexture canvasRenderTarget = {};
 				VE_PROPERTY(Editor)
-				glm::vec2 canvasSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
-										 (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
+					glm::vec2 canvasSize = { (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderWidth,
+											 (float)VE::Engine::GetSingleton()->GetDesc()->projectDetails.renderHeight };
 				VE_PROPERTY(Editor)
-				bool isMain = false;
+					bool isMain = false;
 
 			};
 
 			VE_CLASS(Component)
-			struct UILabelComponent 
+				struct UILabelComponent
 			{
 				class VE::Font* font = nullptr;
 				VE_PROPERTY(Editor, OnChange = UILabelFontOnChange)
-				std::filesystem::path fontFilepath = "";
+					std::filesystem::path fontFilepath = "";
 				VE_PROPERTY(Editor, OnChange = UILabelTextOnChange)
-				std::string text = "";
+					std::string text = "";
 				VE_PROPERTY(Editor);
 				glm::vec2 origin = {};
 				VE_PROPERTY(Editor)
-				int32_t renderOrder = 0;
+					int32_t renderOrder = 0;
 				VE_PROPERTY(Editor)
-				NormalizedColor color = {1.0f, 1.0f, 1.0f, 1.0f};
+					NormalizedColor color = { 1.0f, 1.0f, 1.0f, 1.0f };
 				VE_PROPERTY(Editor, OnChange = UILabelSizeOnChange)
-				float size = 12;
+					float size = 12;
 				Texture2D texture = {};
 				Texture2D* texturePtr = nullptr;
+				std::string oldText = "";
 			};
 
 			VE_FUNCTION(Callback)
-			inline void UILabelFontOnChange(void* data) 
+				inline void UILabelFontOnChange(void* data)
 			{
 				UILabelComponent* label = (UILabelComponent*)data;
 
@@ -615,7 +617,7 @@ namespace VE
 				}
 			}
 			VE_FUNCTION(Callback)
-			inline void UILabelSizeOnChange(void* data) 
+				inline void UILabelSizeOnChange(void* data)
 			{
 				UILabelComponent* label = (UILabelComponent*)data;
 
@@ -638,7 +640,7 @@ namespace VE
 			}
 
 			VE_FUNCTION(Callback)
-			inline void UILabelTextOnChange(void* data)
+				inline void UILabelTextOnChange(void* data)
 			{
 				UILabelComponent* label = (UILabelComponent*)data;
 				if (label)
@@ -658,21 +660,21 @@ namespace VE
 
 
 			VE_CLASS(Component)
-			struct UIImageComponent
+				struct UIImageComponent
 			{
 				VE_PROPERTY(Editor, OnChange = UIImageComponentTextureOnChange)
-				std::filesystem::path imageFilepath = "";
+					std::filesystem::path imageFilepath = "";
 				VE_PROPERTY(Editor)
-				glm::vec2 origin = {};
+					glm::vec2 origin = {};
 				VE_PROPERTY(Editor)
-				NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+					NormalizedColor tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 				VE_PROPERTY(Editor)
-				int32_t renderOrder = 0;
+					int32_t renderOrder = 0;
 				Texture* texture = nullptr;
 			};
 
 			VE_FUNCTION(Callback)
-			inline void UIImageComponentTextureOnChange(void* data) 
+				inline void UIImageComponentTextureOnChange(void* data)
 			{
 				UIImageComponent* img = (UIImageComponent*)data;
 				if (img)
@@ -682,10 +684,10 @@ namespace VE
 			}
 
 			VE_CLASS(Component)
-			struct UIButtonComponent
+				struct UIButtonComponent
 			{
 				VE_PROPERTY(Editor)
-				NormalizedColor pressTintColor = { .78f, .78f, .78f, 1.0f };
+					NormalizedColor pressTintColor = { .78f, .78f, .78f, 1.0f };
 				NormalizedColor imgTintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 				std::function<void()> callback = nullptr;
 
