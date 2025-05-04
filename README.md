@@ -879,14 +879,14 @@ void ManagerSystem(flecs::entity e, ManagerComponent& mc)
 }
 ```
 
-**Key Features (Preserved Exactly):**
+**Key Features:**
 1. **Button Callbacks**:
    - `AddButton`: Spawns new boids using the construct
    - `RemoveButton`: Deletes the most recent boid
    - `Plus/Minus`: Adjusts current parameter values
    - `ChangeButton`: Cycles through parameters
 
-**Final Result (From Original Demo):**
+**Final Result:**
 <div align="center">
   <img src="images/result.gif" alt="Final Flocking Simulation" width="80%"/>
   <br/><em>Complete simulation with interactive UI controls</em>
